@@ -16,7 +16,7 @@ export function modeloInicial() {
   let i = 0;
   return {
     versao: 1,
-    settings: { nome: '', bancos: [...BANCOS_PADRAO], faturasPagas: {}, alertasVistos: {}, onboarding: false },
+    settings: { nome: '', bancos: [...BANCOS_PADRAO], faturasPagas: {}, parcelasPagas: {}, pagamentosFatura: {}, alertasVistos: {}, onboarding: false },
     categorias: [...desp.map((n) => c(n, 'despesa', 0, i++)), ...gua.map((n) => c(n, 'guardar', 0, i++)), ...ent.map((n) => c(n, 'entrada', 0, i++))],
     lancamentos: [], cartoes: [], compras: [], recorrencias: [], metas: [],
   };

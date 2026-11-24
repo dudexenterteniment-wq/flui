@@ -220,15 +220,27 @@ function telaCartoes() {
   ${lista.length ? ms.slice().reverse().map((m) => {
     const fs = lista.map((c) => ({ c, f: C.fatura(st(), c.id, m) })).filter((x) => x.f.total > 0);
     if (!fs.length) return '';
-    return `<div class="grupo-mes">${C.nomeMes(m, true)}</div>${fs.map(({ c, f }) => `<div class="card">
-      <div class="linha-acao" style="margin:0 0 8px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(c.nome)}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
-      <label class="chave"><input type="checkbox" data-a="fatura-paga" data-id="${c.id}" data-m="${m}" ${f.paga ? 'checked' : ''}> Fatura paga</label>
-      <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela }) => `<div class="item" data-a="editar-compra" data-id="${compra.id}">
-        <div class="bola" style="background:${catCor(compra.categoriaId)}">${esc(catNome(compra.categoriaId).slice(0, 1))}</div>
-        <div class="meio"><div class="titulo">${esc(compra.descricao)}</div><div class="det">${esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
-        <div class="valor num">${brl(parcela.valor)}</div></div>`).join('')}</div></div>`).join('')}`;
+    return `<div class="grupo-mes">${C.nomeMes(m, true)}</div>${fs.map(({ c, f }) => blocoFatura(c, f, m)).join('')}`;
   }).join('') || vazio('💳', 'Nenhuma fatura neste período.') : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}
-  <p class="mini" style="margin-top:14px">Cada compra conta uma vez só, como despesa na categoria dela, no mês de cada parcela. Marcar a fatura como paga não cria uma nova despesa.</p>`;
+  <p class="mini" style="margin-top:14px">Marque cada compra que já pagou, registre um valor pago ou selecione tudo. Cada compra conta uma vez só, como despesa na categoria dela; pagar a fatura não cria uma nova despesa.</p>`;
+}
+function blocoFatura(c, f, m) {
+  const k = `${c.id || 'sem'}|${m}`;
+  return `<div class="card">
+    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(c.banco || c.nome)}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
+    <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
+    <div class="mini" style="display:flex;justify-content:space-between;margin-bottom:10px"><span>Pago <b class="pos">${brl(f.pago)}</b></span><span>${f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Em aberto <b>${brl(f.aberto)}</b>`}</span></div>
+    <label class="chave"><input type="checkbox" data-a="fatura-tudo" data-id="${c.id}" data-m="${m}" ${f.tudoMarcado ? 'checked' : ''}> Selecionar tudo (paguei a fatura inteira)</label>
+    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela, paga }) => `<div class="item" data-a="editar-compra" data-id="${compra.id}">
+      <label data-stop="1" style="display:flex;align-items:center" title="Marcar como pago"><input type="checkbox" data-a="item-pago" data-id="${compra.id}" data-m="${m}" ${paga ? 'checked' : ''} style="width:24px;height:24px;accent-color:var(--verde)"></label>
+      <div class="meio"><div class="titulo" style="${paga ? 'text-decoration:line-through;color:var(--cinza)' : ''}">${esc(compra.descricao)}</div><div class="det">${esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
+      <div class="valor num">${brl(parcela.valor)}</div></div>`).join('')}</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+      <span class="mini">Paguei um valor:</span>
+      <input class="inp num" style="width:130px;padding:8px 12px" inputmode="decimal" placeholder="R$ 0,00" data-valor-fatura="${k}">
+      <button class="btn pequeno" data-a="fatura-valor" data-k="${k}">Registrar</button>
+      ${f.avulso ? `<span class="mini">já registrado ${brl(f.avulso)} <button class="btn fantasma pequeno" data-a="fatura-valor-limpa" data-k="${k}">zerar</button></span>` : ''}
+    </div></div>`;
 }
 function comprometido(cartaoId) {
   const m0 = C.mesAtual(); let t = 0;
@@ -336,22 +348,26 @@ const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.f
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
   const mes = l.mes || (ui.periodo.tipo === 'mes' ? mesRef() : C.mesAtual());
-  const extras = !!(l.data || l.forma || l.banco || l.vencimento || l.obs || (l.status && !['pago', 'recebido'].includes(l.status)));
+  const extras = !!(l.data || l.banco || l.vencimento || l.obs || (l.status && !['pago', 'recebido'].includes(l.status)));
   abrirModal(`<form data-form="lanc" data-id="${l.id || ''}">${topoModal(l.id ? 'Editar lançamento' : 'Novo lançamento')}
     <div class="seg" data-seg="tipo">${[['despesa', 'Despesa'], ['entrada', 'Entrada'], ['guardar', 'Guardar']].map(([t, n]) => `<button type="button" class="t-${t} ${t === tipo ? 'ativo' : ''}" data-tipo="${t}">${n}</button>`).join('')}</div>
     <input type="hidden" name="tipo" value="${tipo}">
     <div class="campo"><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${l.valor ? valorInput(l.valor) : ''}" required autocomplete="off"></div>
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, l.categoriaId)}</div></div>
     <div class="campo"><label>Descrição <span class="opc">opcional</span></label><input class="inp" name="descricao" value="${esc(l.descricao || '')}" placeholder="Ex.: almoço com a equipe"></div>
+    <div class="campo"><label>Como pagou?</label><div class="cats">${['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${(l.forma || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma || '')}"></div>
+    <div data-credito class="${l.forma === 'Crédito' && !l.id ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
+      <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
+        <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${st().cartoes.filter(ehCredito).map((k, _, arr) => `<option value="${k.id}" ${arr.length === 1 ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select></div></div>
+      <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
     <div class="campo"><label>Mês</label>${mesSelect('l-mes', mes)}</div>
-    <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, forma, banco, vencimento)'}</button>
+    <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, banco, vencimento)'}</button>
     <div data-extras class="${extras ? '' : 'oculto'}">
       <div class="duas"><div class="campo"><label>Data <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${l.data || ''}"></div>
-        <div class="campo"><label>Forma</label><select class="inp" name="forma"><option value="">—</option>${[...FORMAS, 'Cartão de crédito'].map((f) => `<option ${f === l.forma ? 'selected' : ''}>${f}</option>`).join('')}</select></div></div>
+        <div class="campo"><label>Observação <span class="opc">opcional</span></label><input class="inp" name="obs" value="${esc(l.obs || '')}"></div></div>
       <div class="duas"><div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
         <div class="campo"><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
       <div class="campo"><label>Situação</label><select class="inp" name="status">${(tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}" ${l.status === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-      <div class="campo"><label>Observação <span class="opc">opcional</span></label><input class="inp" name="obs" value="${esc(l.obs || '')}"></div>
     </div>
     <div class="acoes">${l.id ? '<button type="button" class="btn branco" data-a="excluir-lanc">Excluir</button>' : ''}<button class="btn verde" type="submit">${l.id ? 'Salvar' : 'Lançar'}</button></div>
   </form>`, () => { const v = $('[name=valor]'); if (v && !l.id) v.focus(); });
@@ -370,6 +386,12 @@ function modalCompra(c = {}) {
       <div class="campo"><label>Data da compra <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${c.data || ''}"></div></div>
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-compra">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div>
   </form>`, previaParcelas);
+}
+function previaParcelasL() {
+  const f = $('[data-form=lanc]'); if (!f || !f.parcelas) return;
+  const total = parseValor(f.valor.value); const n = parseInt(f.parcelas.value, 10) || 1;
+  const ps = C.parcelasDaCompra({ total, parcelas: n, mesPrimeira: '2000-01' });
+  $('[data-prev-l]', f).innerHTML = total > 0 ? `<b>${n > 1 ? `${n}x de ${brl(ps[0].valor)}${ps[n - 1].valor !== ps[0].valor ? ` (última ${brl(ps[n - 1].valor)})` : ''}` : 'À vista no crédito'}</b>` : '';
 }
 function previaParcelas() {
   const f = $('[data-form=compra]'); if (!f) return;
@@ -452,16 +474,21 @@ document.addEventListener('click', async (e) => {
     const f = tipoBtn.closest('form'); const t = tipoBtn.dataset.tipo; f.tipo.value = t;
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
     const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, '');
+    const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
     const sel = f.status; if (sel) sel.innerHTML = (t === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('');
     return;
   }
+  const fBtn = e.target.closest('[data-forma]');
+  if (fBtn) { const f = fBtn.closest('form'); const novo = f.forma.value === fBtn.dataset.forma ? '' : fBtn.dataset.forma; f.forma.value = novo;
+    f.querySelectorAll('[data-forma]').forEach((b) => b.classList.toggle('ativo', b.dataset.forma === novo));
+    const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(novo === 'Crédito' && !f.dataset.id && f.tipo.value === 'despesa')); previaParcelasL(); return; }
   const tcBtn = e.target.closest('[data-tipocartao]');
   if (tcBtn) { const f = tcBtn.closest('form'); f.tipo.value = tcBtn.dataset.tipocartao; f.querySelectorAll('[data-tipocartao]').forEach((b) => b.classList.toggle('ativo', b === tcBtn)); return; }
   const el = e.target.closest('[data-a]'); if (!el) return;
   if (e.target.closest('[data-stop]') && el.tagName !== 'INPUT') return;
   const a = el.dataset.a; const id = el.dataset.id;
   if (a === 'fechar-fundo' && e.target !== el) return;
-  if (['fatura-paga', 'fixo-pago', 'importar', 'busca', 'orc', 'nome', 'prev-parc'].includes(a)) return; // tratados em 'change'/'input'
+  if (['fatura-tudo', 'item-pago', 'fixo-pago', 'importar', 'busca', 'orc', 'nome', 'prev-parc'].includes(a)) return; // tratados em 'change'/'input'
   e.preventDefault();
   const S = st();
   switch (a) {
@@ -476,7 +503,7 @@ document.addEventListener('click', async (e) => {
     case 'novo-lanc': modalLanc(); break;
     case 'ver-avisos': ui.verAvisos = true; render(); break;
     case 'mais-opcoes-cartao': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Dia de vencimento da fatura (opcional)' : '− Menos opções'; break; }
-    case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, forma, banco, vencimento)' : '− Menos opções'; break; }
+    case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, banco, vencimento)' : '− Menos opções'; break; }
     case 'abrir-mov': {
       const o = el.dataset.origem;
       if (o === 'lanc') modalLanc({ ...S.lancamentos.find((x) => x.id === id) });
@@ -508,6 +535,11 @@ document.addEventListener('click', async (e) => {
     case 'nova-meta': modalMeta(); break;
     case 'editar-meta': modalMeta({ ...S.metas.find((x) => x.id === id) }); break;
     case 'excluir-meta': if (confirm('Excluir esta meta?')) { await store.remover('metas', $('[data-form=meta]').dataset.id); fecharModal(); } break;
+    case 'fatura-valor': { const k = el.dataset.k; const inp = document.querySelector(`[data-valor-fatura="${k}"]`); const v = parseValor(inp?.value);
+      if (!(v > 0)) { toast('Digite quanto você pagou.'); break; }
+      const pf = { ...(S.settings.pagamentosFatura || {}) }; pf[k] = C.fromCents(C.cents(pf[k] || 0) + C.cents(v));
+      await store.salvarSettings({ pagamentosFatura: pf }); toast(`Pagamento de ${brl(v)} registrado!`); render(); break; }
+    case 'fatura-valor-limpa': { const pf = { ...(S.settings.pagamentosFatura || {}) }; delete pf[el.dataset.k]; await store.salvarSettings({ pagamentosFatura: pf }); render(); break; }
     case 'banco-add': { const v = $('#novo-banco').value.trim(); if (v && !S.settings.bancos.includes(v)) await store.salvarSettings({ bancos: [...S.settings.bancos, v] }); break; }
     case 'banco-del': if (confirm(`Remover "${el.dataset.v}" da lista? Lançamentos antigos mantêm o nome.`)) await store.salvarSettings({ bancos: S.settings.bancos.filter((b) => b !== el.dataset.v) }); break;
     case 'exportar': baixar(`flui-backup-${new Date().toISOString().slice(0, 10)}.json`, store.exportar()); toast('Backup baixado.'); break;
@@ -520,6 +552,13 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('change', async (e) => {
   const el = e.target; const a = el.dataset.a; const S = st();
   if (el.matches('[data-mes-m^=per-], [data-mes-y^=per-]')) { ui.periodo.de = lerMes('per-de'); ui.periodo.ate = lerMes('per-ate'); salvarPeriodo(); render(); return; }
+  if (a === 'item-pago') { const k = `${el.dataset.id}|${el.dataset.m}`; const pp = { ...(S.settings.parcelasPagas || {}) }; if (el.checked) pp[k] = true; else delete pp[k];
+    const c = S.compras.find((x) => x.id === el.dataset.id); const fk = `${c?.cartaoId || 'sem'}|${el.dataset.m}`; const fp = { ...(S.settings.faturasPagas || {}) }; if (!el.checked) delete fp[fk];
+    await store.salvarSettings({ parcelasPagas: pp, faturasPagas: fp }); render(); }
+  if (a === 'fatura-tudo') { const cid = el.dataset.id || ''; const m = el.dataset.m; const f = C.fatura(S, cid, m); const pp = { ...(S.settings.parcelasPagas || {}) }; const fp = { ...(S.settings.faturasPagas || {}) };
+    for (const it of f.itens) { const k = `${it.compra.id}|${m}`; if (el.checked) pp[k] = true; else delete pp[k]; }
+    if (el.checked) fp[`${cid || 'sem'}|${m}`] = true; else delete fp[`${cid || 'sem'}|${m}`];
+    await store.salvarSettings({ parcelasPagas: pp, faturasPagas: fp }); toast(el.checked ? 'Fatura inteira marcada como paga! 💚' : 'Fatura em aberto.', el.checked); render(); }
   if (a === 'fatura-paga') { const k = `${el.dataset.id || 'sem'}|${el.dataset.m}`; const fp = { ...(S.settings.faturasPagas || {}) }; if (el.checked) fp[k] = true; else delete fp[k]; await store.salvarSettings({ faturasPagas: fp }); toast(el.checked ? 'Fatura marcada como paga.' : 'Fatura em aberto.'); }
   if (a === 'fixo-pago') { const r = S.recorrencias.find((x) => x.id === el.dataset.id); const pagos = { ...(r.pagos || {}) }; if (el.checked) pagos[el.dataset.m] = true; else delete pagos[el.dataset.m]; await store.salvar('recorrencias', { ...r, pagos }); }
   if (a === 'orc') { const c = S.categorias.find((x) => x.id === el.dataset.id); await store.salvar('categorias', { ...c, orcamento: parseValor(el.value) }); toast('Orçamento salvo.'); }
@@ -538,6 +577,7 @@ document.addEventListener('input', (e) => {
   const a = e.target.dataset.a;
   if (a === 'busca') { ui.busca = e.target.value; const pos = e.target.selectionStart; render(); const b = $('[data-a=busca]'); b.focus(); b.setSelectionRange(pos, pos); }
   if (a === 'prev-parc') previaParcelas();
+  if (a === 'prev-parc-l' || (e.target.name === 'valor' && e.target.closest('[data-form=lanc]'))) previaParcelasL();
 });
 
 document.addEventListener('submit', async (e) => {
@@ -553,7 +593,10 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'lanc') {
     const valor = parseValor(v('valor')); if (!(valor > 0)) return alert('Digite um valor maior que zero.');
     if (!v('categoriaId')) return alert('Escolha uma categoria.');
-    if (v('forma') === 'Cartão de crédito' && !id) { const dados = { total: valor, parcelas: 1, descricao: v('descricao'), categoriaId: v('categoriaId'), mesPrimeira: lerMes('l-mes', f), data: v('data') }; fecharModal(); modalCompra(dados); toast('Compra no cartão vai na fatura. Confira e salve.'); return; }
+    if (v('forma') === 'Crédito' && !id && v('tipo') === 'despesa') {
+      const n = Math.max(1, parseInt(v('parcelas'), 10) || 1);
+      await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: lerMes('l-mes', f), data: v('data') });
+      fecharModal(); toast(n > 1 ? `Lançado no crédito em ${n}x!` : 'Lançado no crédito!', true); return; }
     const antigo = S.lancamentos.find((x) => x.id === id) || {};
     const novo = !id;
     await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: v('obs') });

@@ -66,6 +66,11 @@ export function parcelasDaCompra(c) {
   return out;
 }
 
+export function parcelaPaga(st, c, m) {
+  const set = st.settings || {};
+  return !!((set.faturasPagas || {})[`${c.cartaoId || 'sem'}|${m}`] || (set.parcelasPagas || {})[`${c.id}|${m}`]);
+}
+
 // ---------- recorrências ----------
 export function recorrenciaNoMes(r, m) {
   if (r.ativa === false) return false;
@@ -90,7 +95,7 @@ export function movimentosDoMes(st, m) {
   for (const c of st.compras) {
     for (const p of parcelasDaCompra(c)) {
       if (p.mes !== m) continue;
-      const paga = !!(st.faturasPagas || {})[`${c.cartaoId || 'sem'}|${m}`];
+      const paga = parcelaPaga(st, c, m);
       out.push({ origem: 'cartao', id: c.id, tipo: 'despesa', categoriaId: c.categoriaId, valor: p.valor,
         descricao: c.descricao + (p.de > 1 ? ` (${p.numero}/${p.de})` : ''), status: paga ? 'pago' : 'pendente',
         cartaoId: c.cartaoId || '', forma: 'Cartão de crédito', mes: m });
@@ -124,7 +129,10 @@ export function resumo(st, meses) {
   const despesas = sum(por('despesa'), (x) => x.valor);
   const guardado = sum(por('guardar'), (x) => x.valor);
   const cartao = sum(movs.filter((x) => x.origem === 'cartao'), (x) => x.valor);
-  const pendente = sum(movs.filter((x) => x.tipo !== 'entrada' && (x.status === 'pendente' || x.status === 'previsto')), (x) => x.valor);
+  const pendNaoCartao = sum(movs.filter((x) => x.origem !== 'cartao' && x.tipo !== 'entrada' && (x.status === 'pendente' || x.status === 'previsto')), (x) => x.valor);
+  const ids = [...new Set(st.compras.map((c) => c.cartaoId || ''))];
+  const abertoCartao = sum(meses.flatMap((m) => ids.map((id) => fatura(st, id, m).aberto)));
+  const pendente = fromCents(cents(pendNaoCartao) + cents(abertoCartao));
   const saldo = fromCents(cents(entradas) - cents(despesas) - cents(guardado));
   return { movs, entradas, despesas, guardado, cartao, pendente, saldo };
 }
@@ -150,14 +158,19 @@ export function porCategoria(st, meses) {
   return rows;
 }
 
-// fatura de um cartão num mês
+// fatura de um cartão num mês: itens (cada um pode ser marcado como pago) + valor pago avulso
 export function fatura(st, cartaoId, m) {
   const itens = [];
   for (const c of st.compras) {
     if ((c.cartaoId || '') !== (cartaoId || '')) continue;
-    for (const p of parcelasDaCompra(c)) if (p.mes === m) itens.push({ compra: c, parcela: p });
+    for (const p of parcelasDaCompra(c)) if (p.mes === m) itens.push({ compra: c, parcela: p, paga: parcelaPaga(st, c, m) });
   }
-  return { itens, total: sum(itens, (x) => x.parcela.valor), paga: !!(st.faturasPagas || {})[`${cartaoId || 'sem'}|${m}`] };
+  const total = sum(itens, (x) => x.parcela.valor);
+  const pagoItens = sum(itens.filter((x) => x.paga), (x) => x.parcela.valor);
+  const avulso = Number(((st.settings || {}).pagamentosFatura || {})[`${cartaoId || 'sem'}|${m}`]) || 0;
+  const pago = fromCents(Math.min(cents(total), cents(pagoItens) + cents(avulso)));
+  const aberto = fromCents(cents(total) - cents(pago));
+  return { itens, total, pagoItens, avulso, pago, aberto, paga: total > 0 && aberto <= 0, tudoMarcado: itens.length > 0 && itens.every((x) => x.paga) };
 }
 
 // próximos vencimentos (fixos com dia, lançamentos pendentes com data, faturas com dia)
@@ -178,7 +191,7 @@ export function proximosVencimentos(st, hoje = new Date(), dias = 10) {
       const f = fatura(st, c.id, m);
       if (f.paga || f.total <= 0) continue;
       const d = dataDe(m, c.vencimento);
-      if (d >= d0 && d <= lim) out.push({ tipo: 'fatura', nome: `Fatura ${c.nome}`, valor: f.total, data: d, ref: c.id, mes: m });
+      if (d >= d0 && d <= lim) out.push({ tipo: 'fatura', nome: `Fatura ${c.nome}`, valor: f.aberto, data: d, ref: c.id, mes: m });
     }
   }
   for (const l of st.lancamentos) {
