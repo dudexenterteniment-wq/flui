@@ -159,18 +159,57 @@ export function porCategoria(st, meses) {
 }
 
 // fatura de um cartão num mês: itens (cada um pode ser marcado como pago) + valor pago avulso
+// decisões de fatura fechada: settings.faturaDecisoes['cartao|mes'] = { acao: 'paguei'|'passar'|'parcelar', principal, parcelas, jurosCompraId }
+export function decisaoFatura(st, cartaoId, m) { return ((st.settings || {}).faturaDecisoes || {})[`${cartaoId || 'sem'}|${m}`] || null; }
+// parcelas de saldo transferido de faturas anteriores que caem no mês m deste cartão (não são gasto novo)
+export function transferidosPara(st, cartaoId, m) {
+  const out = []; const ds = (st.settings || {}).faturaDecisoes || {};
+  for (const [k, d] of Object.entries(ds)) {
+    const [cid, mo] = k.split('|'); if ((cartaoId || 'sem') !== cid || !(d.acao === 'passar' || d.acao === 'parcelar') || !(d.principal > 0)) continue;
+    const n = d.acao === 'parcelar' ? Math.max(1, parseInt(d.parcelas, 10) || 1) : 1;
+    const pseudo = { id: `dec~${k}`, cartaoId: cartaoId || '', total: d.principal, parcelas: n, mesPrimeira: addMes(mo, 1), transferencia: true, origemMes: mo,
+      descricao: d.acao === 'parcelar' ? `Parcelamento da fatura de ${nomeMes(mo)}` : `Saldo da fatura de ${nomeMes(mo)}` };
+    for (const p of parcelasDaCompra(pseudo)) if (p.mes === m) out.push({ compra: pseudo, parcela: p, paga: parcelaPaga(st, pseudo, m) });
+  }
+  return out;
+}
 export function fatura(st, cartaoId, m) {
   const itens = [];
   for (const c of st.compras) {
     if ((c.cartaoId || '') !== (cartaoId || '')) continue;
     for (const p of parcelasDaCompra(c)) if (p.mes === m) itens.push({ compra: c, parcela: p, paga: parcelaPaga(st, c, m) });
   }
+  itens.push(...transferidosPara(st, cartaoId, m));
   const total = sum(itens, (x) => x.parcela.valor);
   const pagoItens = sum(itens.filter((x) => x.paga), (x) => x.parcela.valor);
   const avulso = Number(((st.settings || {}).pagamentosFatura || {})[`${cartaoId || 'sem'}|${m}`]) || 0;
   const pago = fromCents(Math.min(cents(total), cents(pagoItens) + cents(avulso)));
-  const aberto = fromCents(cents(total) - cents(pago));
-  return { itens, total, pagoItens, avulso, pago, aberto, paga: total > 0 && aberto <= 0, tudoMarcado: itens.length > 0 && itens.every((x) => x.paga) };
+  const decisao = decisaoFatura(st, cartaoId, m);
+  const transferido = decisao && (decisao.acao === 'passar' || decisao.acao === 'parcelar') ? fromCents(Math.min(cents(decisao.principal), cents(total) - cents(pago))) : 0;
+  const aberto = fromCents(cents(total) - cents(pago) - cents(transferido));
+  return { itens, total, pagoItens, avulso, pago, transferido, decisao, aberto, paga: total > 0 && aberto <= 0, tudoMarcado: itens.length > 0 && itens.every((x) => x.paga) };
+}
+
+// data em que a fatura do mês m fecha (com dia de fechamento) ou vence (sem ele)
+export function dataFechamento(cartao, m) {
+  const dataDe = (mm, dia) => { const [y, mo] = mm.split('-').map(Number); const ult = new Date(y, mo, 0).getDate(); return new Date(y, mo - 1, Math.min(dia, ult)); };
+  const F = parseInt(cartao.fechamento, 10); const V = parseInt(cartao.vencimento, 10);
+  if (F) return V && F > V ? dataDe(addMes(m, -1), F) : dataDe(m, F);
+  if (V) return dataDe(m, V);
+  return null;
+}
+// faturas que já fecharam com valor em aberto e ainda sem escolha
+export function faturasParaDecidir(st, hoje = new Date()) {
+  const out = []; const d0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()); const mA = mesAtual(hoje);
+  for (const c of st.cartoes || []) {
+    if (c.tipo === 'debito') continue;
+    for (const m of [addMes(mA, -2), addMes(mA, -1), mA, addMes(mA, 1)]) {
+      const fe = dataFechamento(c, m); if (!fe || fe > d0) continue;
+      const f = fatura(st, c.id, m); if (f.decisao || f.aberto <= 0) continue;
+      out.push({ cartao: c, m, f, fechou: fe });
+    }
+  }
+  return out;
 }
 
 // próximos vencimentos (fixos com dia, lançamentos pendentes com data, faturas com dia)

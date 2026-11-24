@@ -255,3 +255,14 @@ h3 { font-size: 16px; font-weight: 800; margin: 0; }
 .cc-editar { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,.25); color: #fff; font-size: 16px; cursor: pointer; }
 .cc-editar:hover { background: rgba(255,255,255,.4); }
 .cc .cc-nome { padding-right: 40px; }
+
+/* fatura fechada: decisão */
+.aviso-fatura { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 2px solid var(--azul); border-left-width: 8px; border-radius: var(--raio); padding: 12px 14px; margin: 0 0 14px; background: #fff; }
+.opcoes-dec { display: grid; gap: 8px; margin-bottom: 14px; }
+.op-dec { display: flex; align-items: center; gap: 12px; text-align: left; background: #fff; border: 2px solid var(--linha); border-bottom-width: 4px; border-radius: var(--raio); padding: 12px 14px; cursor: pointer; font: inherit; color: var(--tinta); }
+.op-dec b { display: block; font-size: 15px; } .op-dec small { color: var(--cinza); font-weight: 700; }
+.op-dec .op-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--fundo-2); display: grid; place-items: center; font-weight: 900; font-size: 18px; flex: none; }
+.op-dec.ativo { border-color: var(--azul); background: var(--azul-claro); } .op-dec.ativo .op-ic { background: var(--azul); color: #fff; }
+.previa-dec { background: var(--fundo-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; } .previa-dec:empty { display: none; }
+.decisao-info { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding: 10px 12px; background: var(--azul-claro); border-radius: 12px; font-weight: 700; font-size: 14px; }
+.btn[disabled] { opacity: .5; pointer-events: none; }

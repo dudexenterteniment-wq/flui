@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=20';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=20';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=20';
+import * as C from './calc.js?v=21';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=21';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=21';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -122,6 +122,7 @@ function avisos() {
         : { k, cor: 'laranja', ic: '👀', txt: `Olha quem está quase passando do limite! Você já usou <b>${pct(x.pct)}</b> do orçamento de ${esc(x.cat.nome.toLowerCase())}. Vamos ficar de olho?` });
     }
   }
+  for (const { cartao, m, f } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: 'azul', ic: '💳', txt: `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.nomeMes(m)} fechou com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
   for (const v of C.proximosVencimentos(st(), hoje, 7)) {
     const k = `venc|${v.tipo}|${v.ref}|${v.mes || ''}`; if (vistos[k]) continue;
     const dias = Math.round((v.data - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) / 864e5);
@@ -139,6 +140,7 @@ function telaInicio() {
   const ultimos = [...st().lancamentos].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
   return `
   <h1>Início</h1>
+  ${bannerFaturas()}
   ${filtroPeriodo()}
   <div class="grade g4">
     ${kpi('Entrou', r.entradas, 'verde')}${kpi('Gastou', r.despesas, 'laranja')}${kpi('Guardou', r.guardado, 'azul')}
@@ -242,6 +244,7 @@ function telaCartoes() {
   }
   return `
   <div class="linha-acao" style="margin-top:0"><h1>Cartões</h1><button class="btn verde" data-a="nova-compra">+ Compra no cartão</button></div>
+  ${bannerFaturas()}
   ${filtroPeriodo()}
   ${todos.length ? '<p class="mini" style="margin:0 0 10px">Toque num cartão para ver a fatura e o débito dele.</p>' : ''}
   <div class="grade g2">${todos.map((c) => `<div class="cc ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
@@ -253,26 +256,37 @@ function telaCartoes() {
   </div>
   ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
 }
+function bannerFaturas() {
+  return C.faturasParaDecidir(st(), hoje).map(({ cartao, m, f }) => `<div class="aviso-fatura" style="border-color:${cartao.cor || 'var(--azul)'}">
+    <div><b>A fatura ${esc(nomeCartao(cartao))} de ${C.nomeMes(m)} fechou</b><div class="mini">Ficaram <b>${brl(f.aberto)}</b> em aberto. O que você fez com ela?</div></div>
+    <button class="btn pequeno" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher</button></div>`).join('');
+}
+const textoDecisao = (d, m) => d.acao === 'paguei' ? 'Você marcou que pagou esta fatura.'
+  : d.acao === 'passar' ? `${brl(d.principal)} passou para a fatura de ${C.nomeMes(C.addMes(m, 1))}${d.juros > 0 ? `, com ${brl(d.juros)} de juros` : ''}.`
+  : `${brl(d.principal)} parcelado em ${d.parcelas}x de ${brl(d.parcela)} a partir de ${C.nomeMes(C.addMes(m, 1))}${d.juros > 0 ? ` (${brl(d.juros)} de juros no total)` : ' (sem juros)'}.`;
 function blocoFatura(c, f, m) {
   const k = `${c.id || 'sem'}|${m}`; const aberta = (ui.faturasAbertas ||= new Set()).has(k); const n = f.itens.length;
   return `<div class="card fatura ${aberta ? 'aberta' : ''}">
     <div class="fatura-topo" data-a="fatura-toggle" data-k="${k}" role="button" aria-expanded="${aberta}">
     <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}${c.vencimento ? `<span class="mini" style="font-weight:700;margin-left:6px">vence dia ${c.vencimento}</span>` : ''}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
     <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
-    <div class="mini" style="display:flex;justify-content:space-between;margin-bottom:10px"><span>Pago <b class="pos">${brl(f.pago)}</b></span><span>${f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Em aberto <b>${brl(f.aberto)}</b>`}</span></div>
+    <div class="mini" style="display:flex;justify-content:space-between;margin-bottom:10px"><span>Pago <b class="pos">${brl(f.pago)}</b></span><span>${f.decisao && f.decisao.acao !== 'paguei' && f.aberto <= 0 ? `<b style="color:var(--azul)">${f.decisao.acao === 'passar' ? 'Passou para o próximo mês' : 'Parcelada'}</b>` : f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Em aberto <b>${brl(f.aberto)}</b>`}</span></div>
     <div class="fatura-ver">${aberta ? 'Esconder compras' : `Ver ${n} ${n === 1 ? 'compra' : 'compras'}`}<span class="seta">▾</span></div></div>
     <div class="fatura-corpo ${aberta ? '' : 'oculto'}">
     <label class="chave"><input type="checkbox" data-a="fatura-tudo" data-id="${c.id}" data-m="${m}" ${f.tudoMarcado ? 'checked' : ''}> Selecionar tudo (paguei a fatura inteira)</label>
-    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela, paga }) => `<div class="item" data-a="editar-compra" data-id="${compra.id}">
+    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela, paga }) => `<div class="item" ${compra.transferencia ? 'style="cursor:default"' : `data-a="editar-compra" data-id="${compra.id}"`}>
       <label data-stop="1" style="display:flex;align-items:center" title="Marcar como pago"><input type="checkbox" data-a="item-pago" data-id="${compra.id}" data-m="${m}" ${paga ? 'checked' : ''} style="width:24px;height:24px;accent-color:var(--verde)"></label>
-      <div class="meio"><div class="titulo" style="${paga ? 'text-decoration:line-through;color:var(--cinza)' : ''}">${esc(compra.descricao)}</div><div class="det">${esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
+      <div class="meio"><div class="titulo" style="${paga ? 'text-decoration:line-through;color:var(--cinza)' : ''}">${esc(compra.descricao)}</div><div class="det">${compra.transferencia ? 'veio da fatura anterior · não é gasto novo' : esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
       <div class="valor num">${brl(parcela.valor)}</div></div>`).join('')}</div>
     <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
       <span class="mini">Paguei um valor:</span>
       <input class="inp num" style="width:130px;padding:8px 12px" inputmode="decimal" placeholder="R$ 0,00" data-valor-fatura="${k}">
       <button class="btn pequeno" data-a="fatura-valor" data-k="${k}">Registrar</button>
       ${f.avulso ? `<span class="mini">já registrado ${brl(f.avulso)} <button class="btn fantasma pequeno" data-a="fatura-valor-limpa" data-k="${k}">zerar</button></span>` : ''}
-    </div></div></div>`;
+    </div>
+    ${f.decisao ? `<div class="decisao-info"><span>${textoDecisao(f.decisao, m)}</span><button class="btn fantasma pequeno" data-a="desfazer-decisao" data-id="${c.id}" data-m="${m}">Desfazer</button></div>`
+      : f.aberto > 0 ? `<button class="btn branco" style="width:100%;margin-top:12px" data-a="decidir-fatura" data-id="${c.id}" data-m="${m}">Não deu para pagar tudo? Passar ou parcelar</button>` : ''}
+    </div></div>`;
 }
 function comprometido(cartaoId) {
   const m0 = C.mesAtual(); let t = 0;
@@ -457,7 +471,9 @@ function modalCartao(c = {}) {
     <div class="campo"><label>Nome do cartão <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="apelido" maxlength="30" placeholder="Ex.: Nubank pessoal, Itaú da empresa" value="${esc(c.apelido || '')}"></div>
     <div class="campo"><label>Cor</label><div class="cats" data-cores-cartao ${c.cor ? 'data-manual="1"' : ''}>${cores.map((k) => `<button type="button" data-cor="${k}" class="${cor === k ? 'ativo' : ''}" aria-label="Cor ${k}"><span class="ponto" style="background:${k};margin:0"></span></button>`).join('')}</div><input type="hidden" name="cor" value="${cor}"></div>
     <div class="campo"><label>Tipo</label><div class="seg" data-seg="tipocartao">${TIPOS_CARTAO.map(([t, n]) => `<button type="button" class="t-neutro ${t === tipo ? 'ativo' : ''}" data-tipocartao="${t}">${n}</button>`).join('')}</div><input type="hidden" name="tipo" value="${tipo}"></div>
-    <div class="campo ${tipo === 'debito' ? 'oculto' : ''}" data-venc-cartao><label>Dia que a fatura vence</label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="vencimento" placeholder="Ex.: 10" value="${c.vencimento || ''}" style="max-width:140px"><p class="mini" style="margin-top:6px">Eu te aviso quando estiver chegando.</p></div>
+    <div class="${tipo === 'debito' ? 'oculto' : ''}" data-venc-cartao><div class="duas"><div class="campo"><label>Dia que a fatura fecha</label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="fechamento" placeholder="Ex.: 26" value="${c.fechamento || ''}"></div>
+      <div class="campo"><label>Dia que a fatura vence</label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="vencimento" placeholder="Ex.: 3" value="${c.vencimento || ''}"></div></div>
+      <p class="mini" style="margin:-4px 0 14px">Quando a fatura fechar, eu pergunto se você pagou, se quer passar para o próximo mês ou parcelar. Perto do vencimento, eu te aviso.</p></div>
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-cartao">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
 }
 
@@ -502,6 +518,35 @@ function modalMeta(m = {}) {
     <div class="acoes">${m.id ? '<button type="button" class="btn branco" data-a="excluir-meta">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
 }
 
+function modalDecisao(cid, m) {
+  const c = st().cartoes.find((x) => x.id === cid) || { id: '', nome: 'Sem cartão definido' }; const f = C.fatura(st(), cid, m); const ab = f.aberto;
+  abrirModal(`<form data-form="decisao" data-id="${cid}" data-m="${m}" data-aberto="${ab}">${topoModal(`Fatura ${esc(nomeCartao(c))} · ${C.nomeMes(m)}`)}
+    <p style="margin:0 0 14px">Ficaram <b class="num">${brl(ab)}</b> em aberto. O que aconteceu?</p>
+    <div class="opcoes-dec">
+      <button type="button" class="op-dec" data-dec="paguei"><span class="op-ic">✓</span><span><b>Já paguei</b><small>Marca a fatura inteira como paga</small></span></button>
+      <button type="button" class="op-dec" data-dec="passar"><span class="op-ic">→</span><span><b>Passar para o próximo mês</b><small>O que falta entra na fatura de ${C.nomeMes(C.addMes(m, 1))}</small></span></button>
+      <button type="button" class="op-dec" data-dec="parcelar"><span class="op-ic">÷</span><span><b>Parcelar</b><small>Divide em parcelas, com ou sem juros</small></span></button>
+    </div>
+    <input type="hidden" name="acao" value="">
+    <div data-dec-campos="passar" class="oculto"><div class="campo"><label>Juros e encargos cobrados <span class="opc">opcional</span></label><input class="inp" name="jurosPassar" inputmode="decimal" placeholder="R$ 0,00"></div></div>
+    <div data-dec-campos="parcelar" class="oculto"><div class="duas"><div class="campo"><label>Quantas parcelas?</label><input class="inp" type="number" min="2" max="48" inputmode="numeric" name="nParc" value="3"></div>
+      <div class="campo"><label>Valor de cada parcela (com juros)</label><input class="inp" name="vParc" inputmode="decimal" placeholder="${valorInput(ab / 3)}"></div></div></div>
+    <div class="previa-dec mini" data-previa-dec></div>
+    <div class="acoes"><button class="btn verde" type="submit" disabled>Confirmar</button></div></form>`);
+}
+function previaDecisao(f) {
+  const ab = +f.dataset.aberto; const acao = f.acao.value; const out = f.querySelector('[data-previa-dec]'); const prox = C.nomeMes(C.addMes(f.dataset.m, 1));
+  if (acao === 'paguei') out.innerHTML = `A fatura fica marcada como paga (${brl(ab)}).`;
+  else if (acao === 'passar') { const j = parseValor(f.jurosPassar.value) || 0; out.innerHTML = `Na fatura de ${prox} entram <b>${brl(ab)}</b>${j > 0 ? ` + <b>${brl(j)}</b> de juros = <b>${brl(ab + j)}</b>` : ''}.`; }
+  else if (acao === 'parcelar') { const n = Math.max(2, parseInt(f.nParc.value, 10) || 2); f.vParc.placeholder = valorInput(ab / n); const p = parseValor(f.vParc.value) || Math.round((ab / n) * 100) / 100; const tot = Math.round(p * n * 100) / 100; const j = Math.max(0, Math.round((tot - ab) * 100) / 100);
+    out.innerHTML = `${n}x de <b>${brl(p)}</b> a partir de ${prox}. Total <b>${brl(tot)}</b>, sendo <b>${brl(j)}</b> de juros.${tot < ab - 0.01 ? ' <span style="color:var(--vermelho)">As parcelas somam menos do que o valor em aberto.</span>' : ''}`; }
+  else out.innerHTML = '';
+}
+async function catJuros() {
+  let c = st().categorias.find((x) => x.nome === 'Juros e tarifas');
+  if (!c) c = await store.salvar('categorias', { nome: 'Juros e tarifas', tipo: 'despesa', orcamento: 0, cor: '#FF4B4B', arquivada: false });
+  return c;
+}
 const OB_PASSOS = 4;
 function modalBoasVindas() {
   const fala = (t) => `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">${t}</div></div>`;
@@ -559,6 +604,9 @@ document.addEventListener('click', async (e) => {
   if (fBtn) { const f = fBtn.closest('form'); const novo = f.forma.value === fBtn.dataset.forma ? '' : fBtn.dataset.forma; f.forma.value = novo;
     f.querySelectorAll('[data-forma]').forEach((b) => b.classList.toggle('ativo', b.dataset.forma === novo));
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(novo === 'Crédito' && !f.dataset.id && f.tipo.value === 'despesa')); previaParcelasL(); return; }
+  const decBtn = e.target.closest('[data-dec]');
+  if (decBtn) { const f = decBtn.closest('form'); f.acao.value = decBtn.dataset.dec; f.querySelectorAll('[data-dec]').forEach((b) => b.classList.toggle('ativo', b === decBtn));
+    f.querySelectorAll('[data-dec-campos]').forEach((x) => x.classList.toggle('oculto', x.dataset.decCampos !== decBtn.dataset.dec)); f.querySelector('button[type=submit]').disabled = false; previaDecisao(f); return; }
   const obF = e.target.closest('form[data-form=boas-vindas]');
   if (obF) {
     const ccBox = e.target.closest('[data-ob-cc]');
@@ -613,6 +661,12 @@ document.addEventListener('click', async (e) => {
     case 'excluir-compra': if (confirm('Excluir esta compra e todas as parcelas?')) { await store.remover('compras', $('[data-form=compra]').dataset.id); fecharModal(); toast('Compra excluída.'); } break;
     case 'ver-cartao': ui.cartaoSel = el.dataset.id; render(); document.querySelector('.abas-cartao, [data-painel-cartao]')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); break;
     case 'aba-cartao': ui.abaCartao = el.dataset.v; render(); break;
+    case 'decidir-fatura': modalDecisao(el.dataset.id || '', el.dataset.m); break;
+    case 'desfazer-decisao': { const k = `${el.dataset.id || 'sem'}|${el.dataset.m}`; const ds = { ...(S.settings.faturaDecisoes || {}) }; const d = ds[k]; if (!d) break;
+      if (!confirm('Desfazer a escolha desta fatura? Ela volta a ficar em aberto.')) break;
+      if (d.jurosCompraId) await store.remover('compras', d.jurosCompraId);
+      const patch = {}; if (d.acao === 'paguei') { const fp = { ...(S.settings.faturasPagas || {}) }; delete fp[k]; patch.faturasPagas = fp; }
+      delete ds[k]; await store.salvarSettings({ ...patch, faturaDecisoes: ds }); toast('Escolha desfeita.'); render(); break; }
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
@@ -698,6 +752,7 @@ function previaCartao(f) {
 }
 document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); });
 document.addEventListener('input', (e) => {
+  if (e.target.closest('form[data-form=decisao]')) setTimeout(() => previaDecisao(e.target.closest('form')), 0);
   if (e.target.closest('form[data-form=cartao]')) setTimeout(() => previaCartao(e.target.closest('form')), 0);
   if (e.target.matches('input[inputmode=decimal]')) { const t = e.target; const novo = limparValor(t); if (novo !== t.value) { const pos = Math.max(0, (t.selectionStart || 0) - (t.value.length - novo.length)); t.value = novo; try { t.setSelectionRange(pos, pos); } catch (_) {} } }
   else if (ehTextoLivre(e.target)) { const t = e.target; const v = t.value; const m = v.match(/^(\s*)(\p{Ll})/u); if (m) { const pos = t.selectionStart; t.value = m[1] + m[2].toUpperCase() + v.slice(m[0].length); try { t.setSelectionRange(pos, pos); } catch (_) {} } }
@@ -739,7 +794,7 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'cartao') {
     const antigo = S.cartoes.find((x) => x.id === id) || {};
     if (!v('banco')) return alert('Escolha o banco.');
-    const salvo = await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', apelido: v('apelido').trim(), cor: v('cor') || COR_BANCO[v('banco')] || '#268AFF' });
+    const salvo = await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', fechamento: parseInt(v('fechamento'), 10) || '', apelido: v('apelido').trim(), cor: v('cor') || COR_BANCO[v('banco')] || '#268AFF' });
     const semCartao = S.compras.filter((c) => !c.cartaoId);
     if (ehCredito(salvo) && S.cartoes.filter(ehCredito).length === 1 && semCartao.length && confirm(`Você tem ${semCartao.length} compra(s) sem cartão definido. Colocar no ${nomeCartao(salvo)}?`)) {
       for (const c of semCartao) await store.salvar('compras', { ...c, cartaoId: salvo.id });
@@ -765,6 +820,21 @@ document.addEventListener('submit', async (e) => {
     const antigo = S.metas.find((x) => x.id === id) || {};
     await store.salvar('metas', { ...antigo, id, nome: v('nome'), alvo: parseValor(v('alvo')), valorInicial: parseValor(v('valorInicial')), dataAlvo: f.semData.checked ? '' : lerMes('m-data', f), categoriaId: v('categoriaId'), desde: antigo.desde || C.mesAtual() });
     fecharModal(); toast('Meta salva! Bora conquistar. 🎯');
+  }
+  if (tipoF === 'decisao') {
+    const cid = id; const m = f.dataset.m; const k = `${cid || 'sem'}|${m}`; const ab = +f.dataset.aberto; const acao = v('acao'); const prox = C.addMes(m, 1);
+    const ds = { ...(S.settings.faturaDecisoes || {}) };
+    if (acao === 'paguei') { const fp = { ...(S.settings.faturasPagas || {}), [k]: true }; ds[k] = { acao, principal: ab, em: new Date().toISOString() }; await store.salvarSettings({ faturasPagas: fp, faturaDecisoes: ds }); fecharModal(); toast('Fatura paga! 💚', true); return; }
+    let juros = 0; let n = 1; let parcela = ab;
+    if (acao === 'passar') juros = parseValor(v('jurosPassar')) || 0;
+    if (acao === 'parcelar') { n = parseInt(v('nParc'), 10); if (!(n >= 2 && n <= 48)) return alert('Escolha de 2 a 48 parcelas.');
+      parcela = parseValor(v('vParc')) || Math.round((ab / n) * 100) / 100; const tot = Math.round(parcela * n * 100) / 100;
+      if (tot < ab - 0.01) return alert('As parcelas somam menos do que o valor em aberto. Confira o valor de cada parcela.'); juros = Math.round((tot - ab) * 100) / 100; }
+    let jurosCompraId = '';
+    if (juros > 0.009) { const cj = await catJuros(); const cp = await store.salvar('compras', { descricao: `Juros da fatura de ${C.nomeMes(m)}`, total: juros, parcelas: n, cartaoId: cid, categoriaId: cj.id, mesPrimeira: prox, data: '', automatica: true }); jurosCompraId = cp.id; }
+    ds[k] = { acao, principal: ab, parcelas: n, parcela, juros, jurosCompraId, em: new Date().toISOString() };
+    await store.salvarSettings({ faturaDecisoes: ds }); fecharModal();
+    toast(acao === 'passar' ? `Passou para a fatura de ${C.nomeMes(prox)}.` : `Parcelado em ${n}x.`); return;
   }
   if (tipoF === 'boas-vindas') {
     if (+f.dataset.passo < OB_PASSOS) return obIr(f, +f.dataset.passo + 1);
