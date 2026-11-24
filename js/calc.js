@@ -191,7 +191,7 @@ export function proximosVencimentos(st, hoje = new Date(), dias = 10) {
       const f = fatura(st, c.id, m);
       if (f.paga || f.total <= 0) continue;
       const d = dataDe(m, c.vencimento);
-      if (d >= d0 && d <= lim) out.push({ tipo: 'fatura', nome: `Fatura ${c.nome}`, valor: f.aberto, data: d, ref: c.id, mes: m });
+      if (d >= d0 && d <= lim) out.push({ tipo: 'fatura', nome: `Fatura ${c.apelido || c.banco || c.nome}`, valor: f.aberto, data: d, ref: c.id, mes: m });
     }
   }
   for (const l of st.lancamentos) {

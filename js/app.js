@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=16';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=16';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=16';
+import * as C from './calc.js?v=17';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=17';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=17';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -222,7 +222,7 @@ function telaCartoes() {
   <div class="linha-acao" style="margin-top:0"><h1>Cartões</h1><button class="btn verde" data-a="nova-compra">+ Compra no cartão</button></div>
   ${filtroPeriodo()}
   <div class="grade g2">${cartoes.map((c) => `<div class="cc" style="background:${c.cor || '#268AFF'}" data-a="editar-cartao" data-id="${c.id}">
-      <div><div class="cc-nome">${esc(c.banco || c.nome)}</div><div class="cc-det">${[nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ')}</div></div>
+      <div><div class="cc-nome">${esc(nomeCartao(c))}</div><div class="cc-det">${[c.apelido && c.banco && c.apelido !== c.banco ? c.banco : '', nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ')}</div></div>
       ${ehCredito(c) ? `<div><div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div></div>` : '<div class="cc-det">Gastos no débito vão em Lançamentos</div>'}</div>`).join('')}
     <button class="card" style="border-style:dashed;cursor:pointer;font-weight:900;color:var(--azul);min-height:120px;background:#fff" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
@@ -237,7 +237,7 @@ function telaCartoes() {
 function blocoFatura(c, f, m) {
   const k = `${c.id || 'sem'}|${m}`;
   return `<div class="card">
-    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(c.banco || c.nome)}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
+    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
     <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
     <div class="mini" style="display:flex;justify-content:space-between;margin-bottom:10px"><span>Pago <b class="pos">${brl(f.pago)}</b></span><span>${f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Em aberto <b>${brl(f.aberto)}</b>`}</span></div>
     <label class="chave"><input type="checkbox" data-a="fatura-tudo" data-id="${c.id}" data-m="${m}" ${f.tudoMarcado ? 'checked' : ''}> Selecionar tudo (paguei a fatura inteira)</label>
@@ -417,17 +417,23 @@ function previaParcelas() {
 
 const COR_BANCO = { 'Nubank': '#8A05BE', 'Itaú': '#EC7000', 'Bradesco': '#CC092F', 'Banco do Brasil': '#0038A8', 'Caixa': '#005CA9', 'Santander': '#EC0000', 'Inter': '#FF7A00', 'C6 Bank': '#242424', 'Mercado Pago': '#00A6E2', 'PicPay': '#11C76F' };
 const TIPOS_CARTAO = [['credito', 'Crédito'], ['debito', 'Débito'], ['ambos', 'Débito e crédito']];
+const nomeCartao = (c) => c.apelido || c.banco || c.nome || 'Cartão';
 const ehCredito = (c) => !c.tipo || c.tipo === 'credito' || c.tipo === 'ambos';
 const nomeTipoCartao = (t) => (TIPOS_CARTAO.find((x) => x[0] === t) || TIPOS_CARTAO[0])[1];
 function selCartao(sel, novo) {
   const cs = st().cartoes.filter(ehCredito);
-  if (cs.length === 1 && (novo || !sel || sel === cs[0].id)) return `<input type="hidden" name="cartaoId" value="${cs[0].id}"><div class="inp" style="background:#fff">${esc(cs[0].banco || cs[0].nome)}</div>`;
-  return `<select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cs.map((k) => `<option value="${k.id}" ${k.id === sel ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select>`;
+  if (cs.length === 1 && (novo || !sel || sel === cs[0].id)) return `<input type="hidden" name="cartaoId" value="${cs[0].id}"><div class="inp" style="background:#fff">${esc(nomeCartao(cs[0]))}</div>`;
+  return `<select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cs.map((k) => `<option value="${k.id}" ${k.id === sel ? 'selected' : ''}>${esc(nomeCartao(k))}</option>`).join('')}</select>`;
 }
+const CORES_CARTAO = ['#8A05BE', '#EC7000', '#CC092F', '#0038A8', '#005CA9', '#FF7A00', '#242424', '#00B1EA', '#11C76F', '#268AFF', '#77C800', '#FF9600', '#FF4B4B', '#FF86D0', '#A5683B', '#7C8A9A'];
 function modalCartao(c = {}) {
-  const tipo = c.tipo || 'credito';
+  const tipo = c.tipo || 'credito'; const cor = c.cor || COR_BANCO[c.banco] || '#268AFF';
+  const cores = [...new Set([cor, ...CORES_CARTAO])];
   abrirModal(`<form data-form="cartao" data-id="${c.id || ''}">${topoModal(c.id ? 'Editar cartão' : 'Novo cartão')}
+    <div class="cc cc-previa" data-cc-previa style="background:${cor};margin-bottom:16px"><div><div class="cc-nome" data-cc-previa-nome>${esc(c.id ? nomeCartao(c) : 'Seu cartão')}</div><div class="cc-det">prévia</div></div></div>
     <div class="campo"><label>Banco</label>${selBanco('banco', c.banco || c.nome)}</div>
+    <div class="campo"><label>Nome do cartão <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="apelido" maxlength="30" placeholder="Ex.: Nubank pessoal, Itaú da empresa" value="${esc(c.apelido || '')}"></div>
+    <div class="campo"><label>Cor</label><div class="cats" data-cores-cartao ${c.cor ? 'data-manual="1"' : ''}>${cores.map((k) => `<button type="button" data-cor="${k}" class="${cor === k ? 'ativo' : ''}" aria-label="Cor ${k}"><span class="ponto" style="background:${k};margin:0"></span></button>`).join('')}</div><input type="hidden" name="cor" value="${cor}"></div>
     <div class="campo"><label>Tipo</label><div class="seg" data-seg="tipocartao">${TIPOS_CARTAO.map(([t, n]) => `<button type="button" class="t-neutro ${t === tipo ? 'ativo' : ''}" data-tipocartao="${t}">${n}</button>`).join('')}</div><input type="hidden" name="tipo" value="${tipo}"></div>
     <button type="button" class="mais-opcoes" data-a="mais-opcoes-cartao">${c.vencimento ? '− Menos opções' : '+ Dia de vencimento da fatura (opcional)'}</button>
     <div data-extras class="${c.vencimento ? '' : 'oculto'}"><div class="campo"><label>Dia de vencimento da fatura <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" name="vencimento" value="${c.vencimento || ''}"></div></div>
@@ -516,7 +522,8 @@ document.addEventListener('click', async (e) => {
   const catBtn = e.target.closest('[data-cat]');
   if (catBtn) { const w = catBtn.closest('form'); w.querySelectorAll('[data-cat]').forEach((b) => b.classList.toggle('ativo', b === catBtn)); w.categoriaId.value = catBtn.dataset.cat; return; }
   const corBtn = e.target.closest('[data-cor]');
-  if (corBtn) { const w = corBtn.closest('form'); w.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b === corBtn)); w.cor.value = corBtn.dataset.cor; return; }
+  if (corBtn) { const w = corBtn.closest('form'); w.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b === corBtn)); w.cor.value = corBtn.dataset.cor;
+    const pv = w.querySelector('[data-cc-previa]'); if (pv) { pv.style.background = corBtn.dataset.cor; w.querySelector('[data-cores-cartao]').dataset.manual = '1'; } return; }
   const tipoBtn = e.target.closest('[data-seg=tipo] [data-tipo]');
   if (tipoBtn) {
     const f = tipoBtn.closest('form'); const t = tipoBtn.dataset.tipo; f.tipo.value = t;
@@ -659,7 +666,15 @@ function limparValor(t) {
   return v;
 }
 const ehTextoLivre = (t) => (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && (!t.getAttribute('type') || t.type === 'text'))) && !t.matches('[inputmode=decimal],[data-a=busca],[name=email]');
+function previaCartao(f) {
+  const pv = f.querySelector('[data-cc-previa]'); if (!pv) return;
+  const banco = f.banco?.value || ''; f.querySelector('[data-cc-previa-nome]').textContent = f.apelido.value.trim() || banco || 'Seu cartão';
+  const box = f.querySelector('[data-cores-cartao]');
+  if (!box.dataset.manual && COR_BANCO[banco]) { const k = COR_BANCO[banco]; f.cor.value = k; pv.style.background = k; box.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b.dataset.cor === k)); }
+}
+document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); });
 document.addEventListener('input', (e) => {
+  if (e.target.closest('form[data-form=cartao]')) setTimeout(() => previaCartao(e.target.closest('form')), 0);
   if (e.target.matches('input[inputmode=decimal]')) { const t = e.target; const novo = limparValor(t); if (novo !== t.value) { const pos = Math.max(0, (t.selectionStart || 0) - (t.value.length - novo.length)); t.value = novo; try { t.setSelectionRange(pos, pos); } catch (_) {} } }
   else if (ehTextoLivre(e.target)) { const t = e.target; const v = t.value; const m = v.match(/^(\s*)(\p{Ll})/u); if (m) { const pos = t.selectionStart; t.value = m[1] + m[2].toUpperCase() + v.slice(m[0].length); try { t.setSelectionRange(pos, pos); } catch (_) {} } }
   const a = e.target.dataset.a;
@@ -700,11 +715,11 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'cartao') {
     const antigo = S.cartoes.find((x) => x.id === id) || {};
     if (!v('banco')) return alert('Escolha o banco.');
-    const salvo = await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', cor: COR_BANCO[v('banco')] || '#268AFF' });
+    const salvo = await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', apelido: v('apelido').trim(), cor: v('cor') || COR_BANCO[v('banco')] || '#268AFF' });
     const semCartao = S.compras.filter((c) => !c.cartaoId);
-    if (ehCredito(salvo) && S.cartoes.filter(ehCredito).length === 1 && semCartao.length && confirm(`Você tem ${semCartao.length} compra(s) sem cartão definido. Colocar no ${salvo.banco}?`)) {
+    if (ehCredito(salvo) && S.cartoes.filter(ehCredito).length === 1 && semCartao.length && confirm(`Você tem ${semCartao.length} compra(s) sem cartão definido. Colocar no ${nomeCartao(salvo)}?`)) {
       for (const c of semCartao) await store.salvar('compras', { ...c, cartaoId: salvo.id });
-      toast(`${semCartao.length} compra(s) foram para o ${salvo.banco}.`);
+      toast(`${semCartao.length} compra(s) foram para o ${nomeCartao(salvo)}.`);
     }
     fecharModal(); toast('Cartão salvo!');
   }

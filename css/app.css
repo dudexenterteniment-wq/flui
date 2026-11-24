@@ -235,3 +235,4 @@ h3 { font-size: 16px; font-weight: 800; margin: 0; }
 .ob-cc .inp { width: 72px; flex: none; text-align: center; }
 .ob-cc .mini { white-space: nowrap; }
 .ob-cc .inp:disabled { opacity: .45; }
+.cc-previa { cursor: default; min-height: 92px; transition: background .25s; }
