@@ -267,9 +267,11 @@ h3 { font-size: 16px; font-weight: 800; margin: 0; }
 .decisao-info { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding: 10px 12px; background: var(--azul-claro); border-radius: 12px; font-weight: 700; font-size: 14px; }
 .btn[disabled] { opacity: .5; pointer-events: none; }
 /* símbolos das categorias */
-.item .bola { font-size: 20px; color: var(--tinta); }
-.cat-ic { font-size: 15px; line-height: 1; margin-right: 2px; }
+.item .bola { color: #fff; }
+.cat-ic { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; color: #fff; margin-right: 2px; flex: none; }
+.cats button { display: inline-flex; align-items: center; gap: 6px; }
 .icones-escolha { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; }
-.icones-escolha button { height: 42px; border: 2px solid var(--linha); border-radius: 12px; background: #fff; font-size: 20px; cursor: pointer; }
-.icones-escolha button.ativo { border-color: var(--azul); background: var(--azul-claro); }
+.icones-escolha button { height: 42px; border: 2px solid var(--linha); border-radius: 12px; background: #fff; color: var(--tinta); cursor: pointer; display: grid; place-items: center; }
+.icones-escolha button.ativo { border-color: var(--azul); background: var(--azul); color: #fff; }
 .meta-hint { margin: 8px 0 4px; padding: 8px 12px; border-radius: 12px; background: var(--azul-claro); font-size: 14px; }
+.meta-hint { display: flex; align-items: flex-start; gap: 8px; } .meta-hint svg { color: var(--azul); flex: none; }

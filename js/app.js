@@ -1,7 +1,8 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=22';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=22';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=22';
+import * as C from './calc.js?v=23';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=23';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=23';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=23';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -16,12 +17,10 @@ try { const p = JSON.parse(sessionStorage.getItem('flui:periodo')); if (p) Objec
 const st = () => store.st;
 const cat = (id) => st().categorias.find((c) => c.id === id);
 const catNome = (id) => cat(id)?.nome || 'Sem categoria';
-const ICONES = { 'Combustível': '⛽', 'Estacionamento': '🅿️', 'Comida fora': '🍔', 'Mercado': '🛒', 'Farmácia': '💊', 'Entretenimento': '🎬', 'Academia': '🏋️', 'Assinaturas': '📺', 'Roupa': '👕', 'Presentes': '🎁', 'Dízimo': '⛪', 'Ofertas e doações': '🤲', 'Contas de casa': '🏠', 'Outros': '📦', 'Juros e tarifas': '💸',
-  'Fundo de emergência': '🛟', 'Reserva de emergência': '🛟', 'Investimentos': '📈', 'Investimento': '📈', 'Viagem': '✈️', 'Salário': '💼', 'Entrada extra': '💰', 'Freela': '💻', 'Presente recebido': '🎀', 'Reembolso': '🔄', 'Venda': '🏷️', 'Rendimento': '🌱',
-  'Transporte': '🚌', 'Uber': '🚗', 'Saúde': '🩺', 'Educação': '📚', 'Pet': '🐾', 'Beleza': '💅', 'Casa': '🏠', 'Lazer': '🎉', 'Carro': '🚗', 'Viagens': '✈️', 'Casamento': '💍' };
-const ICONES_ESCOLHA = ['⛽', '🅿️', '🚗', '🚌', '🍔', '🍕', '☕', '🛒', '💊', '🩺', '🎬', '🎉', '🎮', '🏋️', '📺', '🎵', '👕', '👟', '💅', '🎁', '⛪', '🤲', '🏠', '💡', '📱', '📚', '🎓', '🐾', '👶', '✈️', '🏖️', '💍', '📦', '💸', '🛟', '📈', '🐷', '🎯', '💼', '💰', '💻', '🎀', '🔄', '🏷️', '🌱', '❤️', '⭐', '🧾'];
-const catIcone = (c) => (c && (c.icone || ICONES[c.nome])) || (c?.nome || '?').slice(0, 1).toUpperCase();
-const bolaCat = (c, extra = '') => `<div class="bola" style="background:${(c?.cor || '#AFB8C4')}2e;${extra}">${esc(catIcone(c))}</div>`;
+const ICONES_ESCOLHA = Object.keys(ICS);
+const iconeKey = (c) => (c && ICS[c.icone] ? c.icone : ICONE_POR_NOME[c?.nome]) || 'caixa';
+const catIcone = (c, tam = 22) => svgIcone(iconeKey(c), tam);
+const bolaCat = (c, extra = '') => `<div class="bola" style="background:${c?.cor || '#AFB8C4'};${extra}">${catIcone(c)}</div>`;
 const catCor = (id) => cat(id)?.cor || '#AFB8C4';
 const meses = () => C.mesesDoPeriodo(ui.periodo);
 const mesRef = () => meses()[meses().length - 1];
@@ -400,7 +399,7 @@ const selBanco = (nome, v) => { const bs = st().settings.bancos || [];
 const chipsBancos = (sel) => { const todos = [...new Set([...BANCOS_CATALOGO, ...sel])]; return `<div class="cats" data-bancos>${todos.map((b) => `<button type="button" class="${sel.includes(b) ? 'ativo' : ''}" data-banco-tg="${esc(b)}">${sel.includes(b) ? '✓ ' : ''}${esc(b)}</button>`).join('')}</div>`; };
 const FIM = ['Outros', 'Fatura do cartão'];
 const ordemCat = (a, b) => (FIM.indexOf(a.nome) - FIM.indexOf(b.nome)) || a.nome.localeCompare(b.nome, 'pt-BR');
-const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic">${esc(catIcone(c))}</span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
+const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic" style="background:${c.cor}">${catIcone(c, 14)}</span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
 
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
@@ -509,7 +508,7 @@ function modalCat(c = {}) {
     <div class="campo"><label>Nome</label><input autocapitalize="sentences" class="inp" name="nome" required value="${esc(c.nome || '')}"></div>
     <div class="campo"><label>Tipo</label><select class="inp" name="tipo">${[['despesa', 'Despesa'], ['guardar', 'Guardar'], ['entrada', 'Entrada']].map(([v, n]) => `<option value="${v}" ${c.tipo === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
     <div class="campo"><label>Orçamento por mês <span class="opc">opcional</span></label><input class="inp" name="orcamento" inputmode="decimal" value="${c.orcamento ? valorInput(c.orcamento) : ''}"></div>
-    <div class="campo"><label>Símbolo</label><div class="icones-escolha">${[...new Set([catIcone(c), ...ICONES_ESCOLHA])].filter((x) => [...x].length <= 3).map((k) => `<button type="button" data-icone="${k}" class="${catIcone(c) === k ? 'ativo' : ''}">${k}</button>`).join('')}</div><input type="hidden" name="icone" value="${esc(c.icone || ICONES[c.nome] || '')}"></div>
+    <div class="campo"><label>Símbolo</label><div class="icones-escolha">${ICONES_ESCOLHA.map((k) => `<button type="button" data-icone="${k}" class="${iconeKey(c) === k ? 'ativo' : ''}" aria-label="${k}">${svgIcone(k, 22)}</button>`).join('')}</div><input type="hidden" name="icone" value="${esc(iconeKey(c))}"></div>
     <div class="campo"><label>Cor</label><div class="cats">${cores.map((k) => `<button type="button" data-cor="${k}" class="${(c.cor || cores[0]) === k ? 'ativo' : ''}"><span class="ponto" style="background:${k};margin:0"></span></button>`).join('')}</div><input type="hidden" name="cor" value="${c.cor || cores[0]}"></div>
     ${c.id ? `<label class="chave" style="margin-bottom:12px"><input type="checkbox" name="arquivada" ${c.arquivada ? 'checked' : ''}> Arquivar (some das opções, mas o histórico fica)</label>` : ''}
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-cat">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
@@ -561,7 +560,7 @@ function metaHint(form) {
   if (!meta) { h?.remove(); return; }
   if (!h) { h = document.createElement('div'); h.className = 'meta-hint'; wrap.after(h); }
   const p = C.progressoMeta(st(), meta);
-  h.innerHTML = `🎯 Vai para a meta <b>${esc(meta.nome)}</b>: ${brl(p.atual)}${p.alvo ? ` de ${brl(p.alvo)}` : ' guardados até agora'}`;
+  h.innerHTML = `${svgIcone('alvo', 16)}<span>Vai para a meta <b>${esc(meta.nome)}</b>: ${brl(p.atual)}${p.alvo ? ` de ${brl(p.alvo)}` : ' guardados até agora'}</span>`;
 }
 const OB_PASSOS = 4;
 function modalBoasVindas() {
