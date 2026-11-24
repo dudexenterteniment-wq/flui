@@ -1,8 +1,8 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=24';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=24';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=24';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=24';
+import * as C from './calc.js?v=25';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=25';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=25';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=25';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -565,6 +565,8 @@ function metaHint(form) {
   const p = C.progressoMeta(st(), meta);
   h.innerHTML = `${svgIcone('alvo', 16)}<span>Vai para a meta <b>${esc(meta.nome)}</b>: ${brl(p.atual)}${p.alvo ? ` de ${brl(p.alvo)}` : ' guardados até agora'}</span>`;
 }
+// requestSubmit não existe em iPhones mais antigos (Safari < 16)
+function enviarForm(f) { if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }
 const OB_PASSOS = 4;
 function modalBoasVindas() {
   const fala = (t) => `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">${t}</div></div>`;
@@ -587,7 +589,7 @@ function obCartoes(f) {
   const bancos = [...f.querySelectorAll('[data-banco-tg].ativo')].map((b) => b.dataset.bancoTg);
   const box = f.querySelector('[data-ob-cartoes]');
   const antes = {}; box.querySelectorAll('[data-ob-cc]').forEach((r) => { antes[r.dataset.obCc] = { on: r.querySelector('input[type=checkbox]').checked, dia: r.querySelector('input[type=number]').value }; });
-  box.innerHTML = bancos.length ? bancos.map((b) => { const a = antes[b] || {}; return `<div class="ob-cc ${a.on ? 'on' : ''}" data-ob-cc="${esc(b)}"><label><input type="checkbox" ${a.on ? 'checked' : ''}> <b>${esc(b)}</b></label><span class="mini">vence dia</span><input class="inp" type="number" min="1" max="31" inputmode="numeric" placeholder="—" value="${esc(a.dia || '')}" ${a.on ? '' : 'disabled'}></div>`; }).join('') + '<p class="mini">Não tem cartão de crédito? É só tocar em Concluir.</p>'
+  box.innerHTML = bancos.length ? bancos.map((b) => { const a = antes[b] || {}; return `<div class="ob-cc ${a.on ? 'on' : ''}" data-ob-cc="${esc(b)}"><label><input type="checkbox" ${a.on ? 'checked' : ''}> <b>${esc(b)}</b></label><span class="mini">vence dia</span><input class="inp" type="number" min="1" max="31" inputmode="numeric" placeholder="—" value="${esc(a.dia || '')}" data-ob-dia></div>`; }).join('') + '<p class="mini">Não tem cartão de crédito? É só tocar em Concluir.</p>'
     : '<p class="mini">Você não marcou nenhum banco, então não tenho cartões para mostrar. Dá para cadastrar depois na aba Cartões.</p>';
 }
 function obIr(f, n) {
@@ -630,11 +632,12 @@ document.addEventListener('click', async (e) => {
   const obF = e.target.closest('form[data-form=boas-vindas]');
   if (obF) {
     const ccBox = e.target.closest('[data-ob-cc]');
-    if (ccBox && e.target.matches('input[type=checkbox]')) { const on = e.target.checked; ccBox.classList.toggle('on', on); const d = ccBox.querySelector('input[type=number]'); d.disabled = !on; if (on) d.focus(); return; }
+    if (ccBox && e.target.matches('input[type=checkbox]')) { const on = e.target.checked; ccBox.classList.toggle('on', on); if (on) ccBox.querySelector('input[type=number]').focus(); return; }
+    if (ccBox && e.target.matches('[data-ob-dia]')) { const cb = ccBox.querySelector('input[type=checkbox]'); if (!cb.checked) { cb.checked = true; ccBox.classList.add('on'); } return; }
     const ob = e.target.closest('[data-a^=ob-]')?.dataset.a; const n = +obF.dataset.passo;
     if (ob === 'ob-voltar') return obIr(obF, n - 1);
-    if (ob === 'ob-pular') { if (n === 2) { obF.salario.value = ''; obF.diaSalario.value = ''; } if (n === 4) obF.querySelectorAll('[data-ob-cc] input[type=checkbox]').forEach((c) => { c.checked = false; }); return n === OB_PASSOS ? obF.requestSubmit() : obIr(obF, n + 1); }
-    if (ob === 'ob-prox') { if (n === 2 && obF.salario.value && !(parseValor(obF.salario.value) > 0)) return alert('Digite um valor válido ou toque em Pular.'); return n === OB_PASSOS ? obF.requestSubmit() : obIr(obF, n + 1); }
+    if (ob === 'ob-pular') { if (n === 2) { obF.salario.value = ''; obF.diaSalario.value = ''; } if (n === 4) obF.querySelectorAll('[data-ob-cc] input[type=checkbox]').forEach((c) => { c.checked = false; }); return n === OB_PASSOS ? enviarForm(obF) : obIr(obF, n + 1); }
+    if (ob === 'ob-prox') { if (n === 2 && obF.salario.value && !(parseValor(obF.salario.value) > 0)) return alert('Digite um valor válido ou toque em Pular.'); return n === OB_PASSOS ? enviarForm(obF) : obIr(obF, n + 1); }
     if (ob === 'ob-banco-add') { const inp = obF.querySelector('[data-ob-banco-novo]'); const v = inp.value.trim(); if (!v) return; const ex = [...obF.querySelectorAll('[data-banco-tg]')].find((b) => b.dataset.bancoTg.toLowerCase() === v.toLowerCase());
       if (ex) { ex.classList.add('ativo'); ex.textContent = '✓ ' + ex.dataset.bancoTg; } else { const b = document.createElement('button'); b.type = 'button'; b.className = 'ativo'; b.dataset.bancoTg = v; b.textContent = '✓ ' + v; obF.querySelector('[data-bancos]').appendChild(b); }
       inp.value = ''; return; }
@@ -772,6 +775,7 @@ function previaCartao(f) {
 }
 document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); });
 document.addEventListener('input', (e) => {
+  if (e.target.matches('[data-ob-dia]')) { const r = e.target.closest('[data-ob-cc]'); const cb = r.querySelector('input[type=checkbox]'); cb.checked = !!e.target.value; r.classList.toggle('on', cb.checked); }
   if (e.target.closest('form[data-form=decisao]')) setTimeout(() => previaDecisao(e.target.closest('form')), 0);
   if (e.target.closest('form[data-form=cartao]')) setTimeout(() => previaCartao(e.target.closest('form')), 0);
   if (e.target.matches('input[inputmode=decimal]')) { const t = e.target; const novo = limparValor(t); if (novo !== t.value) { const pos = Math.max(0, (t.selectionStart || 0) - (t.value.length - novo.length)); t.value = novo; try { t.setSelectionRange(pos, pos); } catch (_) {} } }
