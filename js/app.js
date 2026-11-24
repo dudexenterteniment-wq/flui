@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=7';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=7';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=7';
+import * as C from './calc.js?v=8';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=8';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=8';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -373,7 +373,7 @@ function modalLanc(l = {}) {
       <div class="duas"><div class="campo"><label>Data <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${l.data || ''}"></div>
         <div class="campo"><label>Observação <span class="opc">opcional</span></label><input class="inp" name="obs" value="${esc(l.obs || '')}"></div></div>
       <div class="duas"><div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
-        <div class="campo"><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
+        <div class="campo ${tipo === 'entrada' ? 'oculto' : ''}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
       <div class="campo"><label>Situação</label><select class="inp" name="status">${(tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}" ${l.status === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
     </div>
     <div class="acoes">${l.id ? '<button type="button" class="btn branco" data-a="excluir-lanc">Excluir</button>' : ''}<button class="btn verde" type="submit">${l.id ? 'Salvar' : 'Lançar'}</button></div>
@@ -482,6 +482,7 @@ document.addEventListener('click', async (e) => {
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
     const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, '');
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
+    const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.toggle('oculto', t === 'entrada');
     const sel = f.status; if (sel) sel.innerHTML = (t === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('');
     return;
   }
@@ -606,7 +607,7 @@ document.addEventListener('submit', async (e) => {
       fecharModal(); toast(n > 1 ? `Lançado no crédito em ${n}x!` : 'Lançado no crédito!', true); return; }
     const antigo = S.lancamentos.find((x) => x.id === id) || {};
     const novo = !id;
-    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: v('obs') });
+    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('tipo') === 'entrada' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: v('obs') });
     fecharModal(); toast(novo ? (v('tipo') === 'guardar' ? 'Guardado! Seu eu do futuro agradece. 💚' : 'Prontinho, lançado!') : 'Salvo!', novo);
   }
   if (tipoF === 'compra') {
