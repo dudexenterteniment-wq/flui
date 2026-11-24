@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=18';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=18';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=18';
+import * as C from './calc.js?v=19';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=19';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=19';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -215,24 +215,43 @@ function telaLancamentos() {
 // ---------------- Cartões ----------------
 function telaCartoes() {
   const ms = meses();
-  const cartoes = st().cartoes; const cred = cartoes.filter(ehCredito);
-  const lista = [...cred, ...(st().compras.some((c) => !c.cartaoId) ? [{ id: '', nome: 'Sem cartão definido', cor: '#AFAFAF' }] : [])];
+  const cartoes = st().cartoes;
+  const semCartao = st().compras.some((c) => !c.cartaoId);
+  const todos = [...cartoes, ...(semCartao ? [{ id: '', nome: 'Sem cartão definido', cor: '#AFAFAF', tipo: 'credito' }] : [])];
+  if (!todos.some((c) => c.id === ui.cartaoSel)) ui.cartaoSel = todos[0]?.id;
+  const sel = todos.find((c) => c.id === ui.cartaoSel);
+  const temCred = (c) => ehCredito(c); const temDeb = (c) => c.id && (c.tipo === 'debito' || c.tipo === 'ambos');
+  if (sel) { const abas = [temCred(sel) && 'fatura', temDeb(sel) && 'debito'].filter(Boolean); if (!abas.includes(ui.abaCartao)) ui.abaCartao = abas[0]; }
   const totMes = (cid, m) => C.fatura(st(), cid, m).total;
+  const debitos = (c) => ms.flatMap((m) => C.movimentosDoMes(st(), m)).filter((x) => x.tipo !== 'entrada' && x.forma === 'Débito' && c.banco && x.banco === c.banco);
+  const convite = (c) => temCred(c) && temDeb(c) ? 'Ver fatura e débito' : temDeb(c) ? 'Ver débito' : 'Ver fatura';
+  let painel = '';
+  if (sel) {
+    const abas = [temCred(sel) && ['fatura', 'Fatura (crédito)'], temDeb(sel) && ['debito', 'Débito']].filter(Boolean);
+    const cab = `<div class="linha-acao" style="margin:26px 0 12px"><h2 style="margin:0"><span class="ponto" style="background:${sel.cor || '#AFAFAF'}"></span>${esc(nomeCartao(sel))}</h2></div>
+      ${abas.length > 1 ? `<div class="seg abas-cartao" style="margin-bottom:14px">${abas.map(([k, n]) => `<button type="button" class="t-neutro ${ui.abaCartao === k ? 'ativo' : ''}" data-a="aba-cartao" data-v="${k}">${n}</button>`).join('')}</div>` : ''}`;
+    if (ui.abaCartao === 'debito') {
+      const ds = debitos(sel); const tot = C.sum(ds.map((x) => x.valor));
+      painel = cab + `<div class="card"><div class="linha-acao" style="margin:0 0 10px"><h3>Gastos no débito</h3><span class="num" style="font-weight:900;font-size:18px">${brl(tot)}</span></div>
+        ${ds.length ? `<div class="lista">${ds.map(itemMov).join('')}</div>` : `<p class="mini">Nada no débito ${esc(sel.banco)} neste período. Quando lançar algo, escolha "Débito" em "Como pagou?" e o banco ${esc(sel.banco)}.</p>`}</div>`;
+    } else {
+      const fs = ms.slice().reverse().map((m) => ({ m, f: C.fatura(st(), sel.id, m) })).filter((x) => x.f.total > 0);
+      painel = cab + (fs.length ? fs.map(({ m, f }) => `<div class="grupo-mes">${C.nomeMes(m, true)}</div>${blocoFatura(sel, f, m)}`).join('') : vazio('💳', 'Nenhuma fatura neste período.'))
+        + '<p class="mini" style="margin-top:14px">Marque cada compra que já pagou, registre um valor pago ou selecione tudo. Cada compra conta uma vez só, como despesa na categoria dela; pagar a fatura não cria uma nova despesa.</p>';
+    }
+  }
   return `
   <div class="linha-acao" style="margin-top:0"><h1>Cartões</h1><button class="btn verde" data-a="nova-compra">+ Compra no cartão</button></div>
   ${filtroPeriodo()}
-  <div class="grade g2">${cartoes.map((c) => `<div class="cc" style="background:${c.cor || '#268AFF'}" data-a="editar-cartao" data-id="${c.id}">
-      <div><div class="cc-nome">${esc(nomeCartao(c))}</div><div class="cc-det">${[c.apelido && c.banco && c.apelido !== c.banco ? c.banco : '', nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ')}</div></div>
-      ${ehCredito(c) ? `<div><div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div></div>` : '<div class="cc-det">Gastos no débito vão em Lançamentos</div>'}</div>`).join('')}
+  ${todos.length ? '<p class="mini" style="margin:0 0 10px">Toque num cartão para ver a fatura e o débito dele.</p>' : ''}
+  <div class="grade g2">${todos.map((c) => `<div class="cc ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
+      ${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão" title="Editar cartão">✎</button>` : ''}
+      <div><div class="cc-nome">${esc(nomeCartao(c))}</div><div class="cc-det">${c.id ? [c.apelido && c.banco && c.apelido !== c.banco ? c.banco : '', nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ') : 'compras sem cartão escolhido'}</div></div>
+      <div>${temCred(c) ? `<div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div>` : ''}
+      <div class="cc-ver">${convite(c)} ›</div></div></div>`).join('')}
     <button class="card" style="border-style:dashed;cursor:pointer;font-weight:900;color:var(--azul);min-height:120px;background:#fff" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
-  <h2>Faturas</h2>
-  ${lista.length ? ms.slice().reverse().map((m) => {
-    const fs = lista.map((c) => ({ c, f: C.fatura(st(), c.id, m) })).filter((x) => x.f.total > 0);
-    if (!fs.length) return '';
-    return `<div class="grupo-mes">${C.nomeMes(m, true)}</div>${fs.map(({ c, f }) => blocoFatura(c, f, m)).join('')}`;
-  }).join('') || vazio('💳', 'Nenhuma fatura neste período.') : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}
-  <p class="mini" style="margin-top:14px">Marque cada compra que já pagou, registre um valor pago ou selecione tudo. Cada compra conta uma vez só, como despesa na categoria dela; pagar a fatura não cria uma nova despesa.</p>`;
+  ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
 }
 function blocoFatura(c, f, m) {
   const k = `${c.id || 'sem'}|${m}`; const aberta = (ui.faturasAbertas ||= new Set()).has(k); const n = f.itens.length;
@@ -592,6 +611,8 @@ document.addEventListener('click', async (e) => {
     case 'nova-compra': modalCompra(); break;
     case 'editar-compra': modalCompra({ ...S.compras.find((x) => x.id === id) }); break;
     case 'excluir-compra': if (confirm('Excluir esta compra e todas as parcelas?')) { await store.remover('compras', $('[data-form=compra]').dataset.id); fecharModal(); toast('Compra excluída.'); } break;
+    case 'ver-cartao': ui.cartaoSel = el.dataset.id; render(); document.querySelector('.abas-cartao, [data-painel-cartao]')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); break;
+    case 'aba-cartao': ui.abaCartao = el.dataset.v; render(); break;
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
