@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=12';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=12';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=12';
+import * as C from './calc.js?v=13';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=13';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=13';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -154,7 +154,7 @@ function telaInicio() {
       ${vis.length ? `<div class="lista">${(ui.limitesTodos ? vis : vis.slice(0, 5)).map(orcLinha).join('')}</div>
         <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
           ${vis.length > 5 ? `<button class="btn fantasma pequeno" data-a="limites-toggle">${ui.limitesTodos ? '− Ver menos' : `+ Ver mais (${vis.length - 5})`}</button>` : '<span></span>'}
-          <a class="btn pequeno" href="#plano" style="background:var(--laranja);box-shadow:0 4px 0 #CC7800;text-decoration:none">Mudar limites</a></div>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
+          <a class="btn pequeno" href="#plano" style="background:var(--laranja);box-shadow:0 4px 0 #CC7800;text-decoration:none">Mudar planejamento</a></div>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
     </div>
     <div><h2>Para onde foi o dinheiro</h2>
       <div class="card">${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), totDesp)}
