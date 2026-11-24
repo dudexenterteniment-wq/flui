@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=8';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=8';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=8';
+import * as C from './calc.js?v=9';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=9';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=9';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -355,7 +355,7 @@ const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.f
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
   const mes = l.mes || (ui.periodo.tipo === 'mes' ? mesRef() : C.mesAtual());
-  const extras = !!(l.data || l.banco || l.vencimento || l.obs || (l.status && !['pago', 'recebido'].includes(l.status)));
+  const extras = !!(l.data || l.vencimento || l.obs || (l.status && !['pago', 'recebido'].includes(l.status)));
   abrirModal(`<form data-form="lanc" data-id="${l.id || ''}">${topoModal(l.id ? 'Editar lançamento' : 'Novo lançamento')}
     <div class="seg" data-seg="tipo">${[['despesa', 'Despesa'], ['entrada', 'Entrada'], ['guardar', 'Guardar']].map(([t, n]) => `<button type="button" class="t-${t} ${t === tipo ? 'ativo' : ''}" data-tipo="${t}">${n}</button>`).join('')}</div>
     <input type="hidden" name="tipo" value="${tipo}">
@@ -363,17 +363,17 @@ function modalLanc(l = {}) {
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, l.categoriaId)}</div></div>
     <div class="campo"><label>Descrição <span class="opc">opcional</span></label><input class="inp" name="descricao" value="${esc(l.descricao || '')}" placeholder="Ex.: almoço com a equipe"></div>
     <div class="campo"><label>Como pagou?</label><div class="cats">${['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${(l.forma || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma || '')}"></div>
+    <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
     <div data-credito class="${l.forma === 'Crédito' && !l.id ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
         <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${st().cartoes.filter(ehCredito).map((k, _, arr) => `<option value="${k.id}" ${arr.length === 1 ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select></div></div>
       <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
     <div class="campo"><label>Mês</label>${mesSelect('l-mes', mes)}</div>
-    <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, banco, vencimento)'}</button>
+    <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, vencimento, observação)'}</button>
     <div data-extras class="${extras ? '' : 'oculto'}">
       <div class="duas"><div class="campo"><label>Data <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${l.data || ''}"></div>
         <div class="campo"><label>Observação <span class="opc">opcional</span></label><input class="inp" name="obs" value="${esc(l.obs || '')}"></div></div>
-      <div class="duas"><div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
-        <div class="campo ${tipo === 'entrada' ? 'oculto' : ''}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
+      <div class="duas"><div class="campo ${tipo === 'entrada' ? 'oculto' : ''}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
       <div class="campo"><label>Situação</label><select class="inp" name="status">${(tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}" ${l.status === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
     </div>
     <div class="acoes">${l.id ? '<button type="button" class="btn branco" data-a="excluir-lanc">Excluir</button>' : ''}<button class="btn verde" type="submit">${l.id ? 'Salvar' : 'Lançar'}</button></div>
@@ -511,7 +511,7 @@ document.addEventListener('click', async (e) => {
     case 'notificacoes': modalNotificacoes(); break;
     case 'novo-lanc': modalLanc(); break;
     case 'mais-opcoes-cartao': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Dia de vencimento da fatura (opcional)' : '− Menos opções'; break; }
-    case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, banco, vencimento)' : '− Menos opções'; break; }
+    case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, vencimento, observação)' : '− Menos opções'; break; }
     case 'abrir-mov': {
       const o = el.dataset.origem;
       if (o === 'lanc') modalLanc({ ...S.lancamentos.find((x) => x.id === id) });
