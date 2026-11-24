@@ -275,3 +275,15 @@ h3 { font-size: 16px; font-weight: 800; margin: 0; }
 .icones-escolha button.ativo { border-color: var(--azul); background: var(--azul); color: #fff; }
 .meta-hint { margin: 8px 0 4px; padding: 8px 12px; border-radius: 12px; background: var(--azul-claro); font-size: 14px; }
 .meta-hint { display: flex; align-items: flex-start; gap: 8px; } .meta-hint svg { color: var(--azul); flex: none; }
+
+/* importar extrato */
+.imp-info { background: var(--azul-claro); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; line-height: 1.5; }
+.imp-passos { margin: 0 0 14px; padding-left: 20px; line-height: 1.6; }
+.imp-lista { border: 2px solid var(--linha); border-radius: var(--raio); max-height: 52vh; overflow: auto; margin-bottom: 14px; }
+.imp-linha { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-bottom: 1px solid var(--linha); }
+.imp-linha:last-child { border-bottom: none; }
+.imp-linha.off { opacity: .5; }
+.imp-linha input[type=checkbox] { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--verde); flex: none; }
+.imp-meio { flex: 1; min-width: 0; } .imp-desc { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.imp-cat { margin-top: 6px; padding: 6px 10px; font-size: 13px; }
+.imp-valor { font-weight: 900; white-space: nowrap; } .imp-aviso { color: var(--laranja); font-weight: 800; }

@@ -1,8 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=25';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=25';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=25';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=25';
+import * as C from './calc.js?v=26';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=26';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=26';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=26';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=26';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -212,7 +213,7 @@ function telaLancamentos() {
   const porMes = ms.slice().reverse().map((m) => [m, movs.filter((x) => x.mes === m)]).filter(([, l]) => l.length);
   const tot = (t) => C.sum(movs.filter((x) => x.tipo === t), (x) => x.valor);
   return `
-  <div class="linha-acao" style="margin-top:0"><h1>Lançamentos</h1><button class="btn verde" data-a="novo-lanc">+ Novo lançamento</button></div>
+  <div class="linha-acao" style="margin-top:0"><h1>Lançamentos</h1><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn branco" data-a="importar-extrato">Importar extrato</button><button class="btn verde" data-a="novo-lanc">+ Novo lançamento</button></span></div>
   ${filtroPeriodo()}
   <div class="chips" style="margin-bottom:10px">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
     ${ui.filtroCat ? `<button class="chip ativo" data-a="filtro-cat-limpa">${esc(catNome(ui.filtroCat))} ×</button>` : ''}</div>
@@ -567,6 +568,46 @@ function metaHint(form) {
 }
 // requestSubmit não existe em iPhones mais antigos (Safari < 16)
 function enviarForm(f) { if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }
+// ---------------- importar extrato ----------------
+function modalImportar() {
+  abrirModal(`${topoModal('Importar extrato')}
+    <div class="imp-info"><b>Aceita o extrato do Nubank</b> (conta: Pix, débito, boletos e transferências).<br>
+      Formato melhor: <b>OFX</b>. O <b>CSV</b> também funciona. O PDF não dá para importar, porque é só para leitura.</div>
+    <ol class="imp-passos mini"><li>No app do Nubank, toque em <b>Conta</b> e depois em <b>Pedir extrato</b>.</li><li>Escolha o mês e toque em <b>Exportar extrato</b>. O Nubank manda para o seu e-mail.</li><li>Baixe o arquivo <b>.ofx</b> do e-mail e escolha ele aqui.</li></ol>
+    <label class="btn cheio" style="cursor:pointer;display:block;text-align:center">Escolher arquivo OFX ou CSV<input type="file" accept=".ofx,.csv,.OFX,.CSV,text/csv,application/x-ofx" data-a="arquivo-extrato" hidden></label>
+    <p class="mini" style="margin-top:10px">Antes de salvar, você confere tudo. O que já foi importado antes é pulado sozinho. Extratos OFX de outros bancos também costumam funcionar.</p>`);
+}
+function prepararImportacao(dados) {
+  const S = st(); const regras = S.settings.regrasImport || {};
+  const porNome = (nome, tipo) => S.categorias.find((c) => c.nome === nome && c.tipo === tipo && !c.arquivada);
+  const sal = S.recorrencias.find((r) => r.tipo === 'entrada' && catNome(r.categoriaId) === 'Salário');
+  const jaIds = new Set(S.lancamentos.map((l) => l.importId).filter(Boolean));
+  const linhas = dados.itens.map((it) => {
+    const e = entender(it); const mes = it.data.slice(0, 7); const valor = Math.abs(it.valor);
+    const regra = regras[chaveRegra(it.texto)]; const cRegra = regra && S.categorias.find((c) => c.id === regra && c.tipo === e.tipo);
+    let cat = cRegra || (e.tipo === 'entrada' && sal && Math.abs(sal.valor - valor) < 0.005 ? porNome('Salário', 'entrada') : null) || porNome(e.sugestao, e.tipo)
+      || (e.tipo === 'despesa' ? porNome('Outros', 'despesa') : S.categorias.find((c) => c.tipo === e.tipo && !c.arquivada));
+    const ja = it.id && jaIds.has(it.id);
+    const parecido = !ja && S.lancamentos.some((l) => l.mes === mes && l.tipo === e.tipo && Math.abs((Number(l.valor) || 0) - valor) < 0.005 && !l.importId);
+    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', marcado: e.marcar && !ja && !parecido, ja,
+      aviso: ja ? 'Já importado antes.' : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
+  });
+  ui.importacao = { banco: dados.banco || 'Nubank', formato: dados.formato, linhas };
+}
+function modalRevisarImport() {
+  const im = ui.importacao; const S = st();
+  const opts = (tipo, sel) => S.categorias.filter((c) => c.tipo === tipo && !c.arquivada).sort(ordemCat).map((c) => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.nome)}</option>`).join('');
+  const n = im.linhas.filter((l) => l.marcado).length;
+  abrirModal(`<form data-form="importar">${topoModal('Conferir importação')}
+    <p class="mini" style="margin:0 0 10px">${im.linhas.length} movimentações do <b>${esc(im.banco)}</b> (${im.formato}). Desmarque o que não quiser e ajuste as categorias. O Flui lembra das suas escolhas na próxima vez.</p>
+    <div class="imp-lista">${im.linhas.map((l, i) => `<div class="imp-linha ${l.marcado ? '' : 'off'}">
+      <input type="checkbox" data-imp-ok="${i}" ${l.marcado ? 'checked' : ''} ${l.ja ? 'disabled' : ''} aria-label="Importar">
+      <div class="imp-meio"><div class="imp-desc">${esc(l.descricao)}</div>
+        <div class="mini">${l.data.split('-').reverse().join('/')} · ${esc(l.forma || '')}${l.aviso ? ` · <span class="imp-aviso">${esc(l.aviso)}</span>` : ''}</div>
+        ${l.ja ? '' : `<select class="inp imp-cat" data-imp-cat="${i}">${opts(l.tipo, l.catId)}</select>`}</div>
+      <div class="imp-valor num ${l.tipo === 'entrada' ? 'pos' : ''}">${l.tipo === 'entrada' ? '+' : '−'}${brl(l.valorAbs)}</div></div>`).join('')}</div>
+    <div class="acoes"><button type="button" class="btn branco" data-a="fechar">Cancelar</button><button class="btn verde" type="submit" data-imp-btn>Importar ${n}</button></div></form>`);
+}
 const OB_PASSOS = 4;
 function modalBoasVindas() {
   const fala = (t) => `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">${t}</div></div>`;
@@ -691,6 +732,7 @@ document.addEventListener('click', async (e) => {
       const patch = {}; if (d.acao === 'paguei') { const fp = { ...(S.settings.faturasPagas || {}) }; delete fp[k]; patch.faturasPagas = fp; }
       delete ds[k]; await store.salvarSettings({ ...patch, faturaDecisoes: ds }); toast('Escolha desfeita.'); render(); break; }
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
+    case 'importar-extrato': modalImportar(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
     case 'excluir-cartao': { const cid = $('[data-form=cartao]').dataset.id; const n = S.compras.filter((c) => c.cartaoId === cid).length;
@@ -774,6 +816,23 @@ function previaCartao(f) {
   if (!box.dataset.manual && COR_BANCO[banco]) { const k = COR_BANCO[banco]; f.cor.value = k; pv.style.background = k; box.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b.dataset.cor === k)); }
 }
 document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); });
+document.addEventListener('change', async (e) => {
+  const t = e.target;
+  if (t.matches('[data-a=arquivo-extrato]') && t.files[0]) {
+    const arq = t.files[0]; const nome = arq.name.toLowerCase();
+    try {
+      if (nome.endsWith('.pdf')) throw new Error('PDF não dá para importar. No e-mail do Nubank, baixe o arquivo .ofx (ou .csv).');
+      const txt = await arq.text();
+      const dados = /<OFX>|OFXHEADER/i.test(txt) ? lerOFX(txt) : lerCSV(txt);
+      if (!dados.itens.length) throw new Error('Não encontrei movimentações nesse arquivo.');
+      prepararImportacao(dados); modalRevisarImport();
+    } catch (err) { alert(err.message || 'Não consegui ler esse arquivo.'); } finally { t.value = ''; }
+    return;
+  }
+  if (t.matches('[data-imp-ok]')) { const l = ui.importacao.linhas[+t.dataset.impOk]; l.marcado = t.checked; t.closest('.imp-linha').classList.toggle('off', !t.checked);
+    $('[data-imp-btn]').textContent = `Importar ${ui.importacao.linhas.filter((x) => x.marcado).length}`; return; }
+  if (t.matches('[data-imp-cat]')) { const l = ui.importacao.linhas[+t.dataset.impCat]; l.catId = t.value; l.mudou = true; return; }
+});
 document.addEventListener('input', (e) => {
   if (e.target.matches('[data-ob-dia]')) { const r = e.target.closest('[data-ob-cc]'); const cb = r.querySelector('input[type=checkbox]'); cb.checked = !!e.target.value; r.classList.toggle('on', cb.checked); }
   if (e.target.closest('form[data-form=decisao]')) setTimeout(() => previaDecisao(e.target.closest('form')), 0);
@@ -846,6 +905,15 @@ document.addEventListener('submit', async (e) => {
     const antigo = S.metas.find((x) => x.id === id) || {};
     await store.salvar('metas', { ...antigo, id, nome: v('nome'), alvo: parseValor(v('alvo')), valorInicial: parseValor(v('valorInicial')), dataAlvo: f.semData.checked ? '' : lerMes('m-data', f), categoriaId: v('categoriaId'), desde: antigo.desde || C.mesAtual() });
     fecharModal(); toast('Meta salva! Bora conquistar. 🎯');
+  }
+  if (tipoF === 'importar') {
+    const im = ui.importacao; const sel = im.linhas.filter((l) => l.marcado && !l.ja);
+    if (!sel.length) return alert('Nenhuma movimentação marcada.');
+    const btn = $('[data-imp-btn]'); btn.disabled = true; btn.textContent = 'Importando...';
+    for (const l of sel) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '' });
+    const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
+    const bancos = S.settings.bancos || []; await store.salvarSettings({ regrasImport: regras, ...(im.banco && !bancos.includes(im.banco) ? { bancos: [...bancos, im.banco] } : {}) });
+    ui.importacao = null; fecharModal(); toast(`${sel.length} lançamentos importados!`, true); return;
   }
   if (tipoF === 'decisao') {
     const cid = id; const m = f.dataset.m; const k = `${cid || 'sem'}|${m}`; const ab = +f.dataset.aberto; const acao = v('acao'); const prox = C.addMes(m, 1);
