@@ -266,3 +266,10 @@ h3 { font-size: 16px; font-weight: 800; margin: 0; }
 .previa-dec { background: var(--fundo-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; } .previa-dec:empty { display: none; }
 .decisao-info { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding: 10px 12px; background: var(--azul-claro); border-radius: 12px; font-weight: 700; font-size: 14px; }
 .btn[disabled] { opacity: .5; pointer-events: none; }
+/* símbolos das categorias */
+.item .bola { font-size: 20px; color: var(--tinta); }
+.cat-ic { font-size: 15px; line-height: 1; margin-right: 2px; }
+.icones-escolha { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; }
+.icones-escolha button { height: 42px; border: 2px solid var(--linha); border-radius: 12px; background: #fff; font-size: 20px; cursor: pointer; }
+.icones-escolha button.ativo { border-color: var(--azul); background: var(--azul-claro); }
+.meta-hint { margin: 8px 0 4px; padding: 8px 12px; border-radius: 12px; background: var(--azul-claro); font-size: 14px; }

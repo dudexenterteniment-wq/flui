@@ -243,9 +243,11 @@ export function proximosVencimentos(st, hoje = new Date(), dias = 10) {
 
 // metas: valor atual = valor inicial + o que foi guardado na categoria vinculada
 export function progressoMeta(st, meta) {
-  const guardado = meta.categoriaId
-    ? sum(st.lancamentos.filter((l) => l.categoriaId === meta.categoriaId && l.tipo === 'guardar' && (!meta.desde || difMeses(meta.desde, l.mes) >= 0)), (l) => l.valor)
-    : 0;
+  const desde = (m) => !meta.desde || difMeses(meta.desde, m) >= 0;
+  const lanc = meta.categoriaId ? sum(st.lancamentos.filter((l) => l.categoriaId === meta.categoriaId && l.tipo === 'guardar' && desde(l.mes)), (l) => l.valor) : 0;
+  // fixos de guardar marcados como feitos também contam
+  const fixos = meta.categoriaId ? sum(st.recorrencias.filter((r) => r.categoriaId === meta.categoriaId).flatMap((r) => Object.keys(r.pagos || {}).filter((m) => r.pagos[m] && desde(m) && recorrenciaNoMes(r, m) && !st.lancamentos.some((l) => l.recorrenciaId === r.id && l.mes === m)).map(() => Number(r.valor) || 0))) : 0;
+  const guardado = fromCents(cents(lanc) + cents(fixos));
   const atual = fromCents(cents(meta.valorInicial) + cents(guardado));
   const alvo = Number(meta.alvo) || 0;
   return { atual, alvo, pct: alvo > 0 ? Math.min(1, atual / alvo) : 0, falta: Math.max(0, fromCents(cents(alvo) - cents(atual))) };

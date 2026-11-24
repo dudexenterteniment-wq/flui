@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=21';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=21';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=21';
+import * as C from './calc.js?v=22';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=22';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=22';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -16,6 +16,12 @@ try { const p = JSON.parse(sessionStorage.getItem('flui:periodo')); if (p) Objec
 const st = () => store.st;
 const cat = (id) => st().categorias.find((c) => c.id === id);
 const catNome = (id) => cat(id)?.nome || 'Sem categoria';
+const ICONES = { 'Combustível': '⛽', 'Estacionamento': '🅿️', 'Comida fora': '🍔', 'Mercado': '🛒', 'Farmácia': '💊', 'Entretenimento': '🎬', 'Academia': '🏋️', 'Assinaturas': '📺', 'Roupa': '👕', 'Presentes': '🎁', 'Dízimo': '⛪', 'Ofertas e doações': '🤲', 'Contas de casa': '🏠', 'Outros': '📦', 'Juros e tarifas': '💸',
+  'Fundo de emergência': '🛟', 'Reserva de emergência': '🛟', 'Investimentos': '📈', 'Investimento': '📈', 'Viagem': '✈️', 'Salário': '💼', 'Entrada extra': '💰', 'Freela': '💻', 'Presente recebido': '🎀', 'Reembolso': '🔄', 'Venda': '🏷️', 'Rendimento': '🌱',
+  'Transporte': '🚌', 'Uber': '🚗', 'Saúde': '🩺', 'Educação': '📚', 'Pet': '🐾', 'Beleza': '💅', 'Casa': '🏠', 'Lazer': '🎉', 'Carro': '🚗', 'Viagens': '✈️', 'Casamento': '💍' };
+const ICONES_ESCOLHA = ['⛽', '🅿️', '🚗', '🚌', '🍔', '🍕', '☕', '🛒', '💊', '🩺', '🎬', '🎉', '🎮', '🏋️', '📺', '🎵', '👕', '👟', '💅', '🎁', '⛪', '🤲', '🏠', '💡', '📱', '📚', '🎓', '🐾', '👶', '✈️', '🏖️', '💍', '📦', '💸', '🛟', '📈', '🐷', '🎯', '💼', '💰', '💻', '🎀', '🔄', '🏷️', '🌱', '❤️', '⭐', '🧾'];
+const catIcone = (c) => (c && (c.icone || ICONES[c.nome])) || (c?.nome || '?').slice(0, 1).toUpperCase();
+const bolaCat = (c, extra = '') => `<div class="bola" style="background:${(c?.cor || '#AFB8C4')}2e;${extra}">${esc(catIcone(c))}</div>`;
 const catCor = (id) => cat(id)?.cor || '#AFB8C4';
 const meses = () => C.mesesDoPeriodo(ui.periodo);
 const mesRef = () => meses()[meses().length - 1];
@@ -191,7 +197,7 @@ function itemMov(x) {
   if (x.status === 'pendente' || x.status === 'previsto' || x.status === 'a receber') tags.push(`<span class="tag laranja">${x.status}</span>`);
   const det = [catNome(x.categoriaId), x.forma, x.banco, x.data ? x.data.split('-').reverse().join('/') : ''].filter(Boolean).join(' · ');
   return `<div class="item" data-a="abrir-mov" data-origem="${x.origem}" data-id="${x.id}">
-    <div class="bola" style="background:${cor}">${esc(ini)}</div>
+    ${bolaCat(cat(x.categoriaId) || { nome: catNome(x.categoriaId), cor })}
     <div class="meio"><div class="titulo">${esc(x.descricao || catNome(x.categoriaId))}${tags.join('')}</div><div class="det">${esc(det)}</div></div>
     <div class="valor num ${corV}">${sinal} ${brl(x.valor)}</div></div>`;
 }
@@ -307,12 +313,12 @@ function telaPlano() {
     <button class="btn ${sal ? 'branco' : ''} pequeno" data-a="${sal ? 'editar-fixo' : 'novo-salario'}" data-id="${sal?.id || ''}">${sal ? brl(sal.valor) : 'Definir'}</button></div>
     <p class="mini" style="margin:10px 0 0">Se num mês você lançar o salário recebido em Lançamentos, o previsto não é somado de novo.</p></div>
   <div class="linha-acao"><h2>Orçamento por categoria</h2><span class="mini">total ${brl(totOrc)} / mês${sal ? ` · sobra planejada <b class="${sal.valor - totOrc < 0 ? 'neg' : 'pos'}">${brl(sal.valor - totOrc)}</b>` : ''}</span></div>
-  <div class="lista">${desp.map((c) => `<div class="item" style="cursor:default"><div class="bola" style="background:${c.cor}">${esc(c.nome.slice(0, 1))}</div>
+  <div class="lista">${desp.map((c) => `<div class="item" style="cursor:default">${bolaCat(c)}
     <div class="meio"><div class="titulo">${esc(c.nome)}</div><div class="det">${c.tipo === 'guardar' ? 'guardar' : 'despesa'}</div></div>
     <input class="inp num" style="width:130px;text-align:right" inputmode="decimal" placeholder="0,00" value="${c.orcamento ? valorInput(c.orcamento) : ''}" data-a="orc" data-id="${c.id}"></div>`).join('')}</div>
   <div class="linha-acao"><h2>Custos fixos e recorrentes</h2><button class="btn pequeno" data-a="novo-fixo">+ Novo fixo</button></div>
   ${fixos.length ? `<div class="lista">${fixos.map((r) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">
-    <div class="bola" style="background:${catCor(r.categoriaId)}">${esc(catNome(r.categoriaId).slice(0, 1))}</div>
+    ${bolaCat(cat(r.categoriaId) || { nome: catNome(r.categoriaId), cor: catCor(r.categoriaId) })}
     <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
       <div class="det">${[catNome(r.categoriaId), `${C.nomeMes(r.inicio)} → ${r.fim ? C.nomeMes(r.fim) : 'sem fim'}`, r.diaVenc ? `vence dia ${r.diaVenc}` : '', r.banco].filter(Boolean).map(esc).join(' · ')}</div></div>
     <div style="text-align:right"><div class="valor num">${brl(r.valor)}</div>${C.recorrenciaNoMes(r, m) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago em ${C.nomeMes(m)}</label>` : ''}</div></div>`).join('')}</div>` : vazio('🔁', 'Academia, assinaturas, dízimo... cadastre aqui o que se repete todo mês.')}
@@ -355,7 +361,7 @@ function telaMetas() {
 // ---------------- Categorias ----------------
 function telaCategorias() {
   const grupo = (t, n) => { const cs = st().categorias.filter((c) => c.tipo === t).sort(ordemCat); return `<div class="grupo-mes">${n}</div><div class="lista">${cs.map((c) => `<div class="item" data-a="editar-cat" data-id="${c.id}">
-    <div class="bola" style="background:${c.cor}">${esc(c.nome.slice(0, 1))}</div><div class="meio"><div class="titulo">${esc(c.nome)}${c.arquivada ? '<span class="tag">arquivada</span>' : ''}</div><div class="det">${c.orcamento ? `orçamento ${brl(c.orcamento)}/mês` : ''}</div></div></div>`).join('')}</div>`; };
+    ${bolaCat(c)}<div class="meio"><div class="titulo">${esc(c.nome)}${c.arquivada ? '<span class="tag">arquivada</span>' : ''}</div><div class="det">${c.orcamento ? `orçamento ${brl(c.orcamento)}/mês` : ''}</div></div></div>`).join('')}</div>`; };
   return `<div class="linha-acao" style="margin-top:0"><h1>Categorias</h1><button class="btn pequeno" data-a="nova-cat">+ Nova</button></div>
   ${grupo('despesa', 'Despesas')}${grupo('guardar', 'Guardar')}${grupo('entrada', 'Entradas')}`;
 }
@@ -394,7 +400,7 @@ const selBanco = (nome, v) => { const bs = st().settings.bancos || [];
 const chipsBancos = (sel) => { const todos = [...new Set([...BANCOS_CATALOGO, ...sel])]; return `<div class="cats" data-bancos>${todos.map((b) => `<button type="button" class="${sel.includes(b) ? 'ativo' : ''}" data-banco-tg="${esc(b)}">${sel.includes(b) ? '✓ ' : ''}${esc(b)}</button>`).join('')}</div>`; };
 const FIM = ['Outros', 'Fatura do cartão'];
 const ordemCat = (a, b) => (FIM.indexOf(a.nome) - FIM.indexOf(b.nome)) || a.nome.localeCompare(b.nome, 'pt-BR');
-const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="ponto" style="background:${c.cor}"></span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
+const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic">${esc(catIcone(c))}</span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
 
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
@@ -503,6 +509,7 @@ function modalCat(c = {}) {
     <div class="campo"><label>Nome</label><input autocapitalize="sentences" class="inp" name="nome" required value="${esc(c.nome || '')}"></div>
     <div class="campo"><label>Tipo</label><select class="inp" name="tipo">${[['despesa', 'Despesa'], ['guardar', 'Guardar'], ['entrada', 'Entrada']].map(([v, n]) => `<option value="${v}" ${c.tipo === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
     <div class="campo"><label>Orçamento por mês <span class="opc">opcional</span></label><input class="inp" name="orcamento" inputmode="decimal" value="${c.orcamento ? valorInput(c.orcamento) : ''}"></div>
+    <div class="campo"><label>Símbolo</label><div class="icones-escolha">${[...new Set([catIcone(c), ...ICONES_ESCOLHA])].filter((x) => [...x].length <= 3).map((k) => `<button type="button" data-icone="${k}" class="${catIcone(c) === k ? 'ativo' : ''}">${k}</button>`).join('')}</div><input type="hidden" name="icone" value="${esc(c.icone || ICONES[c.nome] || '')}"></div>
     <div class="campo"><label>Cor</label><div class="cats">${cores.map((k) => `<button type="button" data-cor="${k}" class="${(c.cor || cores[0]) === k ? 'ativo' : ''}"><span class="ponto" style="background:${k};margin:0"></span></button>`).join('')}</div><input type="hidden" name="cor" value="${c.cor || cores[0]}"></div>
     ${c.id ? `<label class="chave" style="margin-bottom:12px"><input type="checkbox" name="arquivada" ${c.arquivada ? 'checked' : ''}> Arquivar (some das opções, mas o histórico fica)</label>` : ''}
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-cat">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
@@ -547,6 +554,15 @@ async function catJuros() {
   if (!c) c = await store.salvar('categorias', { nome: 'Juros e tarifas', tipo: 'despesa', orcamento: 0, cor: '#FF4B4B', arquivada: false });
   return c;
 }
+function metaHint(form) {
+  const wrap = form.querySelector('[data-cats-wrap]') || form.querySelector('[data-cats]'); if (!wrap) return;
+  let h = form.querySelector('.meta-hint'); const c = cat(form.categoriaId?.value);
+  const meta = c && c.tipo === 'guardar' ? st().metas.find((m) => m.categoriaId === c.id) : null;
+  if (!meta) { h?.remove(); return; }
+  if (!h) { h = document.createElement('div'); h.className = 'meta-hint'; wrap.after(h); }
+  const p = C.progressoMeta(st(), meta);
+  h.innerHTML = `🎯 Vai para a meta <b>${esc(meta.nome)}</b>: ${brl(p.atual)}${p.alvo ? ` de ${brl(p.alvo)}` : ' guardados até agora'}`;
+}
 const OB_PASSOS = 4;
 function modalBoasVindas() {
   const fala = (t) => `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">${t}</div></div>`;
@@ -586,7 +602,9 @@ function obIr(f, n) {
 // ======================= EVENTOS =======================
 document.addEventListener('click', async (e) => {
   const catBtn = e.target.closest('[data-cat]');
-  if (catBtn) { const w = catBtn.closest('form'); w.querySelectorAll('[data-cat]').forEach((b) => b.classList.toggle('ativo', b === catBtn)); w.categoriaId.value = catBtn.dataset.cat; return; }
+  if (catBtn) { const w = catBtn.closest('form'); w.querySelectorAll('[data-cat]').forEach((b) => b.classList.toggle('ativo', b === catBtn)); w.categoriaId.value = catBtn.dataset.cat; metaHint(w); return; }
+  const icBtn = e.target.closest('[data-icone]');
+  if (icBtn) { const w = icBtn.closest('form'); w.querySelectorAll('[data-icone]').forEach((b) => b.classList.toggle('ativo', b === icBtn)); w.icone.value = icBtn.dataset.icone; return; }
   const corBtn = e.target.closest('[data-cor]');
   if (corBtn) { const w = corBtn.closest('form'); w.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b === corBtn)); w.cor.value = corBtn.dataset.cor;
     const pv = w.querySelector('[data-cc-previa]'); if (pv) { pv.style.background = corBtn.dataset.cor; w.querySelector('[data-cores-cartao]').dataset.manual = '1'; } return; }
@@ -594,7 +612,7 @@ document.addEventListener('click', async (e) => {
   if (tipoBtn) {
     const f = tipoBtn.closest('form'); const t = tipoBtn.dataset.tipo; f.tipo.value = t;
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
-    const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, '');
+    const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove();
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
     const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.toggle('oculto', t === 'entrada');
     const sel = f.status; if (sel) sel.innerHTML = (t === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('');
@@ -702,7 +720,7 @@ document.addEventListener('click', async (e) => {
       const existe = S.categorias.find((c) => c.nome.toLowerCase() === nome.toLowerCase() && c.tipo === tipo);
       const PAL = ['#268AFF', '#77C800', '#FF9600', '#CE82FF', '#FF4B4B', '#1CB0F6', '#FFC800', '#2BDCA0', '#FF86D0', '#8E6CFF', '#A5683B', '#3BB9A0'];
       const nova = existe || await store.salvar('categorias', { nome, tipo, orcamento: 0, cor: PAL[S.categorias.length % PAL.length], arquivada: false });
-      const form = w.closest('form'); w.innerHTML = chipsCat(tipo, nova.id); form.categoriaId.value = nova.id;
+      const form = w.closest('form'); w.innerHTML = chipsCat(tipo, nova.id); form.categoriaId.value = nova.id; if (tipo === 'guardar') await garantirMetas(); metaHint(form);
       toast(existe ? 'Essa categoria já existia, selecionei ela.' : `Categoria "${nome}" criada!`); break; }
     case 'banco-add': { const v = $('#novo-banco').value.trim(); if (v && !(S.settings.bancos || []).includes(v)) await store.salvarSettings({ bancos: [...(S.settings.bancos || []), v] }); break; }
     case 'fechar-ir-config': ui.modal = null; location.hash = '#config'; render(); break;
@@ -813,8 +831,8 @@ document.addEventListener('submit', async (e) => {
   }
   if (tipoF === 'cat') {
     const antigo = S.categorias.find((x) => x.id === id) || {};
-    await store.salvar('categorias', { ...antigo, id, nome: v('nome'), tipo: v('tipo'), orcamento: parseValor(v('orcamento')), cor: v('cor'), arquivada: !!(f.arquivada && f.arquivada.checked) });
-    fecharModal();
+    await store.salvar('categorias', { ...antigo, id, nome: v('nome'), tipo: v('tipo'), orcamento: parseValor(v('orcamento')), cor: v('cor'), icone: v('icone'), arquivada: !!(f.arquivada && f.arquivada.checked) });
+    await garantirMetas(); fecharModal();
   }
   if (tipoF === 'meta') {
     const antigo = S.metas.find((x) => x.id === id) || {};
@@ -853,7 +871,17 @@ document.addEventListener('submit', async (e) => {
 });
 
 // ajustes automáticos para contas antigas (rodam para qualquer usuário ao abrir)
+// toda categoria de "guardar" vira uma meta (uma vez só; se a pessoa apagar a meta, não recria)
+async function garantirMetas() {
+  const S = st(); const feitas = { ...(S.settings.metasAuto || {}) }; let mudou = false;
+  for (const c of S.categorias.filter((x) => x.tipo === 'guardar' && !x.arquivada)) {
+    if (feitas[c.id]) continue; feitas[c.id] = true; mudou = true;
+    if (!S.metas.some((m) => m.categoriaId === c.id)) await store.salvar('metas', { nome: c.nome, alvo: 0, valorInicial: 0, dataAlvo: '', categoriaId: c.id, desde: '' });
+  }
+  if (mudou) await store.salvarSettings({ metasAuto: feitas });
+}
 async function migrar() {
+  await garantirMetas();
   const S = st(); const velha = S.categorias.find((c) => c.nome === 'Fatura do cartão');
   if (velha) {
     let outros = S.categorias.find((c) => c.nome === 'Outros' && c.tipo === 'despesa');
