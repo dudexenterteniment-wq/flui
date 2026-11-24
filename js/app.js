@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=9';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=9';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=9';
+import * as C from './calc.js?v=10';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=10';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=10';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -258,7 +258,7 @@ function comprometido(cartaoId) {
 // ---------------- Planejamento ----------------
 function telaPlano() {
   const sal = st().recorrencias.find((r) => r.tipo === 'entrada' && catNome(r.categoriaId) === 'Salário');
-  const desp = st().categorias.filter((c) => !c.arquivada && c.tipo !== 'entrada');
+  const desp = st().categorias.filter((c) => !c.arquivada && c.tipo !== 'entrada').sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'guardar' ? 1 : -1) || ordemCat(a, b));
   const totOrc = C.sum(desp, (c) => c.orcamento);
   const fixos = st().recorrencias.filter((r) => r !== sal);
   const m = C.mesAtual();
@@ -315,7 +315,7 @@ function telaMetas() {
 
 // ---------------- Categorias ----------------
 function telaCategorias() {
-  const grupo = (t, n) => { const cs = st().categorias.filter((c) => c.tipo === t); return `<div class="grupo-mes">${n}</div><div class="lista">${cs.map((c) => `<div class="item" data-a="editar-cat" data-id="${c.id}">
+  const grupo = (t, n) => { const cs = st().categorias.filter((c) => c.tipo === t).sort(ordemCat); return `<div class="grupo-mes">${n}</div><div class="lista">${cs.map((c) => `<div class="item" data-a="editar-cat" data-id="${c.id}">
     <div class="bola" style="background:${c.cor}">${esc(c.nome.slice(0, 1))}</div><div class="meio"><div class="titulo">${esc(c.nome)}${c.arquivada ? '<span class="tag">arquivada</span>' : ''}</div><div class="det">${c.orcamento ? `orçamento ${brl(c.orcamento)}/mês` : ''}</div></div></div>`).join('')}</div>`; };
   return `<div class="linha-acao" style="margin-top:0"><h1>Categorias</h1><button class="btn pequeno" data-a="nova-cat">+ Nova</button></div>
   ${grupo('despesa', 'Despesas')}${grupo('guardar', 'Guardar')}${grupo('entrada', 'Entradas')}`;
@@ -350,7 +350,9 @@ function abrirModal(html, depois) { ui.modal = { html: `<div class="fundo-modal"
 function fecharModal() { ui.modal = null; render(); }
 const topoModal = (t) => `<div class="modal-topo"><h2>${t}</h2><button class="x" type="button" data-a="fechar" aria-label="Fechar">×</button></div>`;
 const selBanco = (nome, v) => `<select class="inp" name="${nome}"><option value="">—</option>${(st().settings.bancos || []).map((b) => `<option ${b === v ? 'selected' : ''}>${esc(b)}</option>`).join('')}${v && !(st().settings.bancos || []).includes(v) ? `<option selected>${esc(v)}</option>` : ''}</select>`;
-const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="ponto" style="background:${c.cor}"></span>${esc(c.nome)}</button>`).join('')}</div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
+const FIM = ['Outros', 'Fatura do cartão'];
+const ordemCat = (a, b) => (FIM.indexOf(a.nome) - FIM.indexOf(b.nome)) || a.nome.localeCompare(b.nome, 'pt-BR');
+const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="ponto" style="background:${c.cor}"></span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
 
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
@@ -388,7 +390,7 @@ function modalCompra(c = {}) {
       <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cartoes.filter(ehCredito).map((k, _, arr) => `<option value="${k.id}" ${k.id === c.cartaoId || (!c.id && arr.length === 1) ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select></div></div>
     <div class="mini" data-prev style="margin:-6px 0 12px"></div>
     <div class="campo"><label>Descrição</label><input class="inp" name="descricao" value="${esc(c.descricao || '')}" required placeholder="Ex.: presente de Natal"></div>
-    <div class="campo"><label>Categoria</label>${chipsCat('despesa', c.categoriaId)}</div>
+    <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat('despesa', c.categoriaId)}</div></div>
     <div class="duas"><div class="campo"><label>1ª parcela em</label>${mesSelect('c-mes', c.mesPrimeira || (ui.periodo.tipo === 'mes' ? mesRef() : C.mesAtual()))}</div>
       <div class="campo"><label>Data da compra <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${c.data || ''}"></div></div>
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-compra">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div>
@@ -548,6 +550,19 @@ document.addEventListener('click', async (e) => {
       const pf = { ...(S.settings.pagamentosFatura || {}) }; pf[k] = C.fromCents(C.cents(pf[k] || 0) + C.cents(v));
       await store.salvarSettings({ pagamentosFatura: pf }); toast(`Pagamento de ${brl(v)} registrado!`); render(); break; }
     case 'fatura-valor-limpa': { const pf = { ...(S.settings.pagamentosFatura || {}) }; delete pf[el.dataset.k]; await store.salvarSettings({ pagamentosFatura: pf }); render(); break; }
+    case 'cat-nova': {
+      const w = el.closest('[data-cats-wrap]'); if (!w) break;
+      el.outerHTML = `<span style="display:inline-flex;gap:6px;align-items:center" data-cat-nova-box><input class="inp" style="padding:7px 12px;width:170px" placeholder="Nome da categoria" data-cat-nova-nome data-tipo-cat="${el.dataset.tipoCat}"><button type="button" class="btn pequeno verde" data-a="cat-nova-ok">OK</button></span>`;
+      w.querySelector('[data-cat-nova-nome]').focus(); break; }
+    case 'cat-nova-ok': {
+      const w = el.closest('[data-cats-wrap]'); const inp = w.querySelector('[data-cat-nova-nome]'); const nome = inp.value.trim();
+      if (!nome) { inp.focus(); break; }
+      const tipo = inp.dataset.tipoCat;
+      const existe = S.categorias.find((c) => c.nome.toLowerCase() === nome.toLowerCase() && c.tipo === tipo);
+      const PAL = ['#268AFF', '#77C800', '#FF9600', '#CE82FF', '#FF4B4B', '#1CB0F6', '#FFC800', '#2BDCA0', '#FF86D0', '#8E6CFF', '#A5683B', '#3BB9A0'];
+      const nova = existe || await store.salvar('categorias', { nome, tipo, orcamento: 0, cor: PAL[S.categorias.length % PAL.length], arquivada: false });
+      const form = w.closest('form'); w.innerHTML = chipsCat(tipo, nova.id); form.categoriaId.value = nova.id;
+      toast(existe ? 'Essa categoria já existia, selecionei ela.' : `Categoria "${nome}" criada!`); break; }
     case 'banco-add': { const v = $('#novo-banco').value.trim(); if (v && !S.settings.bancos.includes(v)) await store.salvarSettings({ bancos: [...S.settings.bancos, v] }); break; }
     case 'banco-del': if (confirm(`Remover "${el.dataset.v}" da lista? Lançamentos antigos mantêm o nome.`)) await store.salvarSettings({ bancos: S.settings.bancos.filter((b) => b !== el.dataset.v) }); break;
     case 'exportar': baixar(`flui-backup-${new Date().toISOString().slice(0, 10)}.json`, store.exportar()); toast('Backup baixado.'); break;
@@ -655,7 +670,7 @@ function baixar(nome, txt) { const a = document.createElement('a'); a.href = URL
 window.addEventListener('hashchange', () => { ui.rota = location.hash.slice(1) || 'inicio'; ui.modal = null; render(); window.scrollTo(0, 0); });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); ui.installEvt = e; });
 window.addEventListener('flui:erro', () => toast('Não consegui salvar agora. Confira a internet; o Flui tenta de novo.'));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ui.modal) fecharModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ui.modal) fecharModal(); if (e.key === 'Enter' && e.target.matches('[data-cat-nova-nome]')) { e.preventDefault(); e.target.parentElement.querySelector('[data-a=cat-nova-ok]').click(); } });
 
 // ======================= INÍCIO =======================
 store.on(() => { if (!ui.modal) render(); });
