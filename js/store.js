@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=23';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=24';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -31,6 +31,7 @@ class LocalBackend {
   _write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn(e); } }
   async signUp(email) { this.user = { uid: 'local-' + email, email }; this._write('flui:user', this.user); this.onUser(this.user); return this.user; }
   async signIn(email) { return this.signUp(email); }
+  async lembrar() {}
   async signOut() { this.user = null; localStorage.removeItem('flui:user'); this.onUser(null); }
   async resetPassword() { throw new Error('No modo de teste não há senha.'); }
   async loadAll() { return this._read('flui:data:' + this.user.uid); }
@@ -57,6 +58,7 @@ class FirebaseBackend {
   }
   async signUp(email, senha) { const r = await this.A.createUserWithEmailAndPassword(this.auth, email, senha); return r.user; }
   async signIn(email, senha) { const r = await this.A.signInWithEmailAndPassword(this.auth, email, senha); return r.user; }
+  async lembrar(sim) { await this.A.setPersistence(this.auth, sim ? this.A.browserLocalPersistence : this.A.browserSessionPersistence); }
   async signOut() { await this.A.signOut(this.auth); }
   async resetPassword(email) { await this.A.sendPasswordResetEmail(this.auth, email); }
   _col(c) { return this.F.collection(this.db, 'users', this.user.uid, c); }

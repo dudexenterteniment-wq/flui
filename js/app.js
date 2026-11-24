@@ -1,8 +1,8 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=23';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=23';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=23';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=23';
+import * as C from './calc.js?v=24';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=24';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=24';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=24';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -58,13 +58,16 @@ const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><di
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
+const lerLocal = (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (_) {} };
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
     ${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
-    <div class="campo"><label>E-mail</label><input class="inp" name="email" type="email" autocomplete="email" required></div>
+    <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
+    <label class="chave" style="margin:2px 0 14px"><input type="checkbox" name="lembrar" ${lerLocal('flui:lembrar') === '0' ? '' : 'checked'}> Lembrar de mim neste aparelho</label>
     ${ui.authErro ? `<div class="erro">${esc(ui.authErro)}</div>` : ''}
     <button class="btn cheio ${criar ? 'verde' : ''}" type="submit">${criar ? 'Criar minha conta' : 'Entrar'}</button>
     <div class="troca">${criar ? 'Já tem conta?' : 'Ainda não tem conta?'} <button type="button" data-a="auth-troca">${criar ? 'Entrar' : 'Criar conta'}</button></div>
@@ -784,7 +787,9 @@ document.addEventListener('submit', async (e) => {
   const f = e.target; const tipoF = f.dataset.form; const id = f.dataset.id || undefined; const S = st();
   const v = (n) => (f.elements[n] ? f.elements[n].value.trim() : '');
   if (tipoF === 'auth') {
-    const email = v('email'), senha = v('senha'); ui.authErro = '';
+    const email = v('email'), senha = v('senha'); ui.authErro = ''; const lembrar = !!f.lembrar?.checked;
+    gravarLocal('flui:lembrar', lembrar ? '1' : '0'); gravarLocal('flui:email', lembrar ? email.trim() : null);
+    try { await store.backend.lembrar?.(lembrar); } catch (_) {}
     try { ui.authModo === 'criar' ? await store.backend.signUp(email, senha) : await store.backend.signIn(email, senha); }
     catch (err) { ui.authErro = ERROS_AUTH[err.code] || 'Não deu certo. Tente de novo.'; render(); }
     return;
