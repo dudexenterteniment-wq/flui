@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=10';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=10';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=10';
+import * as C from './calc.js?v=11';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=11';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=11';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -151,7 +151,10 @@ function telaInicio() {
   <div class="flui-fala" style="margin-top:16px"><div class="mascote">${MASCOTE}</div><div class="balao">${falaDoFlui(r, rows)}</div></div>
   <div class="grade g2 empilha" style="margin-top:4px">
     <div><h2 style="margin-bottom:2px">Seus limites</h2><p class="mini" style="margin:0 0 12px">${vis.length ? (passaram ? `<b class="neg">${passaram} passaram do limite</b> · ${vis.length - passaram} dentro` : `<b class="pos">Tudo dentro do limite</b>`) : ''}</p>
-      ${vis.length ? `<div class="lista">${vis.map(orcLinha).join('')}</div><a class="btn fantasma pequeno" href="#plano" style="margin-top:6px">Mudar limites</a>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
+      ${vis.length ? `<div class="lista">${(ui.limitesTodos ? vis : vis.slice(0, 5)).map(orcLinha).join('')}</div>
+        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
+          ${vis.length > 5 ? `<button class="btn fantasma pequeno" data-a="limites-toggle">${ui.limitesTodos ? '− Ver menos' : `+ Ver mais (${vis.length - 5})`}</button>` : '<span></span>'}
+          <a class="btn pequeno" href="#plano" style="background:var(--laranja);box-shadow:0 4px 0 #CC7800;text-decoration:none">Mudar limites</a></div>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
     </div>
     <div><h2>Para onde foi o dinheiro</h2>
       <div class="card">${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), totDesp)}
@@ -511,6 +514,7 @@ document.addEventListener('click', async (e) => {
     case 'per-tipo': ui.periodo.tipo = el.dataset.v; salvarPeriodo(); render(); break;
     case 'aviso-ok': await store.salvarSettings({ alertasVistos: { ...(S.settings.alertasVistos || {}), [el.dataset.k]: true } }); modalNotificacoes(); break;
     case 'notificacoes': modalNotificacoes(); break;
+    case 'limites-toggle': ui.limitesTodos = !ui.limitesTodos; render(); break;
     case 'novo-lanc': modalLanc(); break;
     case 'mais-opcoes-cartao': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Dia de vencimento da fatura (opcional)' : '− Menos opções'; break; }
     case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, vencimento, observação)' : '− Menos opções'; break; }
