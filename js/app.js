@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=19';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=19';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=19';
+import * as C from './calc.js?v=20';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=20';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=20';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -782,6 +782,16 @@ document.addEventListener('submit', async (e) => {
 
 });
 
+// ajustes automáticos para contas antigas (rodam para qualquer usuário ao abrir)
+async function migrar() {
+  const S = st(); const velha = S.categorias.find((c) => c.nome === 'Fatura do cartão');
+  if (velha) {
+    let outros = S.categorias.find((c) => c.nome === 'Outros' && c.tipo === 'despesa');
+    if (!outros) outros = await store.salvar('categorias', { nome: 'Outros', tipo: 'despesa', orcamento: 0, cor: '#7C8A9A', arquivada: false });
+    for (const col of ['lancamentos', 'compras', 'recorrencias']) for (const x of S[col].filter((i) => i.categoriaId === velha.id)) await store.salvar(col, { ...x, categoriaId: outros.id });
+    await store.remover('categorias', velha.id);
+  }
+}
 function baixar(nome, txt) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 
 window.addEventListener('hashchange', () => { ui.rota = location.hash.slice(1) || 'inicio'; ui.modal = null; render(); window.scrollTo(0, 0); });
@@ -801,6 +811,7 @@ store.on(() => { if (!ui.modal) render(); });
       render();
       await store.carregar();
       render();
+      await migrar();
       if (!st().settings.onboarding) modalBoasVindas();
     });
   } catch (err) {
