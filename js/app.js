@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=5';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=5';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=5';
+import * as C from './calc.js?v=6';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=6';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=6';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -37,11 +37,17 @@ function render() {
   root.innerHTML = `<div class="app">
     <aside class="lateral">${marca()}${NAV.map(([r, n, i]) => `<a class="nav-item ${r === rota ? 'ativo' : ''}" href="#${r}">${i}<span>${n}</span></a>`).join('')}
       <div style="margin-top:auto" class="mini">${store.modo === 'local' ? 'Modo de teste: dados só neste navegador' : esc(store.user.email)}</div></aside>
-    <main class="principal"><div class="topo-movel">${marca(true)}<span class="sequencia">${seqHtml()}</span></div>${tela()}</main>
+    <main class="principal"><div class="topo-movel">${marca(true)}<span style="display:flex;align-items:center;gap:10px"><span class="sequencia">${seqHtml()}</span>${sino()}</span></div><div class="topo-desk">${sino()}</div>${tela()}</main>
     <nav class="barra-inferior">${NAV_MOVEL.map(([r, n, i]) => `<a class="nav-item ${r === rota || (r === 'mais' && ['relatorios', 'metas', 'categorias', 'config'].includes(rota)) ? 'ativo' : ''}" href="#${r}">${i}<span>${n}</span></a>`).join('')}</nav>
     <button class="btn verde fab" data-a="novo-lanc" aria-label="Novo lançamento">+</button>
   </div>${ui.modal ? ui.modal.html : ''}`;
   if (ui.modal?.depois) ui.modal.depois();
+}
+const SINO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>';
+function sino() { const n = avisos().length; return `<button class="sino" data-a="notificacoes" aria-label="Notificações${n ? ` (${n})` : ''}">${SINO}${n ? `<span class="badge">${n > 9 ? '9+' : n}</span>` : ''}</button>`; }
+function modalNotificacoes() {
+  const av = avisos();
+  abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
 const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}>F</div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flui</div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
@@ -103,10 +109,11 @@ function falaDoFlui(r, rows) {
   if (r.guardado > 0) return `Você já guardou ${brl(r.guardado)} por aqui. Olha só como está avançando! 💚`;
   return `Tudo em dia por aqui${nome}. Continua registrando que eu fico de olho.`;
 }
-function avisos(rows) {
+function avisos() {
   const out = []; const vistos = st().settings.alertasVistos || {};
-  if (ui.periodo.tipo === 'mes') {
-    const m = mesRef();
+  const rows = C.porCategoria(st(), [C.mesAtual()]);
+  {
+    const m = C.mesAtual();
     for (const x of rows) {
       if (x.cat.tipo !== 'despesa' || x.pct === null || x.pct < 0.85) continue;
       const k = `${m}|${x.cat.id}|${x.pct > 1 ? '100' : '85'}`; if (vistos[k]) continue;
@@ -141,7 +148,6 @@ function telaInicio() {
     <div class="kpi"><div class="rot" style="color:var(--cinza)">A pagar</div><div class="val num" style="font-size:20px">${brl(r.pendente)}</div><div class="mini">fixos e faturas ainda não marcados como pagos</div></div>
   </div>
   <div class="flui-fala" style="margin-top:16px"><div class="mascote">${MASCOTE}</div><div class="balao">${falaDoFlui(r, rows)}</div></div>
-  ${(() => { const av = avisos(rows); const mostra = ui.verAvisos ? av : av.slice(0, 2); return mostra.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + (av.length > 2 && !ui.verAvisos ? `<button class="mais-opcoes" data-a="ver-avisos">+ ver mais ${av.length - 2} aviso(s)</button>` : ''); })()}
   <div class="grade g2 empilha" style="margin-top:4px">
     <div><h2>Orçamento × real</h2>
       ${vis.length ? `<div class="lista">${vis.map(orcLinha).join('')}</div>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
@@ -499,9 +505,9 @@ document.addEventListener('click', async (e) => {
     case 'per-ant': moverPeriodo(-1); render(); break;
     case 'per-prox': moverPeriodo(1); render(); break;
     case 'per-tipo': ui.periodo.tipo = el.dataset.v; salvarPeriodo(); render(); break;
-    case 'aviso-ok': await store.salvarSettings({ alertasVistos: { ...(S.settings.alertasVistos || {}), [el.dataset.k]: true } }); break;
+    case 'aviso-ok': await store.salvarSettings({ alertasVistos: { ...(S.settings.alertasVistos || {}), [el.dataset.k]: true } }); modalNotificacoes(); break;
+    case 'notificacoes': modalNotificacoes(); break;
     case 'novo-lanc': modalLanc(); break;
-    case 'ver-avisos': ui.verAvisos = true; render(); break;
     case 'mais-opcoes-cartao': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Dia de vencimento da fatura (opcional)' : '− Menos opções'; break; }
     case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, banco, vencimento)' : '− Menos opções'; break; }
     case 'abrir-mov': {
