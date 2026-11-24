@@ -236,3 +236,12 @@ h3 { font-size: 16px; font-weight: 800; margin: 0; }
 .ob-cc .mini { white-space: nowrap; }
 .ob-cc .inp:disabled { opacity: .45; }
 .cc-previa { cursor: default; min-height: 92px; transition: background .25s; }
+
+/* fatura recolhível */
+.fatura-topo { cursor: pointer; margin: -4px -6px 0; padding: 4px 6px 0; border-radius: 12px; }
+.fatura-topo:hover .fatura-ver { background: var(--azul-claro); }
+.fatura-ver { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px 0 2px; padding: 10px; border: 2px solid var(--linha); border-bottom-width: 4px; border-radius: 14px; color: var(--azul); font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: .4px; transition: background .15s; }
+.fatura-ver .seta { font-size: 16px; transition: transform .2s; }
+.fatura.aberta .fatura-ver { margin-bottom: 14px; }
+.fatura.aberta .fatura-ver .seta { transform: rotate(180deg); }
+.fatura-topo:active .fatura-ver { transform: translateY(2px); border-bottom-width: 2px; }

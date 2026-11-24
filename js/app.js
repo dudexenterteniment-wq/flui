@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=17';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=17';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=17';
+import * as C from './calc.js?v=18';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=18';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=18';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -235,11 +235,14 @@ function telaCartoes() {
   <p class="mini" style="margin-top:14px">Marque cada compra que já pagou, registre um valor pago ou selecione tudo. Cada compra conta uma vez só, como despesa na categoria dela; pagar a fatura não cria uma nova despesa.</p>`;
 }
 function blocoFatura(c, f, m) {
-  const k = `${c.id || 'sem'}|${m}`;
-  return `<div class="card">
-    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
+  const k = `${c.id || 'sem'}|${m}`; const aberta = (ui.faturasAbertas ||= new Set()).has(k); const n = f.itens.length;
+  return `<div class="card fatura ${aberta ? 'aberta' : ''}">
+    <div class="fatura-topo" data-a="fatura-toggle" data-k="${k}" role="button" aria-expanded="${aberta}">
+    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}${c.vencimento ? `<span class="mini" style="font-weight:700;margin-left:6px">vence dia ${c.vencimento}</span>` : ''}</h3><span class="num" style="font-weight:900;font-size:18px">${brl(f.total)}</span></div>
     <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
     <div class="mini" style="display:flex;justify-content:space-between;margin-bottom:10px"><span>Pago <b class="pos">${brl(f.pago)}</b></span><span>${f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Em aberto <b>${brl(f.aberto)}</b>`}</span></div>
+    <div class="fatura-ver">${aberta ? 'Esconder compras' : `Ver ${n} ${n === 1 ? 'compra' : 'compras'}`}<span class="seta">▾</span></div></div>
+    <div class="fatura-corpo ${aberta ? '' : 'oculto'}">
     <label class="chave"><input type="checkbox" data-a="fatura-tudo" data-id="${c.id}" data-m="${m}" ${f.tudoMarcado ? 'checked' : ''}> Selecionar tudo (paguei a fatura inteira)</label>
     <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela, paga }) => `<div class="item" data-a="editar-compra" data-id="${compra.id}">
       <label data-stop="1" style="display:flex;align-items:center" title="Marcar como pago"><input type="checkbox" data-a="item-pago" data-id="${compra.id}" data-m="${m}" ${paga ? 'checked' : ''} style="width:24px;height:24px;accent-color:var(--verde)"></label>
@@ -250,7 +253,7 @@ function blocoFatura(c, f, m) {
       <input class="inp num" style="width:130px;padding:8px 12px" inputmode="decimal" placeholder="R$ 0,00" data-valor-fatura="${k}">
       <button class="btn pequeno" data-a="fatura-valor" data-k="${k}">Registrar</button>
       ${f.avulso ? `<span class="mini">já registrado ${brl(f.avulso)} <button class="btn fantasma pequeno" data-a="fatura-valor-limpa" data-k="${k}">zerar</button></span>` : ''}
-    </div></div>`;
+    </div></div></div>`;
 }
 function comprometido(cartaoId) {
   const m0 = C.mesAtual(); let t = 0;
@@ -435,8 +438,7 @@ function modalCartao(c = {}) {
     <div class="campo"><label>Nome do cartão <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="apelido" maxlength="30" placeholder="Ex.: Nubank pessoal, Itaú da empresa" value="${esc(c.apelido || '')}"></div>
     <div class="campo"><label>Cor</label><div class="cats" data-cores-cartao ${c.cor ? 'data-manual="1"' : ''}>${cores.map((k) => `<button type="button" data-cor="${k}" class="${cor === k ? 'ativo' : ''}" aria-label="Cor ${k}"><span class="ponto" style="background:${k};margin:0"></span></button>`).join('')}</div><input type="hidden" name="cor" value="${cor}"></div>
     <div class="campo"><label>Tipo</label><div class="seg" data-seg="tipocartao">${TIPOS_CARTAO.map(([t, n]) => `<button type="button" class="t-neutro ${t === tipo ? 'ativo' : ''}" data-tipocartao="${t}">${n}</button>`).join('')}</div><input type="hidden" name="tipo" value="${tipo}"></div>
-    <button type="button" class="mais-opcoes" data-a="mais-opcoes-cartao">${c.vencimento ? '− Menos opções' : '+ Dia de vencimento da fatura (opcional)'}</button>
-    <div data-extras class="${c.vencimento ? '' : 'oculto'}"><div class="campo"><label>Dia de vencimento da fatura <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" name="vencimento" value="${c.vencimento || ''}"></div></div>
+    <div class="campo ${tipo === 'debito' ? 'oculto' : ''}" data-venc-cartao><label>Dia que a fatura vence</label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="vencimento" placeholder="Ex.: 10" value="${c.vencimento || ''}" style="max-width:140px"><p class="mini" style="margin-top:6px">Eu te aviso quando estiver chegando.</p></div>
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-cartao">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
 }
 
@@ -555,7 +557,7 @@ document.addEventListener('click', async (e) => {
     if (bTg.closest('form')) { bTg.classList.toggle('ativo'); bTg.textContent = (bTg.classList.contains('ativo') ? '✓ ' : '') + b; return; }
     await store.salvarSettings({ bancos: novo }); return; }
   const tcBtn = e.target.closest('[data-tipocartao]');
-  if (tcBtn) { const f = tcBtn.closest('form'); f.tipo.value = tcBtn.dataset.tipocartao; f.querySelectorAll('[data-tipocartao]').forEach((b) => b.classList.toggle('ativo', b === tcBtn)); return; }
+  if (tcBtn) { const f = tcBtn.closest('form'); f.tipo.value = tcBtn.dataset.tipocartao; f.querySelectorAll('[data-tipocartao]').forEach((b) => b.classList.toggle('ativo', b === tcBtn)); f.querySelector('[data-venc-cartao]')?.classList.toggle('oculto', tcBtn.dataset.tipocartao === 'debito'); return; }
   const el = e.target.closest('[data-a]'); if (!el) return;
   if (e.target.closest('[data-stop]') && el.tagName !== 'INPUT') return;
   const a = el.dataset.a; const id = el.dataset.id;
@@ -590,6 +592,7 @@ document.addEventListener('click', async (e) => {
     case 'nova-compra': modalCompra(); break;
     case 'editar-compra': modalCompra({ ...S.compras.find((x) => x.id === id) }); break;
     case 'excluir-compra': if (confirm('Excluir esta compra e todas as parcelas?')) { await store.remover('compras', $('[data-form=compra]').dataset.id); fecharModal(); toast('Compra excluída.'); } break;
+    case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
     case 'excluir-cartao': { const cid = $('[data-form=cartao]').dataset.id; const n = S.compras.filter((c) => c.cartaoId === cid).length;
