@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=13';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=13';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=13';
+import * as C from './calc.js?v=14';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=14';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=14';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -335,9 +335,9 @@ function telaConfig() {
   <div class="card"><h3>Sua conta</h3><p class="mini">${store.modo === 'local' ? 'Modo de teste: os dados ficam só neste navegador.' : `Conectada como <b>${esc(store.user.email)}</b>. Seus dados ficam salvos na sua conta e aparecem em qualquer aparelho em que você entrar.`}</p>
     <div class="campo"><label>Como o Flui te chama</label><input class="inp" data-a="nome" value="${esc(s.nome || '')}" placeholder="Seu nome"></div>
     <button class="btn branco pequeno" data-a="sair">Sair da conta</button></div>
-  <div class="card"><h3>Bancos</h3><p class="mini">Aparecem como opção nos lançamentos, cartões e fixos. Nada é obrigatório.</p>
-    <div class="cats" style="margin:10px 0">${(s.bancos || []).map((b) => `<button data-a="banco-del" data-v="${esc(b)}" title="Remover">${esc(b)} ×</button>`).join('')}</div>
-    <div style="display:flex;gap:8px"><input class="inp" id="novo-banco" placeholder="Adicionar banco"><button class="btn pequeno" data-a="banco-add">Adicionar</button></div></div>
+  <div class="card" id="bancos"><h3>Meus bancos</h3><p class="mini">Toque nos bancos que você usa. Só eles aparecem nos lançamentos, cartões e fixos.</p>
+    <div style="margin:10px 0">${chipsBancos(s.bancos || [])}</div>
+    <div style="display:flex;gap:8px"><input class="inp" id="novo-banco" placeholder="Não achou? Digite o nome"><button class="btn pequeno" data-a="banco-add">Adicionar</button></div></div>
   <div class="card"><h3>Instalar na tela inicial</h3>
     ${ui.installEvt ? '<p class="mini">Seu navegador permite instalar o Flui como app.</p><button class="btn pequeno" data-a="instalar">Instalar o Flui</button>' :
       ios ? '<p class="mini">No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.</p>' :
@@ -352,7 +352,10 @@ function telaConfig() {
 function abrirModal(html, depois) { ui.modal = { html: `<div class="fundo-modal" data-a="fechar-fundo"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`, depois }; render(); }
 function fecharModal() { ui.modal = null; render(); }
 const topoModal = (t) => `<div class="modal-topo"><h2>${t}</h2><button class="x" type="button" data-a="fechar" aria-label="Fechar">×</button></div>`;
-const selBanco = (nome, v) => `<select class="inp" name="${nome}"><option value="">—</option>${(st().settings.bancos || []).map((b) => `<option ${b === v ? 'selected' : ''}>${esc(b)}</option>`).join('')}${v && !(st().settings.bancos || []).includes(v) ? `<option selected>${esc(v)}</option>` : ''}</select>`;
+const selBanco = (nome, v) => { const bs = st().settings.bancos || [];
+  if (!bs.length && !v) return `<input type="hidden" name="${nome}" value=""><div class="mini" style="padding:10px 0">Você ainda não escolheu seus bancos. <a href="#config" data-a="fechar-ir-config">Escolher meus bancos</a></div>`;
+  return `<select class="inp" name="${nome}"><option value="">—</option>${bs.map((b) => `<option ${b === v ? 'selected' : ''}>${esc(b)}</option>`).join('')}${v && !bs.includes(v) ? `<option selected>${esc(v)}</option>` : ''}</select>`; };
+const chipsBancos = (sel) => { const todos = [...new Set([...BANCOS_CATALOGO, ...sel])]; return `<div class="cats" data-bancos>${todos.map((b) => `<button type="button" class="${sel.includes(b) ? 'ativo' : ''}" data-banco-tg="${esc(b)}">${sel.includes(b) ? '✓ ' : ''}${esc(b)}</button>`).join('')}</div>`; };
 const FIM = ['Outros', 'Fatura do cartão'];
 const ordemCat = (a, b) => (FIM.indexOf(a.nome) - FIM.indexOf(b.nome)) || a.nome.localeCompare(b.nome, 'pt-BR');
 const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="ponto" style="background:${c.cor}"></span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
@@ -476,6 +479,7 @@ function modalBoasVindas() {
   abrirModal(`<form data-form="boas-vindas"><div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Oi! Eu sou o Flui. Vou te ajudar a organizar entradas, gastos, cartão e metas, no seu ritmo.</div></div>
     <div class="campo"><label>Como posso te chamar?</label><input class="inp" name="nome" placeholder="Seu nome"></div>
     <div class="campo"><label>Quanto você recebe por mês? <span class="opc">opcional</span></label><input class="inp" name="salario" inputmode="decimal" placeholder="R$ 0,00"></div>
+    <div class="campo"><label>Quais bancos você usa? <span class="opc">opcional</span></label>${chipsBancos([])}</div>
     <p class="mini">Já tem um backup do Flui? Dá para restaurar depois em Configurações → Backup.</p>
     <div class="acoes"><button class="btn verde" type="submit">Começar</button></div></form>`);
 }
@@ -500,6 +504,10 @@ document.addEventListener('click', async (e) => {
   if (fBtn) { const f = fBtn.closest('form'); const novo = f.forma.value === fBtn.dataset.forma ? '' : fBtn.dataset.forma; f.forma.value = novo;
     f.querySelectorAll('[data-forma]').forEach((b) => b.classList.toggle('ativo', b.dataset.forma === novo));
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(novo === 'Crédito' && !f.dataset.id && f.tipo.value === 'despesa')); previaParcelasL(); return; }
+  const bTg = e.target.closest('[data-banco-tg]');
+  if (bTg) { const b = bTg.dataset.bancoTg; const sel = st().settings.bancos || []; const novo = sel.includes(b) ? sel.filter((x) => x !== b) : [...sel, b];
+    if (bTg.closest('form')) { bTg.classList.toggle('ativo'); bTg.textContent = (bTg.classList.contains('ativo') ? '✓ ' : '') + b; return; }
+    await store.salvarSettings({ bancos: novo }); return; }
   const tcBtn = e.target.closest('[data-tipocartao]');
   if (tcBtn) { const f = tcBtn.closest('form'); f.tipo.value = tcBtn.dataset.tipocartao; f.querySelectorAll('[data-tipocartao]').forEach((b) => b.classList.toggle('ativo', b === tcBtn)); return; }
   const el = e.target.closest('[data-a]'); if (!el) return;
@@ -572,7 +580,8 @@ document.addEventListener('click', async (e) => {
       const nova = existe || await store.salvar('categorias', { nome, tipo, orcamento: 0, cor: PAL[S.categorias.length % PAL.length], arquivada: false });
       const form = w.closest('form'); w.innerHTML = chipsCat(tipo, nova.id); form.categoriaId.value = nova.id;
       toast(existe ? 'Essa categoria já existia, selecionei ela.' : `Categoria "${nome}" criada!`); break; }
-    case 'banco-add': { const v = $('#novo-banco').value.trim(); if (v && !S.settings.bancos.includes(v)) await store.salvarSettings({ bancos: [...S.settings.bancos, v] }); break; }
+    case 'banco-add': { const v = $('#novo-banco').value.trim(); if (v && !(S.settings.bancos || []).includes(v)) await store.salvarSettings({ bancos: [...(S.settings.bancos || []), v] }); break; }
+    case 'fechar-ir-config': ui.modal = null; location.hash = '#config'; render(); break;
     case 'banco-del': if (confirm(`Remover "${el.dataset.v}" da lista? Lançamentos antigos mantêm o nome.`)) await store.salvarSettings({ bancos: S.settings.bancos.filter((b) => b !== el.dataset.v) }); break;
     case 'exportar': baixar(`flui-backup-${new Date().toISOString().slice(0, 10)}.json`, store.exportar()); toast('Backup baixado.'); break;
     case 'instalar': ui.installEvt.prompt(); ui.installEvt = null; break;
@@ -674,7 +683,8 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'boas-vindas') {
     const sal = parseValor(v('salario'));
     if (sal > 0) { const cs = S.categorias.find((c) => c.nome === 'Salário'); await store.salvar('recorrencias', { tipo: 'entrada', valor: sal, nome: 'Salário', categoriaId: cs?.id || '', inicio: C.mesAtual(), fim: '', frequencia: 'mensal', ativa: true, pagos: {} }); }
-    await store.salvarSettings({ nome: v('nome'), onboarding: true });
+    const bancos = [...f.querySelectorAll('[data-banco-tg].ativo')].map((b) => b.dataset.bancoTg);
+    await store.salvarSettings({ nome: v('nome'), onboarding: true, bancos });
     fecharModal(); toast(`Bem-vinda${v('nome') ? ', ' + v('nome') : ''}! Bora organizar.`, true);
   }
 });
