@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=11';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=11';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=11';
+import * as C from './calc.js?v=12';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=12';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=12';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -371,7 +371,7 @@ function modalLanc(l = {}) {
     <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
     <div data-credito class="${l.forma === 'Crédito' && !l.id ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
-        <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${st().cartoes.filter(ehCredito).map((k, _, arr) => `<option value="${k.id}" ${arr.length === 1 ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select></div></div>
+        <div class="campo"><label>Cartão</label>${selCartao('', true)}</div></div>
       <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
     <div class="campo"><label>Mês</label>${mesSelect('l-mes', mes)}</div>
     <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, vencimento, observação)'}</button>
@@ -390,7 +390,7 @@ function modalCompra(c = {}) {
   abrirModal(`<form data-form="compra" data-id="${c.id || ''}">${topoModal(c.id ? 'Editar compra' : 'Compra no cartão')}
     <div class="campo"><label>Valor total</label><input class="inp valor-grande num" name="total" inputmode="decimal" placeholder="R$ 0,00" value="${c.total ? valorInput(c.total) : ''}" required autocomplete="off" data-a="prev-parc"></div>
     <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" name="parcelas" type="number" min="1" max="48" value="${c.parcelas || 1}" data-a="prev-parc"></div>
-      <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cartoes.filter(ehCredito).map((k, _, arr) => `<option value="${k.id}" ${k.id === c.cartaoId || (!c.id && arr.length === 1) ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select></div></div>
+      <div class="campo"><label>Cartão</label>${selCartao(c.cartaoId, !c.id)}</div></div>
     <div class="mini" data-prev style="margin:-6px 0 12px"></div>
     <div class="campo"><label>Descrição</label><input class="inp" name="descricao" value="${esc(c.descricao || '')}" required placeholder="Ex.: presente de Natal"></div>
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat('despesa', c.categoriaId)}</div></div>
@@ -416,6 +416,11 @@ const COR_BANCO = { 'Nubank': '#8A05BE', 'Itaú': '#EC7000', 'Bradesco': '#CC092
 const TIPOS_CARTAO = [['credito', 'Crédito'], ['debito', 'Débito'], ['ambos', 'Débito e crédito']];
 const ehCredito = (c) => !c.tipo || c.tipo === 'credito' || c.tipo === 'ambos';
 const nomeTipoCartao = (t) => (TIPOS_CARTAO.find((x) => x[0] === t) || TIPOS_CARTAO[0])[1];
+function selCartao(sel, novo) {
+  const cs = st().cartoes.filter(ehCredito);
+  if (cs.length === 1 && (novo || !sel || sel === cs[0].id)) return `<input type="hidden" name="cartaoId" value="${cs[0].id}"><div class="inp" style="background:#fff">${esc(cs[0].banco || cs[0].nome)}</div>`;
+  return `<select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cs.map((k) => `<option value="${k.id}" ${k.id === sel ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select>`;
+}
 function modalCartao(c = {}) {
   const tipo = c.tipo || 'credito';
   abrirModal(`<form data-form="cartao" data-id="${c.id || ''}">${topoModal(c.id ? 'Editar cartão' : 'Novo cartão')}
@@ -639,7 +644,12 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'cartao') {
     const antigo = S.cartoes.find((x) => x.id === id) || {};
     if (!v('banco')) return alert('Escolha o banco.');
-    await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', cor: COR_BANCO[v('banco')] || '#268AFF' });
+    const salvo = await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', cor: COR_BANCO[v('banco')] || '#268AFF' });
+    const semCartao = S.compras.filter((c) => !c.cartaoId);
+    if (ehCredito(salvo) && S.cartoes.filter(ehCredito).length === 1 && semCartao.length && confirm(`Você tem ${semCartao.length} compra(s) sem cartão definido. Colocar no ${salvo.banco}?`)) {
+      for (const c of semCartao) await store.salvar('compras', { ...c, cartaoId: salvo.id });
+      toast(`${semCartao.length} compra(s) foram para o ${salvo.banco}.`);
+    }
     fecharModal(); toast('Cartão salvo!');
   }
   if (tipoF === 'fixo') {
