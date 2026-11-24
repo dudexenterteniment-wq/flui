@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=6';
-import { Store, uid, FORMAS, validarBackup } from './store.js?v=6';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=6';
+import * as C from './calc.js?v=7';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=7';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=7';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -132,7 +132,8 @@ function avisos() {
 }
 function telaInicio() {
   const ms = meses(); const r = C.resumo(st(), ms); const rows = C.porCategoria(st(), ms);
-  const vis = rows.filter((x) => x.orcado > 0 || x.real > 0);
+  const vis = rows.filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0).sort((a, b) => (b.real / b.orcado) - (a.real / a.orcado));
+  const passaram = vis.filter((x) => x.real > x.orcado).length;
   const desp = rows.filter((x) => x.cat.tipo === 'despesa' && x.real > 0).sort((a, b) => b.real - a.real);
   const totDesp = C.sum(desp, (x) => x.real);
   const ultimos = [...st().lancamentos].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
@@ -149,8 +150,8 @@ function telaInicio() {
   </div>
   <div class="flui-fala" style="margin-top:16px"><div class="mascote">${MASCOTE}</div><div class="balao">${falaDoFlui(r, rows)}</div></div>
   <div class="grade g2 empilha" style="margin-top:4px">
-    <div><h2>Orçamento × real</h2>
-      ${vis.length ? `<div class="lista">${vis.map(orcLinha).join('')}</div>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
+    <div><h2 style="margin-bottom:2px">Seus limites</h2><p class="mini" style="margin:0 0 12px">${vis.length ? (passaram ? `<b class="neg">${passaram} passaram do limite</b> · ${vis.length - passaram} dentro` : `<b class="pos">Tudo dentro do limite</b>`) : ''}</p>
+      ${vis.length ? `<div class="lista">${vis.map(orcLinha).join('')}</div><a class="btn fantasma pequeno" href="#plano" style="margin-top:6px">Mudar limites</a>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
     </div>
     <div><h2>Para onde foi o dinheiro</h2>
       <div class="card">${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), totDesp)}
@@ -163,13 +164,13 @@ function telaInicio() {
 const kpi = (rot, v, cor) => `<div class="kpi ${cor}"><div class="rot">${rot}</div><div class="val num">${brl(v)}</div></div>`;
 const vazio = (ic, t) => `<div class="card vazio"><div class="grande">${ic}</div>${t}</div>`;
 function orcLinha(x) {
-  const p = x.pct; const g = x.cat.tipo === 'guardar';
-  const cls = p === null ? 'neutro' : g ? (p >= 1 ? '' : 'azul') : p > 1 ? 'estourou' : p >= 0.85 ? 'alerta' : '';
-  const w = p === null ? (x.real > 0 ? 100 : 0) : Math.min(100, Math.round(p * 100));
+  const p = x.orcado > 0 ? x.real / x.orcado : 0;
+  const cls = p > 1 ? 'estourou' : p >= 0.85 ? 'alerta' : '';
+  const msg = p > 1 ? `<span class="neg">Passou ${brl(x.real - x.orcado)}</span>` : x.real === x.orcado ? '<span style="color:#C76E00">Chegou no limite</span>' : `Ainda pode gastar <b>${brl(x.orcado - x.real)}</b>`;
   return `<div class="orc" data-a="ver-cat" data-id="${x.cat.id}">
-    <div class="linha1"><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}${x.noCartao > 0 ? '<span class="tag roxo">cartão</span>' : ''}</span><span class="num">${brl(x.real)}</span></div>
-    <div class="prog ${cls}"><i style="width:${w}%"></i></div>
-    <div class="linha2"><span>${x.orcado > 0 ? `de ${brl(x.orcado)}` : 'sem orçamento'}</span><span class="${x.restante < 0 && x.orcado > 0 ? 'neg' : ''}">${x.orcado > 0 ? (g ? (x.restante > 0 ? `faltam ${brl(x.restante)}` : 'meta do mês batida! 💚') : x.restante > 0 ? `faltam ${brl(x.restante)}` : x.restante === 0 ? 'no limite' : `passou ${brl(-x.restante)}`) : ''}</span></div></div>`;
+    <div class="linha1"><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}</span><span class="num"><b>${brl0(x.real)}</b> <span class="mini">de ${brl0(x.orcado)}</span></span></div>
+    <div class="prog ${cls}"><i style="width:${Math.min(100, Math.round(p * 100))}%"></i></div>
+    <div class="linha2"><span>${msg}</span><span>${Math.round(p * 100)}%</span></div></div>`;
 }
 
 // ---------------- Lançamentos ----------------
