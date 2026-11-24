@@ -205,16 +205,15 @@ function telaLancamentos() {
 // ---------------- Cartões ----------------
 function telaCartoes() {
   const ms = meses();
-  const cartoes = st().cartoes;
-  const lista = [...cartoes, ...(st().compras.some((c) => !c.cartaoId) ? [{ id: '', nome: 'Sem cartão definido', cor: '#AFAFAF' }] : [])];
+  const cartoes = st().cartoes; const cred = cartoes.filter(ehCredito);
+  const lista = [...cred, ...(st().compras.some((c) => !c.cartaoId) ? [{ id: '', nome: 'Sem cartão definido', cor: '#AFAFAF' }] : [])];
   const totMes = (cid, m) => C.fatura(st(), cid, m).total;
   return `
   <div class="linha-acao" style="margin-top:0"><h1>Cartões</h1><button class="btn verde" data-a="nova-compra">+ Compra no cartão</button></div>
   ${filtroPeriodo()}
   <div class="grade g2">${cartoes.map((c) => `<div class="cc" style="background:${c.cor || '#268AFF'}" data-a="editar-cartao" data-id="${c.id}">
-      <div><div class="cc-nome">${esc(c.nome)}</div><div class="cc-det">${[c.banco, c.fechamento ? `fecha dia ${c.fechamento}` : '', c.vencimento ? `vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ')}</div></div>
-      <div><div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div>
-      ${c.limite ? `<div class="cc-det">Limite disponível ${brl(c.limite - comprometido(c.id))} de ${brl(c.limite)}</div>` : ''}</div></div>`).join('')}
+      <div><div class="cc-nome">${esc(c.banco || c.nome)}</div><div class="cc-det">${[nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ')}</div></div>
+      ${ehCredito(c) ? `<div><div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div></div>` : '<div class="cc-det">Gastos no débito vão em Lançamentos</div>'}</div>`).join('')}
     <button class="card" style="border-style:dashed;cursor:pointer;font-weight:900;color:var(--azul);min-height:120px;background:#fff" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
   <h2>Faturas</h2>
@@ -363,7 +362,7 @@ function modalCompra(c = {}) {
   abrirModal(`<form data-form="compra" data-id="${c.id || ''}">${topoModal(c.id ? 'Editar compra' : 'Compra no cartão')}
     <div class="campo"><label>Valor total</label><input class="inp valor-grande num" name="total" inputmode="decimal" placeholder="R$ 0,00" value="${c.total ? valorInput(c.total) : ''}" required autocomplete="off" data-a="prev-parc"></div>
     <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" name="parcelas" type="number" min="1" max="48" value="${c.parcelas || 1}" data-a="prev-parc"></div>
-      <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cartoes.map((k) => `<option value="${k.id}" ${k.id === c.cartaoId || (!c.id && cartoes.length === 1) ? 'selected' : ''}>${esc(k.nome)}</option>`).join('')}</select></div></div>
+      <div class="campo"><label>Cartão</label><select class="inp" name="cartaoId"><option value="">Sem cartão definido</option>${cartoes.filter(ehCredito).map((k, _, arr) => `<option value="${k.id}" ${k.id === c.cartaoId || (!c.id && arr.length === 1) ? 'selected' : ''}>${esc(k.banco || k.nome)}</option>`).join('')}</select></div></div>
     <div class="mini" data-prev style="margin:-6px 0 12px"></div>
     <div class="campo"><label>Descrição</label><input class="inp" name="descricao" value="${esc(c.descricao || '')}" required placeholder="Ex.: presente de Natal"></div>
     <div class="campo"><label>Categoria</label>${chipsCat('despesa', c.categoriaId)}</div>
@@ -379,15 +378,17 @@ function previaParcelas() {
   $('[data-prev]', f).textContent = total > 0 ? (n > 1 ? `${n}x de ${brl(ps[0].valor)}${ps[n - 1].valor !== ps[0].valor ? ` (última ${brl(ps[n - 1].valor)})` : ''}` : 'à vista') : '';
 }
 
+const COR_BANCO = { 'Nubank': '#8A05BE', 'Itaú': '#EC7000', 'Bradesco': '#CC092F', 'Banco do Brasil': '#0038A8', 'Caixa': '#005CA9', 'Santander': '#EC0000', 'Inter': '#FF7A00', 'C6 Bank': '#242424', 'Mercado Pago': '#00A6E2', 'PicPay': '#11C76F' };
+const TIPOS_CARTAO = [['credito', 'Crédito'], ['debito', 'Débito'], ['ambos', 'Débito e crédito']];
+const ehCredito = (c) => !c.tipo || c.tipo === 'credito' || c.tipo === 'ambos';
+const nomeTipoCartao = (t) => (TIPOS_CARTAO.find((x) => x[0] === t) || TIPOS_CARTAO[0])[1];
 function modalCartao(c = {}) {
-  const cores = ['#268AFF', '#8A05BE', '#FF7A00', '#EC0000', '#1CB0F6', '#58A700', '#3C3C3C', '#FFC800'];
+  const tipo = c.tipo || 'credito';
   abrirModal(`<form data-form="cartao" data-id="${c.id || ''}">${topoModal(c.id ? 'Editar cartão' : 'Novo cartão')}
-    <div class="campo"><label>Nome do cartão</label><input class="inp" name="nome" required value="${esc(c.nome || '')}" placeholder="Ex.: Nubank roxinho"></div>
-    <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', c.banco)}</div>
-    <div class="duas"><div class="campo"><label>Dia de fechamento <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" name="fechamento" value="${c.fechamento || ''}"></div>
-      <div class="campo"><label>Dia de vencimento <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" name="vencimento" value="${c.vencimento || ''}"></div></div>
-    <div class="campo"><label>Limite <span class="opc">opcional</span></label><input class="inp" name="limite" inputmode="decimal" value="${c.limite ? valorInput(c.limite) : ''}"></div>
-    <div class="campo"><label>Cor</label><div class="cats">${cores.map((k) => `<button type="button" data-cor="${k}" class="${(c.cor || cores[0]) === k ? 'ativo' : ''}"><span class="ponto" style="background:${k};margin:0"></span></button>`).join('')}</div><input type="hidden" name="cor" value="${c.cor || cores[0]}"></div>
+    <div class="campo"><label>Banco</label>${selBanco('banco', c.banco || c.nome)}</div>
+    <div class="campo"><label>Tipo</label><div class="seg" data-seg="tipocartao">${TIPOS_CARTAO.map(([t, n]) => `<button type="button" class="t-neutro ${t === tipo ? 'ativo' : ''}" data-tipocartao="${t}">${n}</button>`).join('')}</div><input type="hidden" name="tipo" value="${tipo}"></div>
+    <button type="button" class="mais-opcoes" data-a="mais-opcoes-cartao">${c.vencimento ? '− Menos opções' : '+ Dia de vencimento da fatura (opcional)'}</button>
+    <div data-extras class="${c.vencimento ? '' : 'oculto'}"><div class="campo"><label>Dia de vencimento da fatura <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" name="vencimento" value="${c.vencimento || ''}"></div></div>
     <div class="acoes">${c.id ? '<button type="button" class="btn branco" data-a="excluir-cartao">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
 }
 
@@ -454,6 +455,8 @@ document.addEventListener('click', async (e) => {
     const sel = f.status; if (sel) sel.innerHTML = (t === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('');
     return;
   }
+  const tcBtn = e.target.closest('[data-tipocartao]');
+  if (tcBtn) { const f = tcBtn.closest('form'); f.tipo.value = tcBtn.dataset.tipocartao; f.querySelectorAll('[data-tipocartao]').forEach((b) => b.classList.toggle('ativo', b === tcBtn)); return; }
   const el = e.target.closest('[data-a]'); if (!el) return;
   if (e.target.closest('[data-stop]') && el.tagName !== 'INPUT') return;
   const a = el.dataset.a; const id = el.dataset.id;
@@ -472,6 +475,7 @@ document.addEventListener('click', async (e) => {
     case 'aviso-ok': await store.salvarSettings({ alertasVistos: { ...(S.settings.alertasVistos || {}), [el.dataset.k]: true } }); break;
     case 'novo-lanc': modalLanc(); break;
     case 'ver-avisos': ui.verAvisos = true; render(); break;
+    case 'mais-opcoes-cartao': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Dia de vencimento da fatura (opcional)' : '− Menos opções'; break; }
     case 'mais-opcoes': { const x = $('[data-extras]'); x.classList.toggle('oculto'); el.textContent = x.classList.contains('oculto') ? '+ Mais opções (data, forma, banco, vencimento)' : '− Menos opções'; break; }
     case 'abrir-mov': {
       const o = el.dataset.origem;
@@ -564,7 +568,8 @@ document.addEventListener('submit', async (e) => {
   }
   if (tipoF === 'cartao') {
     const antigo = S.cartoes.find((x) => x.id === id) || {};
-    await store.salvar('cartoes', { ...antigo, id, nome: v('nome'), banco: v('banco'), fechamento: parseInt(v('fechamento'), 10) || '', vencimento: parseInt(v('vencimento'), 10) || '', limite: parseValor(v('limite')) || '', cor: v('cor') });
+    if (!v('banco')) return alert('Escolha o banco.');
+    await store.salvar('cartoes', { ...antigo, id, nome: v('banco'), banco: v('banco'), tipo: v('tipo') || 'credito', vencimento: parseInt(v('vencimento'), 10) || '', cor: COR_BANCO[v('banco')] || '#268AFF' });
     fecharModal(); toast('Cartão salvo!');
   }
   if (tipoF === 'fixo') {
