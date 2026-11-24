@@ -1,7 +1,7 @@
 // Flui — telas e interação
-import * as C from './calc.js';
-import { Store, uid, FORMAS, validarBackup } from './store.js';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js';
+import * as C from './calc.js?v=5';
+import { Store, uid, FORMAS, validarBackup } from './store.js?v=5';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=5';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);

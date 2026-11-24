@@ -18,3 +18,7 @@ adicione o domínio (ex.: `seuusuario.github.io`) em Firebase → Authentication
 
 ## Próxima versão (fase 2)
 Notificações push com o app fechado, saldo negativo com juros/parcelamento, mascote definitivo.
+
+## Atualizar
+Ao mudar arquivos, aumente o número `?v=` em `index.html`, nos `import` de `js/*.js` e em `sw.js` (VERSAO e ARQUIVOS),
+para que celulares e computadores busquem a versão nova.
