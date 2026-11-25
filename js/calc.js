@@ -61,6 +61,7 @@ export function parcelasDaCompra(c) {
   const out = [];
   for (let i = 0; i < n; i++) {
     const v = i === n - 1 ? total - base * (n - 1) : base;
+    if (i < (parseInt(c.parcelaDe, 10) || 1) - 1) continue; // parcelas antes da primeira que apareceu na fatura não entram
     out.push({ mes: addMes(c.mesPrimeira, i), numero: i + 1, de: n, valor: fromCents(v) });
   }
   return out;

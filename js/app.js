@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=150';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=150';
-import { VAPID_KEY } from './config.js?v=150';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=150';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=150';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=150';
+import * as C from './calc.js?v=152';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=152';
+import { VAPID_KEY } from './config.js?v=152';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=152';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=152';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=152';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -39,9 +39,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=150" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=150" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -60,7 +60,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=150" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=152" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -69,7 +69,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=150" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -321,10 +321,13 @@ function telaPlano() {
   const noMes = (r) => C.recorrenciaNoMes(r, m) && r.ativa !== false;
   // por mês: tudo que está valendo ou vai começar (mesmo que comece no mês que vem); anual conta 1/12
   const porMes = (r) => (r.frequencia === 'anual' ? r.valor / 12 : r.valor);
-  const entra = C.sum(rendas.filter((r) => r.ativa !== false), porMes); const sai = C.sum(fixos.filter((r) => r.ativa !== false), porMes);
-  const aba = ui.abaPlano || 'limites';
-  const abas = `<div class="seg abas-plano">${[['limites', 'Limites'], ['fixos', 'Renda e fixos']].map(([k, n]) => `<button type="button" class="t-neutro ${k === 'fixos' ? 'aba-fixos' : ''} ${aba === k ? 'ativo' : ''}" data-a="aba-plano" data-v="${k}">${n}</button>`).join('')}</div>`;
-  if (aba === 'fixos') {
+  // compras parceladas no crédito que ainda têm parcela deste mês em diante
+  const parcs = st().compras.filter((c) => (parseInt(c.parcelas, 10) || 1) > 1).map((c) => { const ps = C.parcelasDaCompra(c).filter((p) => C.difMeses(m, p.mes) >= 0); return { c, ps }; }).filter((x) => x.ps.length).sort((a, b) => a.ps[a.ps.length - 1].mes.localeCompare(b.ps[b.ps.length - 1].mes));
+  const parcMes = C.sum(parcs, (x) => (x.ps[0].mes === m ? x.ps[0].valor : 0));
+  const entra = C.sum(rendas.filter((r) => r.ativa !== false), porMes); const sai = C.sum(fixos.filter((r) => r.ativa !== false), porMes) + parcMes;
+  const aba = ui.abaPlano || 'fixos';
+  const abas = `<div class="seg abas-plano">${[['fixos', 'Renda e fixos'], ['limites', 'Limites']].map(([k, n]) => `<button type="button" class="t-neutro ${k === 'fixos' ? 'aba-fixos' : ''} ${aba === k ? 'ativo' : ''}" data-a="aba-plano" data-v="${k}">${n}</button>`).join('')}</div>`;
+  if (aba === 'fixos') { const S0 = st();
     const linhaFixo = (r, entrada) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: entrada ? '#77C800' : '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
         <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}` : r.fim ? `por ${C.difMeses(r.inicio, r.fim) + 1} ${C.difMeses(r.inicio, r.fim) ? 'meses' : 'mês'} · ${C.nomeMes(r.inicio)} a ${C.nomeMes(r.fim)}` : C.difMeses(m, r.inicio) > 0 ? 'a partir de ' + C.nomeMes(r.inicio) : 'todo mês'}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}</div></div>
@@ -334,7 +337,13 @@ function telaPlano() {
     <div class="card bloco-fixo entra"><div class="linha-acao" style="margin:0 0 8px"><h3>Entra todo mês</h3><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button></div>
       ${rendas.length ? `<div class="lista rendas">${rendas.map((r) => linhaFixo(r, true)).join('')}</div>` : '<p class="mini" style="margin:0">Salário, freela fixo...</p>'}</div>
     <div class="card bloco-fixo sai"><div class="linha-acao" style="margin:0 0 8px"><h3>Sai todo mês</h3><button class="btn pequeno" data-a="novo-fixo">+ Fixo</button></div>
-      ${fixos.length ? `<div class="lista rendas">${fixos.map((r) => linhaFixo(r, false)).join('')}</div>` : '<p class="mini" style="margin:0">Academia, assinaturas, dízimo...</p>'}</div>`;
+      ${fixos.length ? `<div class="lista rendas">${fixos.map((r) => linhaFixo(r, false)).join('')}</div>` : '<p class="mini" style="margin:0">Academia, assinaturas, dízimo...</p>'}</div>
+    <div class="card bloco-fixo parc"><div class="linha-acao" style="margin:0 0 8px"><h3>Compras parceladas</h3><button class="btn pequeno" data-a="nova-compra">+ Compra</button></div>
+      ${parcs.length ? `<div class="lista rendas">${parcs.map(({ c, ps }) => { const ult = ps[ps.length - 1], pri = ps[0]; const k = S0.cartoes.find((x) => x.id === c.cartaoId);
+        return `<div class="item" data-a="editar-compra" data-id="${c.id}">${bolaCat(cat(c.categoriaId) || { nome: c.descricao, cor: '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
+        <div class="meio"><div class="titulo">${esc(c.descricao || catNome(c.categoriaId))}</div>
+          <div class="det">${ps.length > 1 ? `por ${ps.length} meses · ${C.nomeMes(pri.mes)} a ${C.nomeMes(ult.mes)} · ${pri.numero}/${pri.de}${pri.mes === m ? ' agora' : ''}` : `última parcela (${pri.numero}/${pri.de}) · ${C.nomeMes(pri.mes)}`}${k ? ` · ${esc(nomeCartao(k))}` : ''}</div></div>
+        <div style="text-align:right"><div class="valor num">−${brl(pri.valor)}</div><div class="mini">por mês</div></div></div>`; }).join('')}</div>` : '<p class="mini" style="margin:0">Compras parceladas aparecem aqui com até quando vão.</p>'}</div>`;
   }
   const rows = C.porCategoria(st(), [m]);
   const ordem = (a, b) => { const pa = a.orcado > 0 ? a.real / a.orcado : -1, pb = b.orcado > 0 ? b.real / b.orcado : -1; return pb - pa || ordemCat(a.cat, b.cat); };
@@ -776,12 +785,14 @@ async function prepararImportacao(dados) {
     const renda = e.tipo === 'entrada' ? rendaDoMes(mes, valor) : null;
     let cat = cRegra || (e.tipo === 'guardar' ? guardarPreferido(S) : null) || (renda ? S.categorias.find((c) => c.id === renda.categoriaId) : null) || porNome(e.sugestao, e.tipo)
       || (e.tipo === 'despesa' ? porNome('Outros', 'despesa') : S.categorias.find((c) => c.tipo === e.tipo && !c.arquivada));
-    const ja = it.id && jaIds.has(it.id);
+    const pi = dados.cartao && e.tipo === 'despesa' ? infoParcela(it.texto) : null; const pk = pi ? chaveParc(pi.base, pi.n, valor) : '';
+    const jaParc = pi && S.compras.find((c) => c.parcKey === pk && Math.abs(C.difMeses(C.addMes(c.mesPrimeira, pi.k - 1), mes)) <= 1);
+    const ja = (it.id && jaIds.has(it.id)) || !!jaParc;
     const parecido = !ja && (dados.cartao ? S.compras.some((c) => !c.importId && Math.abs((Number(c.total) || 0) - valor) < 0.005 && Math.abs(C.difMeses(c.mesPrimeira, mes)) <= 1) : S.lancamentos.some((l) => l.mes === mes && l.tipo === e.tipo && Math.abs((Number(l.valor) || 0) - valor) < 0.005 && !l.importId));
     const pagFatura = dados.cartao && e.tipo !== 'despesa';
     const jaFixo = dados.cartao && e.tipo === 'despesa' && S.recorrencias.some((r) => r.forma === 'Crédito' && r.ativa !== false && C.recorrenciaNoMes(r, mes) && (chaveRegra(r.nome || '') === chaveRegra(it.texto) || chaveRegra(r.obsImport || '') === chaveRegra(it.texto)));
-    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido && !pagFatura && !jaFixo, ja, jaFixo,
-      aviso: ja ? 'Já importado antes.' : jaFixo ? 'Já está nos seus fixos.' : pagFatura ? (/pagamento/i.test(it.texto || '') ? 'Pagamento: vai abater a fatura, não é compra.' : 'Estorno: não entra como compra.') : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
+    return { ...it, ...e, mes, valorAbs: valor, parc: pi, parcKey: pk, jaParc: jaParc?.id || '', catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido && !pagFatura && !jaFixo, ja, jaFixo,
+      aviso: jaParc ? `Parcela ${pi.k}/${pi.n}: essa compra já está registrada no cartão.` : ja ? 'Já importado antes.' : jaFixo ? 'Já está nos seus fixos.' : pagFatura ? (/pagamento/i.test(it.texto || '') ? 'Pagamento: vai abater a fatura, não é compra.' : 'Estorno: não entra como compra.') : parecido ? 'Parece que você já lançou este valor neste mês.' : pi && pi.k < pi.n ? `Parcela ${pi.k}/${pi.n}: as próximas ${pi.n - pi.k} já entram nas faturas dos meses seguintes.` : e.aviso || '' };
   });
   const banco = dados.banco || (S.settings?.bancos?.length === 1 ? S.settings.bancos[0] : '');
   const cc = dados.cartao ? (S.cartoes.find((k) => k.tipo !== 'debito' && (k.banco || k.nome) === banco) || S.cartoes.find((k) => k.tipo !== 'debito')) : null;
@@ -1347,7 +1358,11 @@ document.addEventListener('submit', async (e) => {
       const lista = [...(S.settings.pagImportadosLista || [])]; const jaPg = new Set(lista.map((x) => x.id)); let nPgF = 0;
       for (const l of im.linhas.filter((x) => x.tipo !== 'despesa' && /pagamento/i.test(x.texto || x.descricao || ''))) { const id = l.id || `pgf-${l.data}-${l.valorAbs}`; const novo = { id, valor: l.valorAbs, data: l.data, cartaoId: ccId, lote }; if (jaPg.has(id) || lista.some((x) => mesmoPag(x, novo))) continue; lista.push(novo); nPgF++; }
       if (nPgF) await store.salvarSettings({ pagImportadosLista: lista });
+      const catAssP = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa'); const kP = S.cartoes.find((x) => x.id === ccId);
+      for (const l of im.linhas.filter((x) => x.jaParc && x.parc)) { const c0 = S.compras.find((c) => c.id === l.jaParc); if (c0 && (parseInt(c0.parcelaDe, 10) || 1) > l.parc.k) await store.salvar('compras', { ...c0, parcelaDe: l.parc.k }); } // fatura mais antiga importada depois
       for (const l of compras) {
+        if (l.parc && (!catAssP || l.catId !== catAssP.id)) { const mP = C.addMes(mesDaCompra(kP, l.data), -(l.parc.k - 1));
+          await store.salvar('compras', { total: Math.round(l.valorAbs * l.parc.n * 100) / 100, parcelas: l.parc.n, parcelaDe: l.parc.k, cartaoId: ccId, descricao: nomeParc(l.descricao || l.parc.base), categoriaId: l.catId, mesPrimeira: mP, data: l.data, importId: l.id || '', lote, parcKey: l.parcKey }); continue; }
         await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: mesDaCompra(S.cartoes.find((x) => x.id === ccId), l.data), data: l.data, importId: l.id || '', lote }); }
       const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
       await store.salvarSettings({ regrasImport: regras }); await realocarPagamentos(); const kk = S.cartoes.find((x) => x.id === ccId); const bk = kk?.banco || kk?.nome || ''; const catAss = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa');
@@ -1411,12 +1426,24 @@ async function garantirMetas() {
   }
   if (mudou) await store.salvarSettings({ metasAuto: feitas });
 }
+// "Loja X - Parcela 2/5" → { k: 2, n: 5, base: 'Loja X' }
+const infoParcela = (t) => { const m = String(t || '').match(/^(.*?)\s*-\s*Parcela\s+(\d+)\s*\/\s*(\d+)\s*$/i); if (!m) return null; const k = +m[2], n = +m[3]; return n > 1 && k >= 1 && k <= n ? { k, n, base: m[1].trim() } : null; };
+const nomeParc = (t) => { let x = String(t || '').replace(/\s*-\s*Parcela\s+\d+\s*\/\s*\d+\s*$/i, '').replace(/^.*\*/, '').replace(/\s+/g, ' ').trim(); if (!/[a-z0-9]{2}/i.test(x)) return 'Compra parcelada'; return x.charAt(0).toUpperCase() + x.slice(1); };
+const chaveParc = (base, n, valor) => [chaveRegra(base), n, Math.round(valor * 100)].join('|');
 async function migrar() {
+  // compras parceladas importadas como avulsas (versões antigas): viram uma compra só, com as próximas parcelas
+  if (!st().settings.parcRegra) { const S = st(); const catAss = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa'); const grupos = {};
+    for (const c of S.compras.filter((x) => x.importId && x.cartaoId && (parseInt(x.parcelas, 10) || 1) === 1 && (!catAss || x.categoriaId !== catAss.id))) { const pi = infoParcela(c.descricao); if (!pi) continue;
+      const k = S.cartoes.find((x) => x.id === c.cartaoId); const mP = C.addMes(c.data && k ? mesDaCompra(k, c.data) : c.mesPrimeira, -(pi.k - 1)); const ch = chaveParc(pi.base, pi.n, Number(c.total)) + '|' + c.cartaoId + '|' + mP; (grupos[ch] = grupos[ch] || []).push({ c, pi, mP }); }
+    for (const g of Object.values(grupos)) { g.sort((a, b) => a.pi.k - b.pi.k); const { c, pi, mP } = g[0];
+      await store.salvar('compras', { ...c, descricao: nomeParc(pi.base), total: Math.round(Number(c.total) * pi.n * 100) / 100, parcelas: pi.n, parcelaDe: pi.k, mesPrimeira: mP, parcKey: chaveParc(pi.base, pi.n, Number(c.total)) });
+      for (const x of g.slice(1)) await store.remover('compras', x.c.id); }
+    await store.salvarSettings({ parcRegra: 1 }); }
   // assinaturas criadas duas vezes (mesmo nome, valor, cartão e início): fica uma só
   { const vistos = new Set(); for (const r of [...st().recorrencias]) { if (!r.obsImport) continue; const k = [(r.nome || '').toLowerCase(), r.valor, r.cartaoId].join('|'); if (vistos.has(k)) await store.remover('recorrencias', r.id); else vistos.add(k); } }
   // importações: compras no mês da fatura certa (pelo fechamento) e pagamentos na fatura certa
   if (st().settings.importRegra !== 5) { const S = st();
-    for (const c of S.compras.filter((x) => x.importId && x.data && x.cartaoId)) { const k = S.cartoes.find((x) => x.id === c.cartaoId); const m = k ? mesDaCompra(k, c.data) : c.mesPrimeira; if (m !== c.mesPrimeira) await store.salvar('compras', { ...c, mesPrimeira: m }); }
+    for (const c of S.compras.filter((x) => x.importId && x.data && x.cartaoId && !x.parcKey)) { const k = S.cartoes.find((x) => x.id === c.cartaoId); const m = k ? mesDaCompra(k, c.data) : c.mesPrimeira; if (m !== c.mesPrimeira) await store.salvar('compras', { ...c, mesPrimeira: m }); }
     if ((S.settings.pagImportadosLista || []).length) await realocarPagamentos();
     await store.salvarSettings({ importRegra: 5 }); }
   await garantirMetas();
@@ -1495,7 +1522,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=150" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
@@ -1504,4 +1531,4 @@ store.on(() => { if (!ui.modal) render(); });
     navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => { document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); }); }).catch(() => {});
   }
 })();
-window.__flui = { store, C };
+window.__flui = { store, C, ui };
