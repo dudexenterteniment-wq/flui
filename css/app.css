@@ -484,3 +484,25 @@ label.btn { position: relative; }
 .filtros-linha .chips-tipo { flex: 1; min-width: 0; margin: 0 -16px 0 0; }
 .lupa { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--linha); background: #fff; color: var(--cinza); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
 .lupa svg { width: 20px; height: 20px; } .lupa.ativo { border-color: var(--azul); color: var(--azul); background: var(--azul-claro); }
+.an-card { padding: 16px 16px 18px; }
+.an-rot { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--cinza); margin-bottom: 4px; }
+.an-tit { font-size: 20px; line-height: 1.25; margin: 0; } .an-tit .pos { color: var(--verde-esc, #58A700); } .an-tit .neg, .an-card .neg { color: var(--vermelho); }
+.an-sub { margin: 8px 0 0; color: var(--cinza-esc, #4B4B4B); font-weight: 700; } .an-sub .pos { color: var(--verde-esc, #58A700); }
+.an-cats { display: grid; gap: 12px; margin-top: 14px; }
+.an-cat { display: flex; gap: 10px; align-items: center; background: none; border: none; padding: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; width: 100%; }
+.an-cat .meio { flex: 1; min-width: 0; } .an-cat-l { display: flex; justify-content: space-between; gap: 8px; font-weight: 800; font-size: 14px; margin-bottom: 5px; }
+.an-cat-l span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-barra { position: relative; height: 10px; border-radius: 6px; background: var(--linha); } .an-barra.grossa { height: 16px; border-radius: 9px; margin-top: 14px; }
+.an-barra i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; }
+.an-barra em { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1px; background: var(--texto, #3C3C3C); border-radius: 2px; }
+.an-passou { font-size: 12px; font-weight: 800; color: var(--vermelho); margin-top: 4px; }
+.an-mais { display: block; margin: 12px auto 0; background: none; border: none; font: inherit; font-weight: 800; cursor: pointer; }
+.an-card .kpis .kpi { padding: 8px 7px; } .an-card .kpis .kpi .val { font-size: 13px; } .an-card .kpis .kpi .rot { font-size: 10px; }
+.an-evo { display: flex; align-items: flex-end; gap: 8px; height: 150px; margin-top: 16px; }
+.an-evo-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+.an-evo-barras { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; border-bottom: 2px solid var(--linha); }
+.an-evo-barras i { width: 38%; max-width: 18px; border-radius: 5px 5px 0 0; min-height: 2px; }
+.an-evo-col span { font-size: 12px; font-weight: 800; color: var(--cinza); margin-top: 6px; }
+.an-leg { display: flex; gap: 14px; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--cinza); } .an-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; }
+.an-card .grade.g3.kpis .kpi { padding: 8px 6px; } .an-card .grade.g3.kpis .kpi .val { font-size: 12.5px; letter-spacing: -0.02em; } .an-card .grade.g3.kpis { gap: 6px; }
+.marca-link { display: flex; align-items: center; gap: 4px; text-decoration: none; color: inherit; } .marca-seta { color: var(--cinza); font-size: 14px; margin-top: 4px; }

@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=89';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=89';
-import { VAPID_KEY } from './config.js?v=89';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=89';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=89';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=89';
+import * as C from './calc.js?v=91';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=91';
+import { VAPID_KEY } from './config.js?v=91';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=91';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=91';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=91';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,15 +36,15 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
     <aside class="lateral">${marca()}${NAV.map(([r, n, i]) => `<a class="nav-item ${r === rota ? 'ativo' : ''}" href="#${r}">${i}<span>${n}</span></a>`).join('')}
       <div style="margin-top:auto" class="mini">${store.modo === 'local' ? 'Modo de teste: dados só neste navegador' : esc(store.user.email)}</div></aside>
-    <main class="principal"><div class="topo-movel">${marca(true)}<span style="display:flex;align-items:center;gap:10px">${sino()}<a class="sino botao-mais ${['mais', 'metas', 'categorias', 'config'].includes(rota) ? 'ativo' : ''}" href="#mais" aria-label="Mais">${ICON.mais}</a></span></div><div class="topo-desk">${sino()}</div>${tela()}</main>
+    <main class="principal"><div class="topo-movel"><a href="#mais" class="marca-link ${['mais', 'metas', 'categorias', 'config'].includes(rota) ? 'ativo' : ''}" aria-label="Menu">${marca(true)}<span class="marca-seta">▾</span></a><span style="display:flex;align-items:center;gap:10px">${sino()}</span></div><div class="topo-desk">${sino()}</div>${tela()}</main>
     <nav class="barra-inferior">${NAV_MOVEL.map(([r, n, i]) => `<a class="nav-item ${r === 'relatorios' ? 'nav-destaque' : ''} ${r === rota ? 'ativo' : ''}" href="#${r}">${r === 'relatorios' ? `<i class="nd-bola">${i}</i>` : i}<span>${n}</span></a>`).join('')}</nav>
     ${['inicio', 'lancamentos', 'cartoes'].includes(rota) ? '<button class="btn verde fab" data-a="novo-lanc" aria-label="Novo lançamento">+</button>' : ''}
   </div>${ui.modal ? ui.modal.html : ''}`;
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=89" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=91" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -167,7 +167,7 @@ function telaInicio() {
   ${ultimos.length ? `<div class="lista">${ultimos.slice(0, 3).map((l) => itemMov(movDeLanc(l))).join('')}</div>` : '<p class="mini">Seus lançamentos aparecem aqui.</p>'}
   <div class="dica"><span class="dica-ic">${MASCOTE}</span><span>${falaDoFlui(r, rows)}</span></div>`;
 }
-const kpiIr = (rot, v, cor, ir) => `<button class="kpi ${cor} kpi-ir" data-a="kpi-ir" data-v="${ir}"><div class="rot">${rot} ›</div><div class="val num">${brl(v)}</div></button>`;
+const kpiIr = (rot, v, cor, ir) => `<button class="kpi ${cor} kpi-ir" data-a="kpi-ir" data-v="${ir}"><div class="rot">${rot}</div><div class="val num">${brl(v)}</div></button>`;
 const kpi = (rot, v, cor) => `<div class="kpi ${cor}"><div class="rot">${rot}</div><div class="val num">${brl(v)}</div></div>`;
 const vazio = (ic, t) => `<div class="card vazio"><div class="grande">${ic}</div>${t}</div>`;
 function orcLinha(x) {
@@ -344,35 +344,65 @@ function telaPlano() {
 
 // ---------------- Relatórios ----------------
 function telaRelatorios() {
-  const ms = meses();
-  const serie = (t) => ms.map((m) => C.resumo(st(), [m])[t]);
-  const rows = C.porCategoria(st(), ms).filter((x) => x.real > 0 || x.orcado > 0);
-  const desp = rows.filter((x) => x.cat.tipo === 'despesa' && x.real > 0).sort((a, b) => b.real - a.real);
-  const tot = C.sum(desp, (x) => x.real);
-  const cats = st().categorias.filter((c) => !c.arquivada);
-  const linhas = cats.map((c) => ({ c, v: ms.map((m) => C.sum(C.movimentosDoMes(st(), m).filter((x) => x.categoriaId === c.id), (x) => x.valor)) })).filter((l) => l.v.some((x) => x > 0));
-  const res = ms.map((m) => C.resumo(st(), [m]));
-  const aba = ui.abaAnalise || 'resumo'; const tr = C.resumo(st(), ms);
-  const lim = rows.filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
-  const est = lim.filter((x) => x.real > x.orcado);
-  const secLim = () => lim.length ? `${est.length ? `<div class="card estourou-card"><h3 style="margin:0 0 6px">Passou do limite</h3>${est.map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:34px;height:34px;border-radius:10px')}<span class="meio">Extrapolei <b class="neg">${brl(x.real - x.orcado)}</b> em ${esc(x.cat.nome)}<small>gastei ${brl(x.real)} · limite ${brl(x.orcado)}</small></span></div>`).join('')}</div>` : '<div class="card"><b class="pos">Tudo dentro do limite neste período.</b></div>'}
-    <div class="card"><h3 style="margin:0 0 8px">Gasto × limite</h3><div class="lista lim-lista">${lim.map((x) => { const p = x.real / x.orcado; return `<div class="lim-linha">${bolaCat(x.cat)}<div class="meio"><div class="titulo">${esc(x.cat.nome)}</div><div class="prog ${p > 1 ? 'estourou' : 'azul'}"><i style="width:${Math.min(100, Math.round(p * 100))}%"></i></div><div class="mini num">${brl0(x.real)} de ${brl0(x.orcado)}</div></div><b class="num ${p > 1 ? 'neg' : 'pos'}" style="white-space:nowrap">${p > 1 ? '+' + brl0(x.real - x.orcado) : 'sobra ' + brl0(x.orcado - x.real)}</b></div>`; }).join('')}</div></div>`
-    : '<div class="card"><p class="mini" style="margin:0">Você ainda não definiu limites. Defina no <a href="#plano">Planejamento</a>.</p></div>';
-  const abas = [['resumo', 'Resumo'], ['limites', 'Limites'], ['categorias', 'Categorias'], ['meses', 'Mês a mês']];
-  const conteudo = { limites: secLim,
-    categorias: () => `<div class="card"><h3 style="margin-bottom:10px">Despesas por categoria</h3>${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), tot)}
-    <div class="legenda">${desp.map((x) => `<div><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}</span><span><b class="num">${brl(x.real)}</b> <span class="pc">${pct(x.real / tot)}</span></span></div>`).join('')}</div></div>` : vazio('🍩', 'Sem despesas no período.')}</div>`,
-    resumo: () => `<div class="grade g3 kpis">${kpiIr('Entrou', tr.entradas, 'verde', 'entrada')}${kpiIr('Gastou', tr.despesas, 'laranja', 'despesa')}${kpiIr('Guardou', tr.guardado, 'azul', 'metas')}</div><div class="card"><h3 style="margin-bottom:10px">Entradas × gastos</h3>${barras(ms, [{ nome: 'Entradas', cor: '#77C800', valores: serie('entradas') }, { nome: 'Despesas', cor: '#FF9600', valores: serie('despesas') }, { nome: 'Guardado', cor: '#268AFF', valores: serie('guardado') }])}</div>`,
-    meses: () => `<div class="rolagem"><table class="tabela"><thead><tr><th>Categoria</th>${ms.map((m) => `<th>${C.nomeMes(m)}</th>`).join('')}<th>Total</th><th>Média</th></tr></thead><tbody>
-    ${linhas.map(({ c, v }) => `<tr><td><span class="ponto" style="background:${c.cor}"></span>${esc(c.nome)}</td>${v.map((x) => `<td class="num">${x ? brl(x) : '–'}</td>`).join('')}<td class="num"><b>${brl(C.sum(v))}</b></td><td class="num">${brl(C.sum(v) / ms.length)}</td></tr>`).join('')}
-    ${[['Entradas', 'entradas'], ['Despesas', 'despesas'], ['Guardado', 'guardado'], ['Saldo', 'saldo'], ['No cartão', 'cartao']].map(([n, k]) => `<tr class="total"><td>${n}</td>${res.map((x) => `<td class="num ${k === 'saldo' && x[k] < 0 ? 'neg' : ''}">${brl(x[k])}</td>`).join('')}<td class="num">${brl(C.sum(res, (x) => x[k]))}</td><td class="num">${brl(C.sum(res, (x) => x[k]) / ms.length)}</td></tr>`).join('')}
-  </tbody></table></div>` };
-  return `<h1>Análise</h1>${filtroPeriodo()}
-  <div class="abas-analise">${abas.map(([k, n]) => `<button class="${aba === k ? 'ativo' : ''}" data-a="aba-analise" data-v="${k}">${n}</button>`).join('')}</div>
-  ${conteudo[aba]()}`;
+  const S = st(); const ms = meses(); const ult = ms[ms.length - 1]; const cur = C.mesAtual();
+  const r = C.resumo(S, ms);
+  const pctTxt = (v) => `${Math.round(v * 100)}%`;
+  const card = (rot, titulo, corpo = '', cls = '') => `<div class="card an-card ${cls}"><div class="an-rot">${rot}</div><h3 class="an-tit">${titulo}</h3>${corpo}</div>`;
+  const cards = [];
+  // 1. sobrou / guardou
+  if (r.entradas > 0 || r.despesas > 0) {
+    const sobra = r.entradas - r.despesas - r.guardado;
+    const tit = r.entradas <= 0 ? `Você gastou ${brl(r.despesas)}` : r.guardado > 0 ? `Você guardou <b class="pos">${pctTxt(r.guardado / r.entradas)}</b> do que entrou`
+      : sobra >= 0 ? `Sobrou <b class="pos">${brl(sobra)}</b> do que entrou` : `Faltou <b class="neg">${brl(-sobra)}</b> para fechar a conta`;
+    cards.push(card('Resultado', tit, `<div class="grade g3 kpis" style="margin:12px 0 0">${kpiIr('Entrou', r.entradas, 'verde', 'entrada')}${kpiIr('Gastou', r.despesas, 'laranja', 'despesa')}${kpiIr('Guardou', r.guardado, 'azul', 'metas')}</div>`));
+  }
+  // 2. comparação com o mês anterior (só quando olha um mês)
+  if (ms.length === 1) {
+    const ant = C.addMes(ult, -1); const ra = C.resumo(S, [ant]);
+    if (ra.despesas > 0 && r.despesas > 0) {
+      const d = r.despesas / ra.despesas - 1; const ca = Object.fromEntries(C.porCategoria(S, [ant]).map((x) => [x.cat.id, x.real]));
+      const subiu = C.porCategoria(S, ms).filter((x) => x.cat.tipo === 'despesa').map((x) => ({ x, dif: x.real - (ca[x.cat.id] || 0) })).sort((a, b) => b.dif - a.dif)[0];
+      const tit = Math.abs(d) < 0.03 ? `Você gastou quase igual a ${C.nomeMes(ant, true).split(' ')[0]}` : d > 0 ? `Você gastou <b class="neg">${pctTxt(d)} a mais</b> que em ${C.nomeMes(ant, true).split(' ')[0]}` : `Você gastou <b class="pos">${pctTxt(-d)} a menos</b> que em ${C.nomeMes(ant, true).split(' ')[0]}`;
+      cards.push(card('Comparado ao mês anterior', tit, d > 0 && subiu && subiu.dif > 0 ? `<p class="an-sub">Principalmente em <b>${esc(subiu.x.cat.nome)}</b> (+${brl(subiu.dif)})</p>` : ''));
+    }
+  }
+  // 3. para onde foi (com limites)
+  const desp = C.porCategoria(S, ms).filter((x) => x.cat.tipo === 'despesa' && x.real > 0).sort((a, b) => b.real - a.real);
+  if (desp.length) {
+    const max = desp[0].real; const est = desp.filter((x) => x.orcado > 0 && x.real > x.orcado);
+    const lin = desp.slice(0, ui.anTodas ? 99 : 5).map((x) => { const lim = x.orcado > 0 ? x.orcado * ms.length / ms.length : 0; const passou = lim > 0 && x.real > lim;
+      return `<button class="an-cat" data-a="filtro-cat-ir" data-id="${x.cat.id}">${bolaCat(x.cat, 'width:32px;height:32px;border-radius:10px')}<div class="meio"><div class="an-cat-l"><span>${esc(x.cat.nome)}</span><b class="num ${passou ? 'neg' : ''}">${brl(x.real)}</b></div>
+        <div class="an-barra"><i style="width:${Math.min(100, x.real / Math.max(max, lim || 0) * 100)}%;background:${passou ? 'var(--vermelho)' : x.cat.cor}"></i>${lim ? `<em style="left:${Math.min(100, lim / Math.max(max, lim) * 100)}%"></em>` : ''}</div>
+        ${passou ? `<div class="an-passou">Passou ${brl(x.real - lim)} do limite</div>` : ''}</div></button>`; }).join('');
+    cards.push(card('Para onde foi', est.length ? `<b class="neg">${est.length === 1 ? `${esc(est[0].cat.nome)} passou do limite` : `${est.length} categorias passaram do limite`}</b>` : `${esc(desp[0].cat.nome)} foi seu maior gasto`,
+      `<div class="an-cats">${lin}</div>${desp.length > 5 ? `<button class="link-mais an-mais" data-a="an-todas">${ui.anTodas ? 'Ver menos' : `Ver todas (${desp.length})`}</button>` : ''}`));
+  }
+  // 4. renda comprometida com fixos
+  const fixos = C.sum(ms.flatMap((m) => C.movimentosDoMes(S, m)).filter((x) => x.origem === 'fixo' && x.tipo === 'despesa'), (x) => x.valor);
+  if (r.entradas > 0 && fixos > 0) {
+    const p = fixos / r.entradas;
+    cards.push(card('Contas fixas', `<b class="${p > 0.6 ? 'neg' : ''}">${pctTxt(p)}</b> da sua renda já sai sozinho todo mês`,
+      `<div class="an-barra grossa"><i style="width:${Math.min(100, p * 100)}%;background:var(--laranja)"></i></div><p class="an-sub">${brl(fixos)} em fixos · sobram ${brl(Math.max(0, r.entradas - fixos))} para o resto</p>`));
+  }
+  // 5. previsão do mês (só no mês atual)
+  if (ms.length === 1 && ult === cur && r.despesas > 0) {
+    const hoje = new Date(); const dia = hoje.getDate(); const diasMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+    const varia = r.despesas - fixos; const prev = fixos + varia / dia * diasMes; const sobraPrev = r.entradas - prev - r.guardado;
+    if (dia >= 3) cards.push(card('Previsão', `No ritmo atual, você termina ${C.nomeMes(cur, true).split(' ')[0]} gastando <b>${brl(prev)}</b>`,
+      r.entradas > 0 ? `<p class="an-sub">${sobraPrev >= 0 ? `Sobrariam <b class="pos">${brl(sobraPrev)}</b>` : `Faltariam <b class="neg">${brl(-sobraPrev)}</b>`} no fim do mês</p>` : ''));
+  }
+  // 6. evolução (6 meses até o fim do período)
+  let seis = C.rangeMeses(C.addMes(ult, -5), ult); let rs = seis.map((m) => C.resumo(S, [m]));
+  while (seis.length > 2 && !(rs[0].entradas || rs[0].despesas)) { seis = seis.slice(1); rs = rs.slice(1); }
+  if (rs.filter((x) => x.entradas > 0 || x.despesas > 0).length >= 2) {
+    const meds = rs.slice(0, -1).filter((x) => x.despesas > 0); const med = meds.length ? C.sum(meds, (x) => x.despesas) / meds.length : 0; const ultimo = rs[rs.length - 1].despesas;
+    const tit = med && ultimo ? (ultimo > med * 1.05 ? `Seus gastos estão <b class="neg">acima</b> da sua média` : ultimo < med * 0.95 ? `Seus gastos estão <b class="pos">abaixo</b> da sua média` : 'Seus gastos estão na média') : 'Últimos meses';
+    cards.push(card('Evolução', tit, (() => { const mx = Math.max(1, ...rs.map((x) => Math.max(x.entradas, x.despesas)));
+      return `<div class="an-evo">${seis.map((m, k) => `<div class="an-evo-col"><div class="an-evo-barras"><i style="height:${rs[k].entradas / mx * 100}%;background:#77C800"></i><i style="height:${rs[k].despesas / mx * 100}%;background:#FF9600"></i></div><span>${C.MESES_CURTOS[Number(m.slice(5, 7)) - 1]}</span></div>`).join('')}</div>
+      <div class="an-leg"><span><i style="background:#77C800"></i>Entrou</span><span><i style="background:#FF9600"></i>Gastou</span></div>`; })()));
+  }
+  return `<h1>Análise</h1>${filtroPeriodo()}${cards.length ? cards.join('') : vazio('📊', 'Lance algumas coisas para ver sua análise aqui.')}`;
 }
-
-// ---------------- Metas ----------------
 function telaMetas() {
   return `<div class="linha-acao" style="margin-top:0"><h1>Metas</h1><button class="btn verde pequeno" data-a="nova-meta">+ Nova meta</button></div>
   
@@ -822,6 +852,8 @@ document.addEventListener('click', async (e) => {
       else modalFixo({ ...S.recorrencias.find((x) => x.id === id) });
       break; }
     case 'ver-cat': ui.filtroCat = id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
+    case 'an-todas': ui.anTodas = !ui.anTodas; render(); break;
+    case 'filtro-cat-ir': ui.filtroCat = el.dataset.id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
     case 'kpi-ir': if (el.dataset.v === 'metas') location.hash = '#metas'; else { ui.filtroTipo = el.dataset.v; location.hash = '#lancamentos'; } break;
     case 'abrir-busca': if (ui.buscaAberta || ui.busca) { ui.buscaAberta = false; ui.busca = ''; render(); } else { ui.buscaAberta = true; render(); setTimeout(() => $('[data-a=busca]')?.focus(), 30); } break;
     case 'filtro-tipo': ui.filtroTipo = el.dataset.v; render(); break;
@@ -853,7 +885,7 @@ document.addEventListener('click', async (e) => {
     case 'ocultar-aviso-fatura': (ui.faturasOcultas ||= new Set()).add(el.dataset.k); render(); break;
     case 'aba-plano': ui.abaPlano = el.dataset.v; render(); break;
     case 'aba-analise': ui.abaAnalise = el.dataset.v; render(); break;
-    case 'ver-passou': ui.abaAnalise = 'limites'; ui.periodo = { ...ui.periodo, tipo: 'mes', ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 }; location.hash = '#relatorios'; break;
+    case 'ver-passou': ui.periodo = { ...ui.periodo, tipo: 'mes', ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 }; location.hash = '#relatorios'; break;
     case 'setup-ir': { const v = el.dataset.v; ui.modal = null;
       if (v === 'renda') { ui.abaPlano = 'fixos'; location.hash = '#plano'; setTimeout(() => modalFixo({}, true), 80); }
       else if (v === 'fixo') { ui.abaPlano = 'fixos'; location.hash = '#plano'; setTimeout(() => modalFixo(), 80); }
@@ -1182,7 +1214,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
