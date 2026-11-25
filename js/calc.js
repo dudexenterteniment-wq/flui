@@ -90,7 +90,7 @@ export function movimentosDoMes(st, m) {
     if (l.mes !== m) continue;
     out.push({ origem: 'lanc', id: l.id, tipo: l.tipo, categoriaId: l.categoriaId, valor: Number(l.valor) || 0,
       descricao: l.descricao || '', status: l.status || (l.tipo === 'entrada' ? 'recebido' : 'pago'),
-      forma: l.forma || '', banco: l.banco || '', vencimento: l.vencimento || '', data: l.data || '', criadoEm: l.criadoEm || '', mes: m });
+      forma: l.forma || '', banco: l.banco || '', vencimento: l.vencimento || '', data: l.data || '', criadoEm: l.criadoEm || '', contaCartaoId: l.contaCartaoId || '', mes: m });
   }
   for (const c of st.compras) {
     for (const p of parcelasDaCompra(c)) {

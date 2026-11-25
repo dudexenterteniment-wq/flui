@@ -568,3 +568,4 @@ label.btn { position: relative; }
 [data-arrastar] { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: pan-x pan-y; }
 .cc.cartao.arrastando { z-index: 5; box-shadow: 0 12px 28px rgba(0,0,0,.25); transition: none; position: relative; opacity: .95; }
 body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
+.conta-resumo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; } .conta-resumo div { background: #F7F7F7; border-radius: 12px; padding: 8px 12px; } .conta-resumo span { display: block; font-size: 12px; font-weight: 800; color: var(--cinza); text-transform: uppercase; } .conta-resumo b { font-size: 18px; } .conta-resumo .pos { color: #58A700; } .conta-resumo .neg { color: var(--vermelho); }
