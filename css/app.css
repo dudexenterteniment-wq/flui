@@ -400,3 +400,5 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .lim-inp { width: 86px; }
 .lim-cab { display: flex; justify-content: space-between; padding-right: 14px; }
 .aviso-fatura.vencida { border-color: var(--vermelho); background: var(--vermelho-claro); } .aviso-fatura.vencida .af-txt b { color: var(--vermelho-esc); }
+.fat-valores { display: grid; justify-items: end; line-height: 1.2; } .fat-total { font-weight: 900; font-size: 18px; color: var(--tinta); } .fat-pago { font-size: 13px; font-weight: 800; color: var(--verde-esc); }
+.cc.cartao .cc-val small { display: block; font-size: 11px; font-weight: 800; opacity: .85; text-align: right; }
