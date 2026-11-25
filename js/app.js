@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=41';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=41';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=41';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=41';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=41';
+import * as C from './calc.js?v=42';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=42';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=42';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=42';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=42';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -327,18 +327,19 @@ function telaPlano() {
   const desp = rows.filter((x) => x.cat.tipo === 'despesa').sort(ordem); const gua = rows.filter((x) => x.cat.tipo === 'guardar').sort(ordem);
   const comLim = desp.filter((x) => x.orcado > 0); const passou = comLim.filter((x) => x.real > x.orcado).length;
   const totOrc = C.sum(comLim, (x) => x.orcado); const totReal = C.sum(comLim, (x) => x.real);
-  const linhaLim = (x) => { const p = x.orcado > 0 ? x.real / x.orcado : 0; const cls = p > 1 ? 'estourou' : p >= 0.85 ? 'alerta' : '';
-    return `<div class="lim-linha">${bolaCat(x.cat, 'width:34px;height:34px;border-radius:10px')}
-      <div class="meio"><div class="lim-topo"><span class="titulo">${esc(x.cat.nome)}</span><span class="mini num">${x.orcado > 0 ? `${brl0(x.real)} de` : (x.real ? brl0(x.real) : '')}</span></div>
-        ${x.orcado > 0 ? `<div class="prog ${cls}"><i style="width:${Math.min(100, Math.round(p * 100))}%"></i></div>${p > 1 ? `<div class="mini neg" style="font-weight:800;margin-top:3px">passou ${brl(x.real - x.orcado)}</div>` : ''}` : ''}</div>
-      <input class="inp num lim-inp" inputmode="decimal" placeholder="limite" value="${x.cat.orcamento ? valorInput(x.cat.orcamento) : ''}" data-a="orc" data-id="${x.cat.id}" aria-label="Limite de ${esc(x.cat.nome)}"></div>`; };
+  const linhaLim = (x) => { const p = x.orcado > 0 ? x.real / x.orcado : 0;
+    return `<div class="lim-linha">${bolaCat(x.cat)}
+      <div class="meio"><div class="titulo">${esc(x.cat.nome)}</div>
+        ${x.orcado > 0 ? `<div class="prog ${p > 1 ? 'estourou' : 'azul'}"><i style="width:${Math.min(100, Math.round(p * 100))}%"></i></div>` : ''}
+        <div class="mini num">${brl0(x.real)} ${x.cat.tipo === 'guardar' ? 'guardado' : 'gasto'}</div></div>
+      <label class="lim-campo"><input class="inp num lim-inp" inputmode="decimal" placeholder="—" value="${x.cat.orcamento ? valorInput(x.cat.orcamento) : ''}" data-a="orc" data-id="${x.cat.id}"></label></div>`; };
   return `<h1>Planejamento</h1>${abas}
   <div class="card resumo-lim"><div class="linha-acao" style="margin:0 0 6px"><h3>${cap(C.nomeMes(m, true))}</h3>${passou ? `<span class="tag-neg">${passou} ${passou > 1 ? 'passaram' : 'passou'} do limite</span>` : comLim.length ? '<span class="tag-pos">tudo dentro</span>' : ''}</div>
     ${comLim.length ? `<div class="prog ${totReal > totOrc ? 'estourou' : ''}" style="height:16px"><i style="width:${Math.min(100, Math.round((totReal / totOrc) * 100))}%"></i></div>
     <div class="mini" style="margin-top:6px">Gastou <b>${brl(totReal)}</b> de <b>${brl(totOrc)}</b> planejados${entra ? ` · renda ${brl0(entra)}` : ''}</div>` : '<div class="mini">Digite ao lado de cada categoria quanto quer gastar por mês.</div>'}</div>
-  <div class="grupo-mes">Gastos · limite por mês</div>
+  <div class="grupo-mes lim-cab"><span>Gastos</span><span>Limite por mês</span></div>
   <div class="lista lim-lista">${desp.map(linhaLim).join('')}</div>
-  ${gua.length ? `<div class="grupo-mes">Guardar · quanto por mês</div><div class="lista lim-lista">${gua.map(linhaLim).join('')}</div>` : ''}`;
+  ${gua.length ? `<div class="grupo-mes lim-cab"><span>Guardar</span><span>Meta por mês</span></div><div class="lista lim-lista">${gua.map(linhaLim).join('')}</div>` : ''}`;
 }
 
 // ---------------- Relatórios ----------------
