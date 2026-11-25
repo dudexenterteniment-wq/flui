@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=52';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=52';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=52';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=52';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=52';
+import * as C from './calc.js?v=53';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=53';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=53';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=53';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=53';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -273,7 +273,7 @@ function blocoFatura(c, f, m) {
     <div class="fatura-topo">
     <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}${c.vencimento ? `<span class="mini" style="font-weight:700;margin-left:6px">vence dia ${c.vencimento}</span>` : ''}</h3><span class="fat-valores"><span class="num fat-total">${brl(f.total)}</span>${f.pago > 0 ? `<span class="num fat-pago">${brl(f.pago)} pago</span>` : ''}</span></div>
     <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
-    <div class="mini" style="display:flex;justify-content:flex-end;margin-bottom:10px"><span>${f.decisao && f.decisao.acao !== 'paguei' && f.aberto <= 0 ? `<b style="color:var(--azul)">${f.decisao.acao === 'passar' ? 'Passou para o próximo mês' : 'Parcelada'}</b>` : f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Falta <b>${brl(f.aberto)}</b>`}</span></div>
+    <div class="mini" style="display:flex;justify-content:flex-end;margin-bottom:10px"><span>${f.decisao && f.decisao.acao !== 'paguei' && f.aberto <= 0 ? `<b style="color:var(--azul)">${f.decisao.acao === 'passar' ? 'Passou para o próximo mês' : 'Parcelada'}</b>` : f.paga ? '<b class="pos">Fatura paga ✓</b>' : `<b class="neg">Falta ${brl(f.aberto)}</b>`}</span></div>
     </div>
     <div class="pagar-fatura">
       <label><span>Quanto já paguei</span><input class="inp num" inputmode="decimal" placeholder="R$ 0,00" value="${f.pago > 0 && !f.paga ? valorInput(f.pago) : ''}" data-valor-fatura="${k}"></label>
