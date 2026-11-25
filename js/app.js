@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=97';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=97';
-import { VAPID_KEY } from './config.js?v=97';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=97';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=97';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=97';
+import * as C from './calc.js?v=98';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=98';
+import { VAPID_KEY } from './config.js?v=98';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=98';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=98';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=98';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=97" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=98" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=97" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=98" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=97" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=98" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=97" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=98" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -632,9 +632,10 @@ function enviarForm(f) { if (f.requestSubmit) f.requestSubmit(); else f.dispatch
 // ---------------- importar extrato ----------------
 function modalImportar() {
   abrirModal(`${topoModal('Importar extrato')}
-    <div class="imp-info"><b>Aceita o extrato do Nubank</b> (conta: Pix, débito, boletos e transferências).<br>
-      Formato melhor: <b>OFX</b>. O <b>CSV</b> também funciona. O PDF não dá para importar, porque é só para leitura.</div>
-    <ol class="imp-passos mini"><li>No app do Nubank, toque em <b>Conta</b> e depois em <b>Pedir extrato</b>.</li><li>Escolha o mês e toque em <b>Exportar extrato</b>. O Nubank manda para o seu e-mail.</li><li>Baixe o arquivo <b>.ofx</b> do e-mail e escolha ele aqui.</li></ol>
+    <div class="imp-info"><b>Funciona com a maioria dos bancos</b>: Nubank, Itaú, Bradesco, Inter, C6, Santander e outros.<br>
+      Use o arquivo <b>OFX</b> (às vezes chamado de "Money" ou "gerenciador financeiro"). O <b>CSV</b> também pode funcionar. PDF não dá.</div>
+    <ol class="imp-passos mini"><li>No app ou site do banco, abra o <b>extrato</b> e procure <b>Exportar</b> ou <b>Baixar</b>.</li><li>Escolha o formato <b>OFX</b> e o período.</li><li>Escolha o arquivo aqui.</li></ol>
+    <details class="mini" style="margin-bottom:12px"><summary><b>No Nubank</b></summary>Conta › Pedir extrato › escolha o mês › Exportar extrato. Chega no seu e-mail: baixe o <b>.ofx</b>.</details>
     <label class="btn cheio" style="cursor:pointer;display:block;text-align:center">Escolher arquivo OFX ou CSV<input type="file" data-a="arquivo-extrato" class="arquivo-oculto"></label>
     <p class="mini" style="margin-top:10px">Você confere tudo antes de salvar.</p>`);
 }
@@ -654,7 +655,7 @@ function prepararImportacao(dados) {
     return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido, ja,
       aviso: ja ? 'Já importado antes.' : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
   });
-  ui.importacao = { banco: dados.banco || 'Nubank', formato: dados.formato, linhas };
+  ui.importacao = { banco: dados.banco || (st().settings?.bancos?.length === 1 ? st().settings.bancos[0] : ''), formato: dados.formato, linhas };
 }
 function modalRevisarImport() {
   const im = ui.importacao; const S = st();
@@ -675,7 +676,7 @@ const TOUR = [
   { rota: 'plano', alvo: '[data-a=aba-plano][data-v=fixos]', txt: 'Comece aqui: em Renda e fixos, coloque seu salário e o que sai todo mês (academia, dízimo...). Eles entram sozinhos.' },
   { rota: 'plano', alvo: '[data-a=orc]', txt: 'Depois, diga quanto quer gastar por mês em cada categoria.' },
   { rota: 'inicio', alvo: '.fab', txt: 'Toque no + para lançar um gasto, uma entrada ou algo que guardou.' },
-  { rota: 'lancamentos', alvo: '[data-a=importar-extrato]', txt: 'Tem Nubank? Importe o extrato e o Flui lança tudo para você.' },
+  { rota: 'lancamentos', alvo: '[data-a=importar-extrato]', txt: 'Importe o extrato do seu banco e o Flui lança tudo para você.' },
   { rota: 'cartoes', alvo: '.cc, [data-a=novo-cartao]', txt: 'Seus cartões e faturas ficam aqui. Toque no cartão para ver a fatura.' },
   { rota: 'metas', alvo: '.card', txt: 'O que você guarda enche suas metas.' },
   { rota: 'categorias', alvo: '.abas-cats', txt: 'Aqui você edita categorias e escolhe os bancos que usa.' },
@@ -994,7 +995,7 @@ document.addEventListener('change', async (e) => {
   if (t.matches('[data-a=arquivo-extrato]') && t.files[0]) {
     const arq = t.files[0]; const nome = arq.name.toLowerCase();
     try {
-      if (nome.endsWith('.pdf')) throw new Error('PDF não dá para importar. No e-mail do Nubank, baixe o arquivo .ofx (ou .csv).');
+      if (nome.endsWith('.pdf')) throw new Error('PDF não dá para importar. No seu banco, baixe o extrato em OFX (ou CSV).');
       const txt = arq.text ? await arq.text() : await new Promise((ok, erro) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = erro; r.readAsText(arq); });
       const dados = /<OFX>|OFXHEADER/i.test(txt) ? lerOFX(txt) : lerCSV(txt);
       if (!dados.itens.length) throw new Error('Não encontrei movimentações nesse arquivo.');
@@ -1202,7 +1203,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=97" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=98" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho

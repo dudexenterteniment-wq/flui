@@ -27,8 +27,8 @@ export function lerCSV(txt) {
   const iData = cab.findIndex((c) => c.startsWith('DATA'));
   const iValor = cab.findIndex((c) => c.startsWith('VALOR') || c === 'AMOUNT');
   const iId = cab.findIndex((c) => c.startsWith('IDENTIFICADOR') || c === 'ID');
-  const iDesc = cab.findIndex((c) => c.startsWith('DESCRI') || c.startsWith('TITLE') || c.startsWith('HISTORICO'));
-  if (iData < 0 || iValor < 0) throw new Error('Não reconheci as colunas desse CSV. Use o extrato do Nubank em CSV ou OFX.');
+  const iDesc = cab.findIndex((c) => c.startsWith('DESCRI') || c.startsWith('TITLE') || c.startsWith('HISTORICO') || c.startsWith('LANCAMENTO') || c.startsWith('ESTABELECIMENTO'));
+  if (iData < 0 || iValor < 0) throw new Error('Não reconheci as colunas desse CSV. Tente o arquivo OFX do seu banco: ele funciona com quase todos.');
   const itens = [];
   for (const l of linhas.slice(1)) {
     // a descrição é a última coluna e pode ter o separador dentro: junta o que sobrar
@@ -49,7 +49,9 @@ export function lerCSV(txt) {
 function nomeBanco(org, fid) {
   const o = semAcento(org);
   if (o.includes('NU PAGAMENTOS') || fid === '260' || fid === '0260') return 'Nubank';
+  const porCodigo = { '341': 'Itaú', '237': 'Bradesco', '033': 'Santander', '077': 'Inter', '104': 'Caixa', '001': 'Banco do Brasil', '380': 'PicPay', '336': 'C6 Bank', '323': 'Mercado Pago' }; const cod = String(fid || '').replace(/^0+(?=\d{3})/, '').padStart(3, '0'); if (porCodigo[cod]) return porCodigo[cod];
   if (o.includes('ITAU')) return 'Itaú'; if (o.includes('BRADESCO')) return 'Bradesco'; if (o.includes('SANTANDER')) return 'Santander';
+  if (o.includes('PICPAY')) return 'PicPay'; if (o.includes('MERCADO PAGO') || o.includes('MERCADOPAGO')) return 'Mercado Pago'; if (o.includes('C6')) return 'C6 Bank';
   if (o.includes('INTER')) return 'Inter'; if (o.includes('CAIXA')) return 'Caixa'; if (o.includes('BANCO DO BRASIL')) return 'Banco do Brasil';
   return org ? titulo(org) : '';
 }
