@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=70';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=70';
-import { VAPID_KEY } from './config.js?v=70';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=70';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=70';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=70';
+import * as C from './calc.js?v=71';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=71';
+import { VAPID_KEY } from './config.js?v=71';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=71';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=71';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=71';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -189,7 +189,8 @@ function itemMov(x) {
   if (x.origem === 'cartao') tags.push('<span class="tag roxo">cartão</span>');
   if (x.origem === 'fixo') tags.push('<span class="tag azul">fixo</span>');
   if (x.tipo === 'guardar') tags.push('<span class="tag azul">guardado</span>');
-  if (x.status === 'pendente' || x.status === 'previsto' || x.status === 'a receber') tags.push(`<span class="tag laranja">${x.status}</span>`);
+  if (x.status === 'pendente' || (x.status === 'previsto' && x.tipo === 'despesa')) tags.push('<span class="tag laranja">a pagar</span>');
+  if (x.status === 'a receber') tags.push('<span class="tag laranja">a receber</span>');
   const det = [catNome(x.categoriaId), x.forma, x.banco, x.data ? x.data.split('-').reverse().join('/') : ''].filter(Boolean).join(' · ');
   return `<div class="item" data-a="abrir-mov" data-origem="${x.origem}" data-id="${x.id}">
     ${bolaCat(cat(x.categoriaId) || { nome: catNome(x.categoriaId), cor })}
@@ -254,7 +255,7 @@ function telaCartoes() {
   <div class="cartoes-fila">${todos.map((c) => `<div class="cc cartao ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
       <div class="cc-l1"><span class="cc-nome">${esc(nomeCartao(c))}</span>${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão">✎</button>` : ''}</div>
       <div class="cc-tipo">${c.id ? esc(nomeTipoCartao(c.tipo)) : 'Sem cartão'}</div><span class="cc-chip"></span>
-      <div class="cc-l3">${temCred(c) ? `<span class="cc-venc">${c.vencimento ? `Vence ${c.vencimento} ${C.MESES_CURTOS[+C.addMes(mesRef(), 1).slice(5) - 1]}` : 'Fatura'}</span>${(() => { const fz = C.fatura(st(), c.id, mesRef()); return fz.total > 0 && fz.aberto <= 0 ? '<span class="cc-val">Paga ✓</span>' : `<span class="cc-val num"><small>falta</small>${brl(fz.aberto)}</span>`; })()}` : '<span class="cc-venc">Ver débito ›</span>'}</div></div>`).join('')}
+      <div class="cc-l3">${temCred(c) ? `<span class="cc-venc">${c.vencimento ? `Vence ${c.vencimento} ${C.MESES_CURTOS[+C.addMes(mesRef(), 1).slice(5) - 1]}` : 'Fatura'}</span>${(() => { const fz = C.fatura(st(), c.id, mesRef()); return fz.total <= 0 ? '<span class="cc-venc">sem compras</span>' : fz.aberto <= 0 ? '<span class="cc-val">Paga ✓</span>' : `<span class="cc-val num"><small>falta</small>${brl(fz.aberto)}</span>`; })()}` : '<span class="cc-venc">Ver débito ›</span>'}</div></div>`).join('')}
     <button class="cc cartao cc-novo" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
   ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
@@ -412,7 +413,7 @@ function telaConfig() {
   const s = st().settings;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   return `<h1>Configurações</h1>
-  <button class="btn branco pequeno" style="margin-bottom:12px" data-a="ver-tour">Ver o tour do app de novo</button>
+
   <div class="card"><h3>Sua conta</h3><p class="mini">${store.modo === 'local' ? 'Modo de teste: os dados ficam só neste navegador.' : `Conectada como <b>${esc(store.user.email)}</b>. Seus dados ficam salvos na sua conta e aparecem em qualquer aparelho em que você entrar.`}</p>
     <div class="campo"><label>Como o Flui te chama</label><input autocapitalize="sentences" class="inp" data-a="nome" value="${esc(s.nome || '')}" placeholder="Seu nome"></div>
     <button class="btn branco pequeno" data-a="sair">Sair da conta</button></div>
@@ -423,6 +424,7 @@ function telaConfig() {
   <div class="card"><h3>Backup</h3><p class="mini">Guarde uma cópia dos seus dados.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pequeno" data-a="exportar">Baixar backup</button><label class="btn branco pequeno" style="cursor:pointer">Restaurar backup<input type="file" accept=".json,application/json" data-a="importar" hidden></label></div></div>
   <div class="card"><h3>Notificações</h3>${blocoPush()}</div>
+  <div class="card"><h3>Ajuda</h3><button class="btn branco pequeno" data-a="ver-tour">Ver o tour do app</button></div>
   <p class="mini" style="text-align:center;margin-top:18px">Flui · versão 1.0</p>`;
 }
 
