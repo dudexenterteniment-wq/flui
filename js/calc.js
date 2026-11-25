@@ -289,6 +289,7 @@ export function realizadoConta(st, hoje = new Date()) {
   for (const m of rangeMeses(todos[0], cur)) {
     for (const x of movimentosDoMes(st, m)) {
       if (x.origem === 'cartao' || x.forma === 'Crédito') continue; // cartão sai da conta quando paga a fatura
+      if (x.forma === 'Dinheiro' || x.banco === 'Dinheiro') continue; // dinheiro vivo fica na carteira
       const passou = m < cur;
       if (x.tipo === 'entrada') {
         const ok = x.origem === 'fixo' ? (passou || x.status === 'recebido' || !x.diaVenc || dia >= Number(x.diaVenc)) : x.status === 'recebido';
@@ -304,3 +305,16 @@ export function saldoConta(st) {
   const b = st.settings?.saldoBase; if (!b) return realizadoConta(st); // calculado: tudo que entrou − tudo que saiu
   return fromCents(cents(b.valor) + cents(realizadoConta(st)) - cents(b.ref || 0));
 }
+
+// dinheiro físico (carteira): entra o que recebeu em dinheiro, sai o que pagou em dinheiro
+export function realizadoCarteira(st) {
+  const cur = mesAtual(); const todos = [...st.lancamentos.map((l) => l.mes), ...(st.recorrencias || []).map((r) => r.inicio)].filter(Boolean).sort();
+  if (!todos.length) return 0; let t = 0;
+  for (const m of rangeMeses(todos[0], cur)) for (const x of movimentosDoMes(st, m)) {
+    if (!(x.forma === 'Dinheiro' || x.banco === 'Dinheiro') || x.origem === 'cartao') continue;
+    if (x.tipo === 'entrada') { if (x.status === 'recebido' || (x.origem === 'fixo' && m < cur)) t += cents(x.valor); }
+    else if (x.tipo === 'guardar' || x.status === 'pago' || (x.origem === 'fixo' && m < cur)) t -= cents(x.valor);
+  }
+  return fromCents(t);
+}
+export function saldoCarteira(st) { const b = st.settings?.carteiraBase; return fromCents(cents(b?.valor || 0) + cents(realizadoCarteira(st)) - cents(b?.ref || 0)); }
