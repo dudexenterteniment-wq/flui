@@ -458,3 +458,8 @@ label.btn { position: relative; }
 .kpi-apagar.tem { border-color: #FFC9C9; background: #FFF4F4; } .kpi-apagar.tem .val { color: var(--vermelho); }
 .topo-saldo .rot { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
 .grade.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grade.g3.kpis { margin-bottom: 14px; }
+.grade.g3.kpis .kpi { min-width: 0; padding: 10px 8px; }
+.grade.g3.kpis .kpi .rot { font-size: 11px; }
+.grade.g3.kpis .kpi .val { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
+.kpi-saldo .val, .kpi-apagar .val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .kpi-saldo, .kpi-apagar { min-width: 0; }
