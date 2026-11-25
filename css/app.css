@@ -448,3 +448,4 @@ label.btn { position: relative; }
 .i-verde::after { content: ''; position: absolute; left: 50%; top: 0.28em; width: 0.21em; height: 0.21em; transform: translateX(-50%); border-radius: 50%; background: var(--verde); }
 .entrada-mascote { width: 150px; height: auto; display: block; margin: 0 auto 6px; }
 .entrada-box .marca-icone { display: none; }
+.kpi-saldo { text-align: left; font: inherit; cursor: pointer; border: inherit; width: 100%; }

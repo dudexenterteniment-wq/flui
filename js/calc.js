@@ -278,3 +278,29 @@ export function sequenciaRegistro(st, hoje = new Date()) {
   while (dias.has(iso(d))) { n++; d.setDate(d.getDate() - 1); }
   return n;
 }
+
+// dinheiro que já se moveu na conta (entrou − saiu), do primeiro mês com dados até hoje
+export function realizadoConta(st, hoje = new Date()) {
+  const cur = mesAtual(); const dia = hoje.getDate();
+  const todos = [...st.lancamentos.map((l) => l.mes), ...st.compras.map((c) => c.mesPrimeira), ...(st.recorrencias || []).map((r) => r.inicio)].filter(Boolean).sort();
+  if (!todos.length) return 0;
+  let t = 0;
+  const ids = [...new Set([...st.compras.map((c) => c.cartaoId || ''), ...(st.recorrencias || []).filter((r) => r.forma === 'Crédito').map((r) => r.cartaoId || '')])];
+  for (const m of rangeMeses(todos[0], cur)) {
+    for (const x of movimentosDoMes(st, m)) {
+      if (x.origem === 'cartao' || x.forma === 'Crédito') continue; // cartão sai da conta quando paga a fatura
+      const passou = m < cur;
+      if (x.tipo === 'entrada') {
+        const ok = x.origem === 'fixo' ? (passou || x.status === 'recebido' || !x.diaVenc || dia >= Number(x.diaVenc)) : x.status === 'recebido';
+        if (ok) t += cents(x.valor);
+      } else if (x.tipo === 'guardar') t -= cents(x.valor);
+      else if (x.status === 'pago' || (x.origem === 'fixo' && passou)) t -= cents(x.valor);
+    }
+    for (const id of ids) t -= cents(fatura(st, id, m).pago || 0);
+  }
+  return fromCents(t);
+}
+export function saldoConta(st) {
+  const b = st.settings?.saldoBase; if (!b) return null;
+  return fromCents(cents(b.valor) + cents(realizadoConta(st)) - cents(b.ref || 0));
+}
