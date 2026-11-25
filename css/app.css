@@ -449,3 +449,12 @@ label.btn { position: relative; }
 .entrada-mascote { width: 150px; height: auto; display: block; margin: 0 auto 6px; }
 .entrada-box .marca-icone { display: none; }
 .kpi-saldo { text-align: left; font: inherit; cursor: pointer; border: inherit; width: 100%; }
+.topo-saldo { display: grid; grid-template-columns: 1.7fr 1fr; gap: 10px; margin-bottom: 10px; }
+.kpi-saldo, .kpi-apagar { border-radius: 18px; padding: 14px 16px; text-align: left; font: inherit; }
+.kpi-saldo { background: var(--azul); color: #fff; border: none; box-shadow: 0 4px 0 #1A6FD6; cursor: pointer; }
+.kpi-saldo .rot { color: rgba(255,255,255,.85); } .kpi-saldo .val { font-size: 26px; font-weight: 900; margin-top: 2px; }
+.kpi-saldo.negativo { background: var(--vermelho); box-shadow: 0 4px 0 var(--vermelho-esc); }
+.kpi-apagar { border: 2px solid var(--linha); } .kpi-apagar .val { font-size: 18px; font-weight: 900; margin-top: 6px; }
+.kpi-apagar.tem { border-color: #FFC9C9; background: #FFF4F4; } .kpi-apagar.tem .val { color: var(--vermelho); }
+.topo-saldo .rot { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.grade.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
