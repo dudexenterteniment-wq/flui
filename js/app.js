@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=143';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=143';
-import { VAPID_KEY } from './config.js?v=143';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=143';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=143';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=143';
+import * as C from './calc.js?v=144';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=144';
+import { VAPID_KEY } from './config.js?v=144';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=144';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=144';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=144';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=143" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=144" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=143" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=144" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=143" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=144" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=143" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=144" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -459,10 +459,10 @@ const topoModal = (t) => `<div class="modal-topo"><h2>${t}</h2><button class="x"
 // cartões (e bancos sem cartão) para dizer de onde saiu / onde entrou o dinheiro
 const opcoesConta = () => { const S = st(); const ks = cartoesOrdem(); const semK = (S.settings.bancos || []).filter((b) => !ks.some((k) => (k.banco || k.nome) === b));
   return [...ks.map((k) => ({ v: 'c:' + k.id, t: nomeCartao(k) + (ks.filter((x) => (x.banco || x.nome) === (k.banco || k.nome)).length > 1 ? ` (${nomeTipoCartao(k.tipo)})` : ''), banco: k.banco || k.nome, cid: k.id })), ...semK.map((b) => ({ v: 'b:' + b, t: b, banco: b, cid: '' }))]; };
-const selConta = (l = {}) => { const S = st(); const ops = opcoesConta(); if (!ops.length) return selBanco('banco', l.banco);
+const selConta = (l = {}, tipo = '') => { const S = st(); const ops = opcoesConta(); if (!ops.length && tipo !== 'guardar') return selBanco('banco', l.banco);
   let atual = l.contaCartaoId ? 'c:' + l.contaCartaoId : l.banco ? (ops.find((o) => o.banco === l.banco)?.v || '') : (S.settings.cartaoPadrao && ops.some((o) => o.v === S.settings.cartaoPadrao) ? S.settings.cartaoPadrao : ops.length === 1 ? ops[0].v : '');
   if (l.forma === 'Dinheiro') atual = '';
-  return `<select class="inp" name="conta"><option value="">Escolha...</option>${ops.map((o) => `<option value="${esc(o.v)}" ${o.v === atual ? 'selected' : ''}>${esc(o.t)}</option>`).join('')}</select><input type="hidden" name="banco" value="${esc(l.banco || '')}">
+  return `<select class="inp" name="conta"><option value="">Escolha...</option>${ops.map((o) => `<option value="${esc(o.v)}" ${o.v === atual ? 'selected' : ''}>${esc(o.t)}</option>`).join('')}<option value="dinheiro" data-so-guardar ${tipo !== 'guardar' ? 'hidden disabled' : ''} ${tipo === 'guardar' && l.forma === 'Dinheiro' ? 'selected' : ''}>Dinheiro (carteira)</option></select><input type="hidden" name="banco" value="${esc(l.banco || '')}">
     ${ops.length > 1 ? `<label class="chave mini banco-padrao"><input type="checkbox" name="contaPadrao" ${S.settings.cartaoPadrao && S.settings.cartaoPadrao === atual ? 'checked' : ''}> Usar sempre este cartão</label>` : ''}`; };
 const selBanco = (nome, v) => { const bs = st().settings.bancos || []; if (!v && st().settings.bancoPadrao && bs.includes(st().settings.bancoPadrao)) v = st().settings.bancoPadrao; if (!v && bs.length === 1) v = bs[0];
   if (!bs.length && !v) return `<input type="hidden" name="${nome}" value=""><div class="mini" style="padding:10px 0">Você ainda não escolheu seus bancos. <a href="#categorias" data-a="fechar-ir-config">Escolher meus bancos</a></div>`;
@@ -491,8 +491,8 @@ function modalLanc(l = {}) {
     <div class="campo"><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${l.valor ? valorInput(l.valor) : ''}" required autocomplete="off"></div>
     <div class="campo"><label data-cat-label>${tipo === 'guardar' ? 'Para qual objetivo?' : 'Categoria'}</label><div data-cats-wrap>${chipsCat(tipo, l.categoriaId)}</div></div>
     <div class="campo"><label>Descrição <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="descricao" value="${esc(l.descricao || '')}" placeholder="Ex.: almoço com a equipe"></div>
-    <div class="campo"><label>Como pagou?</label><div class="cats">${['Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${((l.forma === 'Pix' ? 'Débito' : l.forma) || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma === 'Pix' ? 'Débito' : l.forma || '')}"></div>
-    <div class="campo ${l.forma === 'Dinheiro' ? 'oculto' : ''}" data-banco-campo><label data-banco-label>${tipo === 'guardar' ? 'De qual cartão saiu?' : 'Cartão'}</label>${selConta(l)}</div>
+    <div class="campo ${tipo === 'guardar' ? 'oculto' : ''}" data-forma-campo><label>Como pagou?</label><div class="cats">${['Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${((l.forma === 'Pix' ? 'Débito' : l.forma) || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma === 'Pix' ? 'Débito' : l.forma || '')}"></div>
+    <div class="campo ${l.forma === 'Dinheiro' ? 'oculto' : ''}" data-banco-campo><label data-banco-label>${tipo === 'guardar' ? 'De onde saiu?' : 'Cartão'}</label>${selConta(l, tipo)}</div>
     <div data-credito class="${l.forma === 'Crédito' && !l.id ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
         <div class="campo"><label>Cartão</label>${selCartao('', true)}</div></div>
@@ -916,7 +916,9 @@ document.addEventListener('click', async (e) => {
   if (tipoBtn) {
     const f = tipoBtn.closest('form'); const t = tipoBtn.dataset.tipo; f.tipo.value = t;
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
-    const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove(); const lb = f.querySelector('[data-cat-label]'); if (lb) lb.textContent = t === 'guardar' ? 'Para qual objetivo?' : 'Categoria'; const bl = f.querySelector('[data-banco-label]'); if (bl) bl.innerHTML = t === 'guardar' ? 'De qual cartão saiu?' : 'Cartão';
+    const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove(); const lb = f.querySelector('[data-cat-label]'); if (lb) lb.textContent = t === 'guardar' ? 'Para qual objetivo?' : 'Categoria'; const bl = f.querySelector('[data-banco-label]'); if (bl) bl.innerHTML = t === 'guardar' ? 'De onde saiu?' : 'Cartão';
+    f.querySelector('[data-forma-campo]')?.classList.toggle('oculto', t === 'guardar'); const od = f.querySelector('[data-so-guardar]'); if (od) { od.hidden = t !== 'guardar'; od.disabled = t !== 'guardar'; if (t !== 'guardar' && f.conta.value === 'dinheiro') f.conta.value = ''; }
+    if (t === 'guardar') { f.forma.value = ''; f.querySelectorAll('[data-forma]').forEach((b) => b.classList.remove('ativo')); f.querySelector('[data-banco-campo]')?.classList.remove('oculto'); f.querySelector('[data-credito]')?.classList.add('oculto'); }
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
     const sw = f.querySelector('[data-status-wrap]'); if (sw) sw.innerHTML = chipsStatus(t, '');
     const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.add('oculto');
@@ -1227,11 +1229,12 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'lanc') {
     const valor = parseValor(v('valor')); if (!(valor > 0)) return alert('Digite um valor maior que zero.');
     if (!v('categoriaId')) return alert('Escolha uma categoria.');
+    if (v('tipo') === 'guardar' && f.conta) f.forma.value = f.conta.value === 'dinheiro' ? 'Dinheiro' : 'Transferência';
     let contaCid = ''; if (f.conta) { const op = opcoesConta().find((o) => o.v === f.conta.value); f.banco.value = op ? op.banco : ''; contaCid = op?.cid || '';
-      if (!['Dinheiro', 'Crédito'].includes(v('forma')) && opcoesConta().length > 1 && !op) return alert(v('tipo') === 'guardar' ? 'Escolha de qual cartão saiu o dinheiro (ou marque Dinheiro).' : 'Escolha o cartão.');
+      if (!['Dinheiro', 'Crédito'].includes(v('forma')) && (opcoesConta().length > 1 || v('tipo') === 'guardar') && !op) return alert(v('tipo') === 'guardar' ? 'Escolha de onde saiu o dinheiro.' : 'Escolha o cartão.');
       if (f.contaPadrao) { const novoP = f.contaPadrao.checked ? f.conta.value : (S.settings.cartaoPadrao === f.conta.value ? '' : S.settings.cartaoPadrao || ''); if (novoP !== (S.settings.cartaoPadrao || '')) await store.salvarSettings({ cartaoPadrao: novoP }); } }
     if (v('tipo') === 'guardar') { // guardar: precisa dizer de onde saiu e não pode passar do que tem
-      const din = v('forma') === 'Dinheiro'; if (!din && !v('banco')) return alert('Escolha de qual banco saiu o dinheiro (ou marque Dinheiro).');
+      const din = v('forma') === 'Dinheiro'; if (!din && !v('banco')) return alert('Escolha de onde saiu o dinheiro.');
       const ant = S.lancamentos.find((x) => x.id === id); const volta = ant && ant.tipo === 'guardar' && (ant.forma === 'Dinheiro') === din ? Number(ant.valor) || 0 : 0;
       const disp = (din ? C.saldoCarteira(S) : C.saldoConta(S)) + volta;
       if (valor > disp + 0.005) return alert(`Você só tem ${brl(Math.max(0, disp))} ${din ? 'na carteira' : 'na conta'}. Diminua o valor${din ? '' : ' ou confira o saldo no Início'}.`); }
@@ -1485,7 +1488,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=143" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=144" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
