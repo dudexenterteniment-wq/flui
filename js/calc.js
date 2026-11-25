@@ -280,16 +280,20 @@ export function sequenciaRegistro(st, hoje = new Date()) {
 }
 
 // dinheiro que já se moveu na conta (entrou − saiu), do primeiro mês com dados até hoje
-export function realizadoConta(st, hoje = new Date()) {
+// banco: undefined = todos; '' = só o que não tem banco; 'Nubank' = só daquele banco
+export function realizadoConta(st, hoje = new Date(), banco) {
+  if (typeof hoje === 'string' || hoje === null) { banco = hoje; hoje = new Date(); }
   const cur = mesAtual(); const dia = hoje.getDate();
   const todos = [...st.lancamentos.map((l) => l.mes), ...st.compras.map((c) => c.mesPrimeira), ...(st.recorrencias || []).map((r) => r.inicio)].filter(Boolean).sort();
   if (!todos.length) return 0;
-  let t = 0;
-  const ids = [...new Set([...st.compras.map((c) => c.cartaoId || ''), ...(st.recorrencias || []).filter((r) => r.forma === 'Crédito').map((r) => r.cartaoId || '')])];
+  let t = 0; const doBanco = (b) => banco === undefined || (b || '') === banco;
+  const bancoDoCartao = (id) => { const k = (st.cartoes || []).find((x) => x.id === id); return k ? (k.banco || k.nome || '') : ''; };
+  const ids = [...new Set([...st.compras.map((c) => c.cartaoId || ''), ...(st.recorrencias || []).filter((r) => r.forma === 'Crédito').map((r) => r.cartaoId || '')])].filter((id) => doBanco(bancoDoCartao(id)));
   for (const m of rangeMeses(todos[0], cur)) {
     for (const x of movimentosDoMes(st, m)) {
       if (x.origem === 'cartao' || x.forma === 'Crédito') continue; // cartão sai da conta quando paga a fatura
       if (x.forma === 'Dinheiro' || x.banco === 'Dinheiro') continue; // dinheiro vivo fica na carteira
+      if (!doBanco(x.banco)) continue;
       const passou = m < cur;
       if (x.tipo === 'entrada') {
         const ok = x.origem === 'fixo' ? (passou || x.status === 'recebido' || !x.diaVenc || dia >= Number(x.diaVenc)) : x.status === 'recebido';
@@ -301,9 +305,15 @@ export function realizadoConta(st, hoje = new Date()) {
   }
   return fromCents(t);
 }
-export function saldoConta(st) {
-  const b = st.settings?.saldoBase; if (!b) return realizadoConta(st); // calculado: tudo que entrou − tudo que saiu
-  return fromCents(cents(b.valor) + cents(realizadoConta(st)) - cents(b.ref || 0));
+// saldo de um banco: o que ele calculou + o ajuste que a pessoa informou para aquele banco
+export function saldoBanco(st, b) { const base = (st.settings?.saldosBanco || {})[b]; return fromCents(cents(base?.valor || 0) + cents(realizadoConta(st, b)) - cents(base?.ref || 0)); }
+export function bancosComConta(st) { const bs = new Set([...(st.settings?.bancos || []), ...(st.cartoes || []).map((k) => k.banco || k.nome).filter(Boolean), ...st.lancamentos.map((l) => l.banco).filter((b) => b && b !== 'Dinheiro'), ...(st.recorrencias || []).map((r) => r.banco).filter((b) => b && b !== 'Dinheiro')]); return [...bs]; }
+// saldo geral: soma dos bancos que estão "à mostra" (olhinho) + o que não tem banco + ajuste geral antigo
+export function saldoConta(st, { incluirOcultos = false } = {}) {
+  const oc = st.settings?.saldoOculto || {}; const g = st.settings?.saldoBase;
+  let t = cents(realizadoConta(st, '')) + (g ? cents(g.valor) - cents(g.ref || 0) : 0);
+  for (const b of bancosComConta(st)) if (incluirOcultos || !oc[b]) t += cents(saldoBanco(st, b));
+  return fromCents(t);
 }
 
 // dinheiro físico (carteira): entra o que recebeu em dinheiro, sai o que pagou em dinheiro
