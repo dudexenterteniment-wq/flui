@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=99';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=99';
-import { VAPID_KEY } from './config.js?v=99';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=99';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=99';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=99';
+import * as C from './calc.js?v=100';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=100';
+import { VAPID_KEY } from './config.js?v=100';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=100';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=100';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=100';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=99" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=99" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=99" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=100" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=99" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -673,13 +673,13 @@ function modalRevisarImport() {
 }
 // ---------------- tour rápido ----------------
 const TOUR = [
-  { rota: 'plano', alvo: '[data-a=aba-plano][data-v=fixos]', txt: 'Comece aqui: em Renda e fixos, coloque seu salário e o que sai todo mês (academia, dízimo...). Eles entram sozinhos.' },
-  { rota: 'plano', alvo: '[data-a=orc]', txt: 'Depois, diga quanto quer gastar por mês em cada categoria.' },
-  { rota: 'inicio', alvo: '.fab', txt: 'Toque no + para lançar um gasto, uma entrada ou algo que guardou.' },
-  { rota: 'lancamentos', alvo: '[data-a=importar-extrato]', txt: 'Importe o extrato do seu banco e o Flui lança tudo para você.' },
-  { rota: 'cartoes', alvo: '.cc, [data-a=novo-cartao]', txt: 'Seus cartões e faturas ficam aqui. Toque no cartão para ver a fatura.' },
-  { rota: 'metas', alvo: '.card', txt: 'O que você guarda enche suas metas.' },
-  { rota: 'categorias', alvo: '.abas-cats', txt: 'Aqui você edita categorias e escolhe os bancos que usa.' },
+  { rota: 'plano', alvo: '[data-a=aba-plano][data-v=fixos]', tit: 'Comece pelos fixos', txt: 'Coloque seu salário e o que sai todo mês. Eles entram sozinhos.' },
+  { rota: 'plano', alvo: '[data-a=orc]', tit: 'Defina seus limites', txt: 'Quanto quer gastar por mês em cada categoria.' },
+  { rota: 'inicio', alvo: '.fab', tit: 'Lance em segundos', txt: 'Toque no + para registrar um gasto, uma entrada ou algo que guardou.' },
+  { rota: 'lancamentos', alvo: '[data-a=importar-extrato]', tit: 'Importe o extrato', txt: 'O Flui lê o extrato do seu banco e lança tudo para você.' },
+  { rota: 'cartoes', alvo: '.cc, [data-a=novo-cartao]', tit: 'Seus cartões', txt: 'Toque no cartão para ver a fatura e quanto falta pagar.' },
+  { rota: 'relatorios', alvo: '.an-heroi, h1', tit: 'Veja sua análise', txt: 'Quanto sobrou, para onde foi o dinheiro e o que pede atenção.' },
+  { rota: 'metas', alvo: '.card', tit: 'Suas metas', txt: 'Tudo o que você guarda vai enchendo suas metas.' },
 ];
 function perguntarTour(nome) {
   abrirModal(`<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo pronto${nome ? ', ' + esc(nome) : ''}! Quer um tour rápido pelo app? Leva menos de 1 minuto.</div></div>
@@ -693,15 +693,17 @@ function desenharTour() {
   const alvo = document.querySelector(p.alvo);
   const box = document.createElement('div'); box.className = 'tour';
   const ultimo = ui.tour === TOUR.length - 1;
-  box.innerHTML = `<div class="tour-ponto"></div><div class="tour-balao"><div class="tour-topo"><span class="tour-ic">${MASCOTE}</span><span>${p.txt}</span></div>
-    <div class="tour-acoes"><span class="mini">${ui.tour + 1} de ${TOUR.length}</span><span><button data-a="tour-sair">Pular</button><button class="ok" data-a="tour-prox">${ultimo ? 'Começar' : 'Próximo'}</button></span></div></div>`;
+  box.innerHTML = `<div class="tour-luz"></div><div class="tour-balao"><i class="tour-seta"></i><div class="tour-tit">${p.tit}</div><div class="tour-txt">${p.txt}</div>
+    <div class="tour-acoes"><button data-a="tour-sair">Pular</button><span class="tour-pontos">${TOUR.map((_, k) => `<i class="${k === ui.tour ? 'on' : ''}"></i>`).join('')}</span><button class="ok" data-a="tour-prox">${ultimo ? 'Começar' : 'Próximo'}</button></div></div>`;
   document.body.appendChild(box);
   const pos = () => {
-    const r = alvo ? alvo.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0, bottom: innerHeight / 2 };
-    const cx = r.left + Math.min(r.width / 2, 40), cy = r.top + r.height / 2;
-    const pt = box.querySelector('.tour-ponto'); pt.style.left = `${cx - 11}px`; pt.style.top = `${cy - 11}px`;
-    const b = box.querySelector('.tour-balao'); const embaixo = cy < innerHeight * 0.55;
-    b.style.top = embaixo ? `${Math.min(r.bottom + 14, innerHeight - b.offsetHeight - 12)}px` : `${Math.max(12, r.top - b.offsetHeight - 14)}px`;
+    const r = alvo ? alvo.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0, bottom: innerHeight / 2, right: innerWidth / 2 };
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2; const raio = Math.min(110, Math.max(34, Math.max(r.width, r.height) / 2 + 14));
+    const luz = box.querySelector('.tour-luz'); Object.assign(luz.style, { left: `${cx - raio}px`, top: `${cy - raio}px`, width: `${raio * 2}px`, height: `${raio * 2}px` });
+    const b = box.querySelector('.tour-balao'); const embaixo = cy < innerHeight * 0.55; const seta = box.querySelector('.tour-seta');
+    const top = embaixo ? Math.min(cy + raio + 14, innerHeight - b.offsetHeight - 12) : Math.max(12, cy - raio - b.offsetHeight - 14);
+    b.style.top = `${top}px`; const bl = b.getBoundingClientRect().left;
+    seta.className = 'tour-seta ' + (embaixo ? 'cima' : 'baixo'); seta.style.left = `${Math.max(18, Math.min(b.offsetWidth - 36, cx - bl - 9))}px`;
   };
   if (alvo) alvo.scrollIntoView({ block: 'center' }); setTimeout(pos, 60); pos();
 }
@@ -1203,7 +1205,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=99" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho

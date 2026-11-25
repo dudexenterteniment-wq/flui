@@ -524,3 +524,12 @@ label.btn { position: relative; }
 @media (min-width: 821px) { .topo-desk ~ h1, .topo-desk ~ .linha-acao, .topo-desk ~ .titulo-linha { margin-right: 64px; } }
 .aviso-falta { background: #FFE5E5; color: var(--vermelho-esc, #C23434); border-radius: 14px; padding: 10px 14px; font-weight: 700; margin: -4px 0 14px; } .aviso-falta b { color: var(--vermelho); }
 .an-trio button.gasto-alto { background: #fff; color: var(--vermelho); } .an-trio button.gasto-alto span { opacity: 1; }
+.tour { pointer-events: auto; }
+.tour-luz { position: fixed; border-radius: 50%; box-shadow: 0 0 0 9999px rgba(0,0,0,.55), 0 0 0 4px rgba(255,255,255,.9) inset; pointer-events: none; transition: all .25s; }
+.tour-balao { left: 16px; right: 16px; max-width: 380px; border: none; border-radius: 20px; padding: 18px 18px 14px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,.18); }
+.tour-seta { position: absolute; width: 18px; height: 18px; background: #fff; transform: rotate(45deg); border-radius: 3px; }
+.tour-seta.cima { top: -8px; } .tour-seta.baixo { bottom: -8px; }
+.tour-tit { font-size: 18px; font-weight: 900; color: var(--texto, #3C3C3C); margin-bottom: 6px; }
+.tour-txt { font-size: 15px; font-weight: 600; color: var(--cinza); line-height: 1.4; }
+.tour-balao .tour-acoes { margin-top: 14px; }
+.tour-pontos { display: flex; gap: 5px; } .tour-pontos i { width: 7px; height: 7px; border-radius: 50%; background: var(--linha); } .tour-pontos i.on { background: var(--azul); width: 18px; border-radius: 4px; }
