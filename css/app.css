@@ -547,3 +547,6 @@ label.btn { position: relative; }
 .imp-banco.ativo { border-color: var(--azul); background: var(--azul-claro); color: var(--azul); }
 .imp-banco .imp-dest-cor { width: 22px; height: 16px; border-radius: 4px; }
 .imp-onde { background: var(--azul-claro); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; font-weight: 700; }
+.imp-completo { margin-top: 14px; border: 2px solid var(--linha); border-radius: 14px; padding: 10px 12px; display: grid; gap: 6px; font-size: 14px; }
+.imp-ck { display: flex; align-items: center; gap: 8px; font-weight: 700; } .imp-ck span { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--linha); display: grid; place-items: center; font-size: 12px; color: #fff; flex: none; }
+.imp-ck.ok span { background: var(--verde); border-color: var(--verde); } .imp-ck small { color: var(--cinza); font-weight: 600; }
