@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=69';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=69';
-import { VAPID_KEY } from './config.js?v=69';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=69';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=69';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=69';
+import * as C from './calc.js?v=70';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=70';
+import { VAPID_KEY } from './config.js?v=70';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=70';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=70';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=70';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -612,7 +612,7 @@ function modalImportar() {
     <div class="imp-info"><b>Aceita o extrato do Nubank</b> (conta: Pix, débito, boletos e transferências).<br>
       Formato melhor: <b>OFX</b>. O <b>CSV</b> também funciona. O PDF não dá para importar, porque é só para leitura.</div>
     <ol class="imp-passos mini"><li>No app do Nubank, toque em <b>Conta</b> e depois em <b>Pedir extrato</b>.</li><li>Escolha o mês e toque em <b>Exportar extrato</b>. O Nubank manda para o seu e-mail.</li><li>Baixe o arquivo <b>.ofx</b> do e-mail e escolha ele aqui.</li></ol>
-    <label class="btn cheio" style="cursor:pointer;display:block;text-align:center">Escolher arquivo OFX ou CSV<input type="file" data-a="arquivo-extrato" hidden></label>
+    <label class="btn cheio" style="cursor:pointer;display:block;text-align:center">Escolher arquivo OFX ou CSV<input type="file" data-a="arquivo-extrato" class="arquivo-oculto"></label>
     <p class="mini" style="margin-top:10px">Você confere tudo antes de salvar.</p>`);
 }
 function prepararImportacao(dados) {
@@ -792,7 +792,7 @@ document.addEventListener('click', async (e) => {
   if (e.target.closest('[data-stop]') && el.tagName !== 'INPUT') return;
   const a = el.dataset.a; const id = el.dataset.id;
   if (a === 'fechar-fundo' && (e.target !== el || el.querySelector('[data-form=boas-vindas]'))) return;
-  if (['fatura-tudo', 'item-pago', 'fixo-pago', 'importar', 'busca', 'orc', 'nome', 'prev-parc'].includes(a)) return; // tratados em 'change'/'input'
+  if (['fatura-tudo', 'item-pago', 'fixo-pago', 'importar', 'arquivo-extrato', 'busca', 'orc', 'nome', 'prev-parc'].includes(a)) return; // tratados em 'change'/'input'
   e.preventDefault();
   const S = st();
   switch (a) {

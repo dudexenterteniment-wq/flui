@@ -433,3 +433,5 @@ a.tag-neg { text-decoration: none; }
 .per-nav { padding: 0 2px 1px; }
 .per-nav .seta { width: 30px; height: 28px; border-radius: 9px; font-size: 15px; }
 .per-nav .rotulo { font-size: 15px; }
+.arquivo-oculto { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+label.btn { position: relative; }
