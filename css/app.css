@@ -581,3 +581,8 @@ body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
 .aviso-app { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 16px); transform: translateX(-50%); background: var(--tinta); color: #fff; padding: 14px 18px; border-radius: 14px; font-weight: 800; z-index: 9999; width: max-content; max-width: min(90vw, 420px); text-align: center; line-height: 1.35; box-shadow: 0 8px 24px rgba(0,0,0,.25); animation: avisoIn .2s ease-out; cursor: pointer; }
 @keyframes avisoIn { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 [hidden] { display: none !important; }
+.mes-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.repete-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 2px solid var(--borda, #E5E5E5); border-bottom-width: 4px; border-radius: 14px; font-weight: 800; color: var(--cinza, #777); cursor: pointer; user-select: none; background: #fff; }
+.repete-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.repete-chip:has(input:checked) { border-color: #1CB0F6; background: #E5F5FE; color: #1899D6; }
+.repete-box { margin: -6px 0 14px; }
