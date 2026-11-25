@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=60';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=60';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=60';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=60';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=60';
+import * as C from './calc.js?v=61';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=61';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=61';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=61';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=61';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -670,6 +670,24 @@ function desenharTour() {
   };
   if (alvo) alvo.scrollIntoView({ block: 'center' }); setTimeout(pos, 60); pos();
 }
+// lembrete ao abrir: falta o mínimo (renda fixa, um fixo, limites, cartão)
+function faltasSetup() {
+  const S = st();
+  return [
+    { ok: S.recorrencias.some((r) => r.tipo === 'entrada'), txt: 'Sua renda fixa', ir: 'renda' },
+    { ok: S.recorrencias.some((r) => r.tipo !== 'entrada'), txt: 'Um gasto fixo', ir: 'fixo' },
+    { ok: S.categorias.some((c) => c.tipo === 'despesa' && c.orcamento > 0), txt: 'Seus limites de gasto', ir: 'limites' },
+    { ok: S.cartoes.length > 0, txt: 'Seu cartão', ir: 'cartao' },
+  ];
+}
+function lembreteSetup() {
+  if (st().settings.lembreteSetupOff || ui.lembreteVisto) return;
+  const itens = faltasSetup(); if (itens.every((x) => x.ok)) return;
+  ui.lembreteVisto = true;
+  abrirModal(`<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Falta pouco para o Flui ficar com a sua cara!</div></div>
+    <div class="lista checklist">${itens.map((x) => `<div class="item ${x.ok ? 'ok' : ''}" ${x.ok ? '' : `data-a="setup-ir" data-v="${x.ir}"`}><span class="ck">${x.ok ? '✓' : ''}</span><div class="meio"><div class="titulo">${x.txt}</div></div>${x.ok ? '' : '<span class="link-mais">Fazer ›</span>'}</div>`).join('')}</div>
+    <div class="acoes"><button class="btn branco pequeno" data-a="setup-nunca">Não mostrar de novo</button><button class="btn verde pequeno" data-a="fechar">Agora não</button></div>`);
+}
 const OB_PASSOS = 4;
 function modalBoasVindas() {
   const fala = (t) => `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">${t}</div></div>`;
@@ -813,6 +831,13 @@ document.addEventListener('click', async (e) => {
     case 'aba-plano': ui.abaPlano = el.dataset.v; render(); break;
     case 'aba-analise': ui.abaAnalise = el.dataset.v; render(); break;
     case 'ver-passou': ui.abaAnalise = 'limites'; ui.periodo = { ...ui.periodo, tipo: 'mes', ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 }; location.hash = '#relatorios'; break;
+    case 'setup-ir': { const v = el.dataset.v; ui.modal = null;
+      if (v === 'renda') { ui.abaPlano = 'fixos'; location.hash = '#plano'; setTimeout(() => modalFixo({}, true), 80); }
+      else if (v === 'fixo') { ui.abaPlano = 'fixos'; location.hash = '#plano'; setTimeout(() => modalFixo(), 80); }
+      else if (v === 'limites') { ui.abaPlano = 'limites'; location.hash = '#plano'; }
+      else { location.hash = '#cartoes'; setTimeout(() => modalCartao(), 80); }
+      break; }
+    case 'setup-nunca': await store.salvarSettings({ lembreteSetupOff: true }); fecharModal(); toast('Combinado, não aparece mais.'); break;
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
@@ -1086,6 +1111,7 @@ store.on(() => { if (!ui.modal) render(); });
       render();
       await migrar();
       if (!st().settings.onboarding) modalBoasVindas();
+      else lembreteSetup();
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
