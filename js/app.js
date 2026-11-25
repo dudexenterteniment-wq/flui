@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=42';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=42';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=42';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=42';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=42';
+import * as C from './calc.js?v=43';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=43';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=43';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=43';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=43';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -307,7 +307,9 @@ function telaPlano() {
   const rendas = todasRendas.filter((r) => (!r.fim || C.difMeses(m, r.fim) >= 0) && !sucessor(r)).sort((a, b) => b.valor - a.valor);
   const fixos = st().recorrencias.filter((r) => r.tipo !== 'entrada' && (!r.fim || C.difMeses(m, r.fim) >= 0)).sort((a, b) => b.valor - a.valor);
   const noMes = (r) => C.recorrenciaNoMes(r, m) && r.ativa !== false;
-  const entra = C.sum(todasRendas.filter(noMes), (r) => r.valor); const sai = C.sum(fixos.filter(noMes), (r) => r.valor);
+  // por mês: tudo que está valendo ou vai começar (mesmo que comece no mês que vem); anual conta 1/12
+  const porMes = (r) => (r.frequencia === 'anual' ? r.valor / 12 : r.valor);
+  const entra = C.sum(rendas.filter((r) => r.ativa !== false), porMes); const sai = C.sum(fixos.filter((r) => r.ativa !== false), porMes);
   const aba = ui.abaPlano || 'limites';
   const abas = `<div class="seg abas-plano">${[['limites', 'Limites'], ['fixos', 'Renda e fixos']].map(([k, n]) => `<button type="button" class="t-neutro ${aba === k ? 'ativo' : ''}" data-a="aba-plano" data-v="${k}">${n}</button>`).join('')}</div>`;
   if (aba === 'fixos') {
@@ -316,7 +318,7 @@ function telaPlano() {
         <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'todo mês'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}${!entrada && r.diaVenc ? ` · dia ${r.diaVenc}` : ''}</div></div>
       <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
     return `<h1>Planejamento</h1>${abas}
-    <div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
+    <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
     <div class="card bloco-fixo entra"><div class="linha-acao" style="margin:0 0 8px"><h3>Entra todo mês</h3><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button></div>
       ${rendas.length ? `<div class="lista rendas">${rendas.map((r) => linhaFixo(r, true)).join('')}</div>` : '<p class="mini" style="margin:0">Salário, freela fixo...</p>'}</div>
     <div class="card bloco-fixo sai"><div class="linha-acao" style="margin:0 0 8px"><h3>Sai todo mês</h3><button class="btn pequeno" data-a="novo-fixo">+ Fixo</button></div>
