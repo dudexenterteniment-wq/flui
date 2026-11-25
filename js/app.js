@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=100';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=100';
-import { VAPID_KEY } from './config.js?v=100';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=100';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=100';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=100';
+import * as C from './calc.js?v=101';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=101';
+import { VAPID_KEY } from './config.js?v=101';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=101';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=101';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=101';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=101" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=101" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=100" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=101" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=101" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -426,7 +426,7 @@ function blocoPush() {
   return '<p class="mini">Aviso quando a fatura fecha, quando vai vencer e no dia do salário.</p><button class="btn verde pequeno" data-a="push-ativar">Ativar notificações</button>';
 }
 function telaMais() {
-  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
+  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}<button class="item" data-a="ver-tour" style="border-top:2px solid var(--linha);width:100%;background:none;border:none;font:inherit;text-align:left;cursor:pointer;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg></span></div><div class="meio"><div class="titulo">Ajuda</div><div class="det">Ver o tour do app</div></div><div class="valor">›</div></button></div>`;
 }
 function telaConfig() {
   const s = st().settings;
@@ -443,7 +443,6 @@ function telaConfig() {
   <div class="card"><h3>Backup</h3><p class="mini">Guarde uma cópia dos seus dados.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn verde pequeno" data-a="baixar-planilha">Baixar planilha (Excel)</button><button class="btn pequeno" data-a="exportar">Baixar backup</button><label class="btn branco pequeno" style="cursor:pointer">Restaurar backup<input type="file" data-a="importar" class="arquivo-oculto"></label></div></div>
   <div class="card"><h3>Notificações</h3>${blocoPush()}</div>
-  <div class="card"><h3>Ajuda</h3><button class="btn branco pequeno" data-a="ver-tour">Ver o tour do app</button></div>
   ${store.modo === 'local' ? '' : '<button class="btn-excluir" data-a="excluir-conta">Excluir minha conta</button>'}
   <p class="mini" style="text-align:center;margin-top:18px">Flui · versão 1.0</p>`;
 }
@@ -1205,7 +1204,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=100" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=101" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
