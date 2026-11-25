@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=51';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=51';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=51';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=51';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=51';
+import * as C from './calc.js?v=52';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=52';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=52';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=52';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=52';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -334,9 +334,7 @@ function telaPlano() {
         <div class="mini num">${brl0(x.real)} ${x.cat.tipo === 'guardar' ? 'guardado' : 'gasto'}</div></div>
       <label class="lim-campo"><input class="inp num lim-inp" inputmode="decimal" placeholder="—" value="${x.cat.orcamento ? valorInput(x.cat.orcamento) : ''}" data-a="orc" data-id="${x.cat.id}"></label></div>`; };
   return `<h1>Planejamento</h1>${abas}
-  <div class="card resumo-lim"><div class="linha-acao" style="margin:0 0 6px"><h3>${cap(C.nomeMes(m, true))}</h3>${passou ? `<span class="tag-neg">${passou} ${passou > 1 ? 'passaram' : 'passou'} do limite</span>` : comLim.length ? '<span class="tag-pos">tudo dentro</span>' : ''}</div>
-    ${comLim.length ? `<div class="prog ${totReal > totOrc ? 'estourou' : ''}" style="height:16px"><i style="width:${Math.min(100, Math.round((totReal / totOrc) * 100))}%"></i></div>
-    <div class="mini" style="margin-top:6px">Gastou <b>${brl(totReal)}</b> de <b>${brl(totOrc)}</b> planejados${entra ? ` · renda ${brl0(entra)}` : ''}</div>` : '<div class="mini">Digite ao lado de cada categoria quanto quer gastar por mês.</div>'}</div>
+  <div class="lim-titulo"><h3>Limites de ${C.MESES_LONGOS[+m.slice(5) - 1]}</h3>${passou ? `<span class="tag-neg">${passou} ${passou > 1 ? 'passaram' : 'passou'} do limite</span>` : comLim.length ? '<span class="tag-pos">tudo dentro</span>' : ''}</div>
   <div class="grupo-mes lim-cab"><span>Gastos</span><span>Limite por mês</span></div>
   <div class="lista lim-lista">${desp.map(linhaLim).join('')}</div>
   ${gua.length ? `<div class="grupo-mes lim-cab"><span>Guardar</span><span>Meta por mês</span></div><div class="lista lim-lista">${gua.map(linhaLim).join('')}</div>` : ''}`;
