@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=102';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=102';
-import { VAPID_KEY } from './config.js?v=102';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=102';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=102';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=102';
+import * as C from './calc.js?v=103';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=103';
+import { VAPID_KEY } from './config.js?v=103';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=103';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=103';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=103';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=102" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=102" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=102" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=103" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=102" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -842,8 +842,8 @@ document.addEventListener('click', async (e) => {
     case 'ver-cat': ui.filtroCat = id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
     case 'an-evo': ui.anEvo = !ui.anEvo; render(); break;
     case 'an-todas': ui.anTodas = !ui.anTodas; render(); break;
-    case 'filtro-cat-ir': ui.filtroCat = el.dataset.id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
-    case 'kpi-ir': if (el.dataset.v === 'metas') location.hash = '#metas'; else { ui.filtroTipo = el.dataset.v; location.hash = '#lancamentos'; } break;
+    case 'filtro-cat-ir': ui.manterPeriodo = true; ui.filtroCat = el.dataset.id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
+    case 'kpi-ir': ui.manterPeriodo = el.dataset.v !== 'metas'; if (el.dataset.v === 'metas') location.hash = '#metas'; else { ui.filtroTipo = el.dataset.v; location.hash = '#lancamentos'; } break;
     case 'abrir-busca': if (ui.buscaAberta || ui.busca) { ui.buscaAberta = false; ui.busca = ''; render(); } else { ui.buscaAberta = true; render(); setTimeout(() => $('[data-a=busca]')?.focus(), 30); } break;
     case 'filtro-tipo': ui.filtroTipo = el.dataset.v; render(); break;
     case 'filtro-cat-limpa': ui.filtroCat = ''; render(); break;
@@ -874,7 +874,7 @@ document.addEventListener('click', async (e) => {
     case 'ocultar-aviso-fatura': (ui.faturasOcultas ||= new Set()).add(el.dataset.k); render(); break;
     case 'aba-plano': ui.abaPlano = el.dataset.v; render(); break;
     case 'aba-analise': ui.abaAnalise = el.dataset.v; render(); break;
-    case 'ver-passou': ui.periodo = { ...ui.periodo, tipo: 'mes', ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 }; location.hash = '#relatorios'; break;
+    case 'ver-passou': location.hash = '#relatorios'; break;
     case 'setup-ir': { const v = el.dataset.v; ui.modal = null;
       if (v === 'renda') { ui.abaPlano = 'fixos'; location.hash = '#plano'; setTimeout(() => modalFixo({}, true), 80); }
       else if (v === 'fixo') { ui.abaPlano = 'fixos'; location.hash = '#plano'; setTimeout(() => modalFixo(), 80); }
@@ -1179,7 +1179,11 @@ function baixarPlanilha() {
 }
 function baixar(nome, txt) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 
-window.addEventListener('hashchange', () => { ui.rota = location.hash.slice(1) || 'inicio'; ui.modal = null; render(); window.scrollTo(0, 0); });
+const periodoHoje = () => { const h = new Date(); return { tipo: 'mes', ano: h.getFullYear(), mes: h.getMonth() + 1, tri: Math.floor(h.getMonth() / 3) + 1, sem: h.getMonth() < 6 ? 1 : 2, de: C.addMes(C.mesAtual(), -2), ate: C.mesAtual() }; };
+window.addEventListener('hashchange', () => { const nova = location.hash.slice(1) || 'inicio';
+  // cada tela abre no mês atual; só mantém o período quando veio de um toque na Análise
+  if (nova !== ui.rota) { if (ui.manterPeriodo) ui.manterPeriodo = false; else ui.periodo = periodoHoje(); }
+  ui.rota = nova; ui.modal = null; render(); window.scrollTo(0, 0); });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); ui.installEvt = e; });
 window.addEventListener('flui:erro', () => toast('Não consegui salvar agora. Confira a internet; o Flui tenta de novo.'));
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.closest('form[data-form=boas-vindas]') && e.target.matches('input')) { e.preventDefault(); const f = e.target.closest('form'); if (e.target.matches('[data-ob-banco-novo]')) f.querySelector('[data-a=ob-banco-add]').click(); else f.querySelector('[data-a=ob-prox]').click(); return; }
@@ -1203,7 +1207,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=102" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
