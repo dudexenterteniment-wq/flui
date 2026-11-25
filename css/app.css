@@ -418,3 +418,7 @@ a.tag-neg { text-decoration: none; }
 .abas-analise button.ativo { border-color: var(--azul); color: var(--azul); background: var(--azul-claro); }
 .ver-gastos { width: 100%; margin: 0 0 6px; }
 .lim-lista .lim-linha > b { font-size: 14px; }
+
+.btn-parcelar { display: block; width: 100%; margin-top: 10px; border: none; background: var(--laranja-claro); color: #B36200; border-radius: 12px; padding: 9px 12px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; }
+.btn-parcelar b { font-weight: 900; }
+.fixos-dica { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: -2px 0 10px; flex-wrap: wrap; }
