@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=44';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=44';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=44';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=44';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=44';
+import * as C from './calc.js?v=45';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=45';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=45';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=45';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=45';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -260,8 +260,8 @@ function telaCartoes() {
 }
 function bannerFaturas() {
   const ocultas = ui.faturasOcultas ||= new Set();
-  return C.faturasParaDecidir(st(), hoje).filter(({ cartao, m }) => !ocultas.has(`${cartao.id}|${m}`)).map(({ cartao, m, f }) => `<div class="aviso-fatura">
-    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.nomeMes(m)} fechou</b><div class="mini">${brl(f.aberto)} em aberto</div></div>
+  return C.faturasParaDecidir(st(), hoje).filter(({ cartao, m }) => !ocultas.has(`${cartao.id}|${m}`)).map(({ cartao, m, f, fechou }) => `<div class="aviso-fatura">
+    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()}</b><div class="mini">${cartao.vencimento ? `vence dia ${cartao.vencimento} · ` : ''}${brl(f.aberto)} em aberto</div></div>
     <button class="btn verde pequeno" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher</button>
     <button class="af-x" data-a="ocultar-aviso-fatura" data-k="${cartao.id}|${m}" aria-label="Fechar aviso">×</button></div>`).join('');
 }

@@ -22,7 +22,7 @@ export function difMeses(a, b) { // b - a
 }
 export function nomeMes(m, longo = false) {
   const [y, mo] = m.split('-').map(Number);
-  return longo ? `${MESES_LONGOS[mo - 1]} de ${y}` : `${MESES_CURTOS[mo - 1]}/${String(y).slice(2)}`;
+  return longo ? `${MESES_LONGOS[mo - 1]} de ${y}` : `${MESES_CURTOS[mo - 1]} ${y}`;
 }
 export function rangeMeses(de, ate) {
   const out = []; let m = de;
