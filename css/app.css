@@ -427,3 +427,9 @@ a.tag-neg { text-decoration: none; }
 .checklist .item.ok .ck { background: var(--verde); border-color: var(--verde); }
 .chips-tipo { flex-wrap: nowrap; gap: 5px; } .chips-tipo .chip { flex: 1 1 auto; padding: 6px 4px; font-size: 12.5px; text-align: center; white-space: nowrap; min-width: 0; }
 .seg-status { margin: 0; } .seg-status button { padding: 10px 6px; font-size: 13px; }
+/* período mais fino */
+.periodo { padding: 4px; gap: 4px; border-radius: 14px; }
+.periodo .seg-periodo button { padding: 4px 0; font-size: 12.5px; border-radius: 8px; }
+.per-nav { padding: 0 2px 1px; }
+.per-nav .seta { width: 30px; height: 28px; border-radius: 9px; font-size: 15px; }
+.per-nav .rotulo { font-size: 15px; }

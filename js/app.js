@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=68';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=68';
-import { VAPID_KEY } from './config.js?v=68';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=68';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=68';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=68';
+import * as C from './calc.js?v=69';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=69';
+import { VAPID_KEY } from './config.js?v=69';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=69';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=69';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=69';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
