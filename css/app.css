@@ -569,3 +569,4 @@ label.btn { position: relative; }
 .cc.cartao.arrastando { z-index: 5; box-shadow: 0 12px 28px rgba(0,0,0,.25); transition: none; position: relative; opacity: .95; }
 body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
 .conta-resumo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; } .conta-resumo div { background: #F7F7F7; border-radius: 12px; padding: 8px 12px; } .conta-resumo span { display: block; font-size: 12px; font-weight: 800; color: var(--cinza); text-transform: uppercase; } .conta-resumo b { font-size: 18px; } .conta-resumo .pos { color: #58A700; } .conta-resumo .neg { color: var(--vermelho); }
+.aviso-falta { display: flex; align-items: center; gap: 10px; } .aviso-falta span { flex: 1; } .af-x { border: none; background: rgba(255,75,75,.15); color: var(--vermelho-esc, #C23434); width: 30px; height: 30px; border-radius: 50%; font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
