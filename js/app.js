@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=65';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=65';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=65';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=65';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=65';
+import * as C from './calc.js?v=66';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=66';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=66';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=66';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=66';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -448,7 +448,7 @@ function modalLanc(l = {}) {
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
         <div class="campo"><label>Cartão</label>${selCartao('', true)}</div></div>
       <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
-    <div class="campo"><label>Quando</label><input class="inp" type="date" name="data" value="${dataPadrao}" required></div>
+    <div class="campo"><label>Mês</label>${mesSelect('l-mes', l.mes || mes)}</div>
     <div class="campo" data-status-wrap>${chipsStatus(tipo, l.status)}</div>
     <div class="campo ${tipo === 'despesa' && l.status === 'pendente' ? '' : 'oculto'}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div>
     ${l.id ? '' : `<label class="chave" style="margin:-4px 0 10px"><input type="checkbox" name="repete" data-a="repete-tg"> Repete todo mês</label>
@@ -974,17 +974,17 @@ document.addEventListener('submit', async (e) => {
     const valor = parseValor(v('valor')); if (!(valor > 0)) return alert('Digite um valor maior que zero.');
     if (!v('categoriaId')) return alert('Escolha uma categoria.');
     if (!id && f.repete?.checked && v('forma') !== 'Crédito') {
-      const inicio = (v('data') || C.mesAtual()).slice(0, 7); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
+      const inicio = lerMes('l-mes', f); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
       if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
       await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: '', frequencia: 'mensal', forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: true, pagos: {} });
       fecharModal(); toast(fim ? `Vai se repetir até ${C.nomeMes(fim)}.` : 'Vai se repetir todo mês.', true); return; }
     if (v('forma') === 'Crédito' && !id && v('tipo') === 'despesa') {
       const n = Math.max(1, parseInt(v('parcelas'), 10) || 1);
-      await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: (v('data') || C.mesAtual()).slice(0, 7), data: v('data') });
+      await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: lerMes('l-mes', f), data: '' });
       fecharModal(); toast(n > 1 ? `Lançado no crédito em ${n}x!` : 'Lançado no crédito!', true); return; }
     const antigo = S.lancamentos.find((x) => x.id === id) || {};
     const novo = !id;
-    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: (v('data') || C.mesAtual()).slice(0, 7), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('tipo') !== 'despesa' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: antigo.obs || '' });
+    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: antigo.data || '', forma: v('forma'), banco: v('banco'), vencimento: v('tipo') !== 'despesa' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: antigo.obs || '' });
     fecharModal(); toast(novo ? (v('tipo') === 'guardar' ? 'Guardado! Seu eu do futuro agradece. 💚' : 'Prontinho, lançado!') : 'Salvo!', novo);
   }
   if (tipoF === 'compra') {
