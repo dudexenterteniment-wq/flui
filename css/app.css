@@ -463,3 +463,6 @@ label.btn { position: relative; }
 .grade.g3.kpis .kpi .rot { font-size: 11px; }
 .grade.g3.kpis .kpi .val { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
 .kpi-saldo .val, .kpi-apagar .val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .kpi-saldo, .kpi-apagar { min-width: 0; }
+.topo-saldo { margin-bottom: 14px; }
+.bloco-pizza .legenda div > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .bloco-pizza .legenda .pc { flex: none; }
+.bloco-pizza .legenda { flex: 1 1 0; overflow: hidden; } .bloco-pizza .pizza-wrap svg { width: 150px; height: 150px; flex: none; }
