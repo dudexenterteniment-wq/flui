@@ -19,11 +19,18 @@ export function lerOFX(txt) {
 }
 
 // ---------- CSV (Nubank: Data,Valor,Identificador,Descrição; aceita ; e vírgula decimal) ----------
+function colunasCSV(l, sep) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < l.length; i++) { const ch = l[i];
+    if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; }
+    else if (ch === sep && !q) { out.push(cur); cur = ''; } else cur += ch; }
+  out.push(cur); return out.map((c) => c.trim());
+}
 export function lerCSV(txt) {
   const linhas = txt.replace(/^﻿/, '').split(/\r?\n/).filter((l) => l.trim());
   if (!linhas.length) return { formato: 'CSV', banco: '', itens: [] };
   const sep = (linhas[0].match(/;/g) || []).length > (linhas[0].match(/,/g) || []).length ? ';' : ',';
-  const cab = linhas[0].split(sep).map((c) => semAcento(c.replace(/"/g, '').trim()));
+  const cab = colunasCSV(linhas[0], sep).map((c) => semAcento(c));
   const iData = cab.findIndex((c) => c.startsWith('DATA') || c === 'DATE');
   const iValor = cab.findIndex((c) => c.startsWith('VALOR') || c === 'AMOUNT');
   const iId = cab.findIndex((c) => c.startsWith('IDENTIFICADOR') || c === 'ID');
@@ -34,12 +41,11 @@ export function lerCSV(txt) {
   const itens = [];
   for (const l of linhas.slice(1)) {
     // a descrição é a última coluna e pode ter o separador dentro: junta o que sobrar
-    let cols = l.split(sep);
+    let cols = colunasCSV(l, sep);
     if (iDesc === cab.length - 1 && cols.length > cab.length) cols = [...cols.slice(0, cab.length - 1), cols.slice(cab.length - 1).join(sep)];
-    cols = cols.map((c) => c.replace(/^"|"$/g, '').trim());
     const [dd, mm, aa] = (cols[iData] || '').split(/[/-]/);
-    let v = cols[iValor] || '';
-    v = sep === ';' || /,\d{1,2}$/.test(v) ? v.replace(/\./g, '').replace(',', '.') : v;
+    let v = (cols[iValor] || '').replace(/[R$\s]/g, '');
+    v = /,\d{1,2}$/.test(v) || (sep === ';' && v.includes(',')) ? v.replace(/\./g, '').replace(',', '.') : v;
     const valor = parseFloat(v);
     if (!aa || !Number.isFinite(valor)) continue;
     const data = dd.length === 4 ? `${dd}-${mm}-${aa}` : `${aa.length === 2 ? '20' + aa : aa}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
@@ -75,18 +81,19 @@ export function entender(it) {
   if (/^APLICACAO (RDB|CDB)|CAIXINHA|GUARDADO/.test(T) && !entrada) return { tipo: 'guardar', descricao: 'Guardado no Nubank', forma: 'Transferência', sugestao: 'Investimentos', marcar: true };
   if (/^RESGATE/.test(T)) return { tipo: 'entrada', descricao: 'Resgate de investimento', forma: 'Transferência', sugestao: 'Rendimento', marcar: false, aviso: 'Resgate do seu próprio dinheiro guardado. Desmarcado para não contar como renda.' };
   // só o nome do lugar decide a categoria; Pix para pessoa física (CPF mascarado) fica em Outros
-  const lugar = semAcento(partes.length > 1 ? partes[1] : t); const pessoa = /•••/.test(t);
+  const temPrefixo = /^(COMPRA NO DEBITO|TRANSFERENCIA|PAGAMENTO DE BOLETO)/.test(T);
+  const lugar = semAcento(temPrefixo && partes.length > 1 ? partes[1] : t.replace(/ - Parcela \d+\/\d+$/i, '')); const pessoa = /•••/.test(t);
   return { tipo: entrada ? 'entrada' : 'despesa', descricao, forma, sugestao: entrada ? 'Entrada extra' : pessoa ? 'Outros' : sugerirCategoria(lugar), marcar: true };
 }
 
 const REGRAS = [
   ['Comida fora', /IFD\*|IFOOD|99 ?FOOD|RAPPI|LANCHE|LANCHONETE|CHURRAS|BURGUER|PASTEL|BOTECO|CERVEJ|CONFEITARIA|PADOCA|EMPORIO|CHOPP|TAPIOCA|CREPE|COXINHA|ESFIH|GRILL|STEAK|BISTRO|CANTINA|COMIDA|DELIVERY|ACAI|BURGER|PIZZ|RESTAUR|CAFE|MACARRAO|ACAI|BISCOIT|PADARIA|SUSHI|BAR |BOTEQUIM|SORVET|DOCERIA|MC ?DONALD|BOB.?S|SUBWAY|OUTBACK|SPOLETO|HABIB/],
-  ['Mercado', /ZONA SUL|MULTI ?FRUTI|HORTIFRUTI|HIPER|SUPERMERC|MERCADO(?! PAGO)|CARREFOUR|PAO DE ACUCAR|GUANABARA|MUNDIAL|PREZUNIC|ASSAI|ATACAD|DEPOSITO|SENDAS|EXTRA |DIA BRASIL|HORTIFRUTI|ACOUGUE|SACOLAO|QUITANDA|FEIRA|AMERICANAS|ST MARCHE|OBA |NATURAL DA TERRA|GRUPO MATEUS/],
+  ['Mercado', /ZONA SUL|MULTI ?FRUTI|HORTIFRUTI|HIPER|SUPERMERC|MERCADO(?! ?PAGO| ?LIVRE|\*MERCADOLIVRE)|CARREFOUR|PAO DE ACUCAR|GUANABARA|MUNDIAL|PREZUNIC|ASSAI|ATACAD|DEPOSITO|SENDAS|EXTRA |DIA BRASIL|HORTIFRUTI|ACOUGUE|SACOLAO|QUITANDA|FEIRA|AMERICANAS|ST MARCHE|OBA |NATURAL DA TERRA|GRUPO MATEUS/],
   ['Transporte', /METRO|SUPERVIA|\bBRT\b|RIOCARD|\bJAE\b|PEDAGIO|SEM PARAR|VELOE|CONECTCAR|TAXI|BLABLA|ONIBUS|RODOVIARIA|LATAM|GOL LINHAS|AZUL LINHAS/],
   ['Farmácia', /DROGA|FARMA|RAIA|PAGUE MENOS|VENANCIO/],
   ['Combustível', /POSTO|SHELL|IPIRANGA|PETROBRAS|COMBUST|AUTO POSTO|\bBR MANIA/],
   ['Estacionamento', /ESTACION|ESTAPAR|PARKING|\bPARK\b|MULTIPARK|INDIGO/],
-  ['Assinaturas', /NETFLIX|SPOTIFY|DEEZER|DISNEY|HBO|MAX\.COM|PRIME VIDEO|AMAZON PRIME|APPLE\.COM|GOOGLE ?ONE|YOUTUBE|UBER ?ONE|GLOBOPLAY|ICLOUD|CANVA|CHATGPT|OPENAI/],
+  ['Assinaturas', /NETFLIX|SPOTIFY|DEEZER|TIDAL|DISNEY|HBO ?MAX|HBOMAX|\bHBO\b|\bMAX\.COM|PRIME ?VIDEO|AMAZON ?PRIME|AMAZONPRIME|KINDLE UNL|AUDIBLE|APPLE\.COM|APPLE COM BILL|ITUNES|ICLOUD|GOOGLE ?ONE|GOOGLE \*?(YOUTUBE|STORAGE|PLAY)|YOUTUBE ?PREM|YOUTUBEPREM|UBER\W*ONE|GLOBOPLAY|GLOBO ?PLAY|PARAMOUNT|STAR ?PLUS|CRUNCHYROLL|MUBI|TELECINE|PREMIERE|DAZN|CANVA|ADOBE|NOTION|DROPBOX|CHATGPT|OPENAI|ANTHROPIC|CLAUDE\.AI|DUOLINGO|LIVECAREER|LINKEDIN|TINDER|BUMBLE|MICROSOFT ?365|MSFT|XBOX ?GAME ?PASS|PLAYSTATION ?(PLUS|NETWORK)|PSN|NINTENDO ONLINE|CLUBE ?IFOOD|IFOOD ?CLUB|RAPPI ?PRIME|MELI ?\+|MELIMAIS|NUBANK\+|NU ?MAIS|SKY ?\+|CLARO ?TV|VIVO ?PLAY|CONTA ?AZUL|TINDER|GRINDR/],
   ['Academia', /SMART ?FIT|ACADEMIA|BODYTECH|SELFIT|BLUEFIT|GYMPASS|WELLHUB|CROSSFIT|PILATES/],
   ['Dízimo', /IGREJA|ASSEMBLEIA|BATISTA|PAROQUIA|MINISTERIO|COMUNIDADE EVANG|EVANGEL/],
   ['Entretenimento', /CINEMA|CINEMARK|KINOPLEX|INGRESSO|SYMPLA|EVENTIM|TEATRO|SHOW|STEAM|PLAYSTATION|XBOX/],
@@ -95,7 +102,7 @@ const REGRAS = [
 ];
 export function sugerirCategoria(T) {
   T = T.replace(/^(MP|PG|PAG|EC|EBN|PAYPAL|PICPAY|SUMUP|STONE|CIELO|PAGSEGURO|ZP|SP|LV)\s?\*\s?/, '');
-  if (/\bUBER\b(?!.*ONE)|\b99 ?(APP|POP|TAXI)|CABIFY/.test(T)) return 'Transporte';
+  if (/\bUBER\b(?!\W*ONE)|\b99 ?(APP|POP|TAXI)|CABIFY/.test(T)) return 'Transporte';
   for (const [cat, re] of REGRAS) if (re.test(T)) return cat;
   return 'Outros';
 }

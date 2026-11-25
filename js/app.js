@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=118';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=118';
-import { VAPID_KEY } from './config.js?v=118';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=118';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=118';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=118';
+import * as C from './calc.js?v=120';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=120';
+import { VAPID_KEY } from './config.js?v=120';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=120';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=120';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=120';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=118" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=118" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=118" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=120" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=118" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -635,6 +635,32 @@ function statusImport(b) {
   const ult = (t) => (S.settings.importacoes || []).filter((x) => x.banco === b && x.tipo === t).map((x) => x.mes).sort().pop() || '';
   return { temCred, conta: ult('conta'), fatura: ult('fatura') };
 }
+// depois de importar a fatura: confirmar com o app do banco quanto falta (o saldo da fatura anterior não vem no arquivo)
+function conferirFatura(cid, m, msg) {
+  const k = st().cartoes.find((x) => x.id === cid); const f = C.fatura(st(), cid, m);
+  abrirModal(`<form data-form="conferir-fatura" data-id="${cid}" data-m="${m}">${topoModal('Conferir a fatura')}
+    <p style="margin:0 0 6px"><b>${esc(msg)}</b></p>
+    <p class="mini" style="margin:0 0 12px">Abra o app do ${esc(k?.banco || 'banco')} e veja quanto está a <b>fatura atual</b> (a que vence em ${C.dataVencimento(k, m)?.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }) || '—'}). O Flui calculou:</p>
+    <div class="campo"><label>Quanto falta pagar dessa fatura</label><input class="inp valor-grande num" name="falta" inputmode="decimal" value="${valorInput(Math.max(0, f.aberto))}" autocomplete="off"></div>
+    <p class="mini" style="margin:0 0 12px">Total de compras: ${brl(f.total)}. Se o app do banco mostrar outro valor, corrija aqui.</p>
+    <div class="acoes"><button type="button" class="btn branco" data-a="conferir-depois" data-v="${esc(k?.banco || '')}">Depois</button><button class="btn verde">Confirmar</button></div></form>`);
+}
+// assinaturas que apareceram na fatura: pergunta se vira gasto fixo no cartão (e até quando)
+const NOMES_ASSIN = [[/UBER\W*ONE/i, 'Uber One'], [/NETFLIX/i, 'Netflix'], [/SPOTIFY/i, 'Spotify'], [/HBO/i, 'HBO Max'], [/LIVECAREER/i, 'LiveCareer'], [/DISNEY/i, 'Disney+'],
+  [/PRIME ?VIDEO|AMAZON ?PRIME|AMAZONPRIME/i, 'Amazon Prime'], [/YOUTUBE/i, 'YouTube Premium'], [/GLOBO ?PLAY/i, 'Globoplay'], [/ICLOUD|APPLE/i, 'Apple / iCloud'], [/GOOGLE ?ONE/i, 'Google One'],
+  [/CANVA/i, 'Canva'], [/CHATGPT|OPENAI/i, 'ChatGPT'], [/CLAUDE|ANTHROPIC/i, 'Claude'], [/DUOLINGO/i, 'Duolingo'], [/DEEZER/i, 'Deezer'], [/PARAMOUNT/i, 'Paramount+'], [/CRUNCHYROLL/i, 'Crunchyroll'],
+  [/CLUBE ?IFOOD|IFOOD ?CLUB/i, 'Clube iFood'], [/MELI/i, 'Meli+'], [/ADOBE/i, 'Adobe'], [/LINKEDIN/i, 'LinkedIn'], [/MICROSOFT|MSFT/i, 'Microsoft 365'], [/SMART ?FIT/i, 'Smart Fit']];
+const nomeAssin = (t) => (NOMES_ASSIN.find(([re]) => re.test(t)) || [])[1] || t.replace(/ - Parcela \d+\/\d+$/i, '').replace(/^[A-Z]{2,4}\s?\*/i, '').trim();
+function perguntarAssinaturas(banco) {
+  const lst = (ui.assinaturas || []).filter((a, i, arr) => arr.findIndex((x) => chaveRegra(x.texto) === chaveRegra(a.texto)) === i); if (!lst.length) return false;
+  ui.assinaturas = lst;
+  abrirModal(`<form data-form="assinaturas" data-banco="${esc(banco)}">${topoModal('Assinaturas')}
+    <p style="margin:0 0 12px">Achei estas assinaturas na fatura. Quer que elas entrem sozinhas todo mês, como gasto fixo no cartão?</p>
+    ${lst.map((a, i) => `<div class="assin-linha"><label class="chave"><input type="checkbox" name="a${i}" checked> <b>${esc(a.nome)}</b> <span class="num">${brl(a.valor)}/mês</span></label>
+      <div class="assin-ate"><span class="mini">até</span><input class="inp" type="month" name="ate${i}" min="${C.addMes(a.mes, 1)}" value="${a.parc ? C.addMes(a.mes, +a.parc[2] - +a.parc[1]) : ''}"><span class="mini">(vazio = sem data para acabar)</span></div></div>`).join('')}
+    <div class="acoes"><button type="button" class="btn branco" data-a="assin-pular" data-v="${esc(banco)}">Agora não</button><button class="btn verde">Salvar</button></div></form>`);
+  return true;
+}
 function avisoCompleto(b, feito, msg) {
   const st2 = statusImport(b); const falta = feito === 'conta' ? (st2.temCred && st2.fatura < st2.conta ? 'fatura' : '') : (st2.conta < st2.fatura ? 'conta' : '');
   if (!falta) { toast(msg, true); return; }
@@ -667,7 +693,7 @@ function guardarPreferido(S) {
 function diasCartao(k) { const V = parseInt(k?.vencimento, 10) || 0; const F = parseInt(k?.fechamento, 10) || (V ? (V > 7 ? V - 7 : V + 23) : 0); return { V, F }; }
 // em qual fatura (mês) cai uma compra feita na data d
 function mesDaCompra(k, d) { const { V, F } = diasCartao(k); const m = d.slice(0, 7); const dia = +d.slice(8, 10); if (!F) return m;
-  return F < V ? (dia > F ? m : C.addMes(m, -1)) : (dia > F ? C.addMes(m, 1) : m); }
+  return F < V ? (dia >= F ? m : C.addMes(m, -1)) : (dia >= F ? C.addMes(m, 1) : m); }
 // qual fatura um pagamento feito na data d quita: a que já fechou (se pagou até o vencimento) ou a que está aberta
 function mesDoPagamento(k, d) { const { V, F } = diasCartao(k); if (!V) return C.addMes(d.slice(0, 7), -1);
   const kk = { ...k, fechamento: F, vencimento: V }; const D = new Date(d + 'T12:00:00');
@@ -702,8 +728,9 @@ async function prepararImportacao(dados) {
     const ja = it.id && jaIds.has(it.id);
     const parecido = !ja && (dados.cartao ? S.compras.some((c) => !c.importId && Math.abs((Number(c.total) || 0) - valor) < 0.005 && Math.abs(C.difMeses(c.mesPrimeira, mes)) <= 1) : S.lancamentos.some((l) => l.mes === mes && l.tipo === e.tipo && Math.abs((Number(l.valor) || 0) - valor) < 0.005 && !l.importId));
     const pagFatura = dados.cartao && e.tipo !== 'despesa';
-    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido && !pagFatura, ja,
-      aviso: ja ? 'Já importado antes.' : pagFatura ? (/pagamento/i.test(it.texto || '') ? 'Pagamento: vai abater a fatura, não é compra.' : 'Estorno: não entra como compra.') : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
+    const jaFixo = dados.cartao && e.tipo === 'despesa' && S.recorrencias.some((r) => r.forma === 'Crédito' && r.ativa !== false && C.recorrenciaNoMes(r, mes) && (chaveRegra(r.nome || '') === chaveRegra(it.texto) || chaveRegra(r.obsImport || '') === chaveRegra(it.texto)));
+    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido && !pagFatura && !jaFixo, ja, jaFixo,
+      aviso: ja ? 'Já importado antes.' : jaFixo ? 'Já está nos seus fixos.' : pagFatura ? (/pagamento/i.test(it.texto || '') ? 'Pagamento: vai abater a fatura, não é compra.' : 'Estorno: não entra como compra.') : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
   });
   const banco = dados.banco || (S.settings?.bancos?.length === 1 ? S.settings.bancos[0] : '');
   const cc = dados.cartao ? (S.cartoes.find((k) => k.tipo !== 'debito' && (k.banco || k.nome) === banco) || S.cartoes.find((k) => k.tipo !== 'debito')) : null;
@@ -921,6 +948,8 @@ document.addEventListener('click', async (e) => {
       delete ds[k]; await store.salvarSettings({ ...patch, faturaDecisoes: ds }); toast('Escolha desfeita.'); render(); break; }
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'importar-extrato': ui.impDestino = ''; modalImportar(); break;
+    case 'conferir-depois': fecharModal(); if (!perguntarAssinaturas(el.dataset.v)) avisoCompleto(el.dataset.v, 'fatura', 'Fatura importada!'); break;
+    case 'assin-pular': ui.assinaturas = []; fecharModal(); avisoCompleto(el.dataset.v, 'fatura', 'Fatura importada!'); break;
     case 'imp-de-novo': ui.impDestino = el.dataset.v; modalImportar(); break;
     case 'imp-dest': ui.impDestino = el.dataset.v; modalImportar(); break;
     case 'meta-alvo-ok': { const inp = document.querySelector(`[data-meta-alvo="${id}"]`); const v = parseValor(inp?.value); if (!(v > 0)) { inp?.focus(); break; }
@@ -1150,6 +1179,16 @@ document.addEventListener('submit', async (e) => {
     await store.salvar('compras', { ...antigo, id, total, parcelas: Math.max(1, parseInt(v('parcelas'), 10) || 1), cartaoId: v('cartaoId'), descricao: v('descricao'), categoriaId: v('categoriaId'), mesPrimeira: lerMes('c-mes', f), data: v('data') });
     fecharModal(); toast('Compra salva!');
   }
+  if (tipoF === 'assinaturas') {
+    let n = 0; for (const [i, a] of (ui.assinaturas || []).entries()) { if (!f.elements['a' + i]?.checked) continue;
+      await store.salvar('recorrencias', { tipo: 'despesa', nome: a.nome, valor: a.valor, categoriaId: a.catId, inicio: C.addMes(a.mes, 1), fim: v('ate' + i) || '', frequencia: 'mensal', forma: 'Crédito', cartaoId: a.cartaoId, banco: '', obs: '', obsImport: a.texto, ativa: true, pagos: {} }); n++; }
+    ui.assinaturas = []; fecharModal(); avisoCompleto(f.dataset.banco, 'fatura', n ? `${n} assinatura${n > 1 ? 's' : ''} agora ${n > 1 ? 'são fixas' : 'é fixa'} no cartão.` : 'Fatura importada!'); return;
+  }
+  if (tipoF === 'conferir-fatura') {
+    const falta = parseValor(v('falta')); if (isNaN(falta)) return; const cid = f.dataset.id; const m = f.dataset.m; const k = `${cid}|${m}`; const tot = C.fatura(S, cid, m).total;
+    await store.salvarSettings({ pagamentosFatura: { ...(S.settings.pagamentosFatura || {}), [k]: Math.max(0, Math.round((tot - falta) * 100) / 100) }, pagManual: { ...(S.settings.pagManual || {}), [k]: true } });
+    const kk = S.cartoes.find((x) => x.id === cid); fecharModal(); if (!perguntarAssinaturas(kk?.banco || kk?.nome || '')) avisoCompleto(kk?.banco || kk?.nome || '', 'fatura', 'Fatura conferida!'); return;
+  }
   if (tipoF === 'saldo-conta') {
     const valor = parseValor(v('valor')); if (isNaN(valor)) return;
     await store.salvarSettings({ saldoBase: { valor, ref: C.realizadoConta(S), em: new Date().toISOString() } }); fecharModal(); toast('Saldo atualizado!', true); render(); return;
@@ -1206,14 +1245,17 @@ document.addEventListener('submit', async (e) => {
     } else if (ccId) {
       const compras = sel.filter((l) => l.tipo === 'despesa');
       const conta = {}; for (const l of im.linhas.filter((x) => x.tipo === 'despesa')) conta[l.mes] = (conta[l.mes] || 0) + 1;
-      const mesFat = Object.entries(conta).sort((a, b) => b[1] - a[1])[0]?.[0] || C.mesAtual();
+      const kSel = S.cartoes.find((x) => x.id === ccId); const conta2 = {}; for (const l of im.linhas.filter((x) => x.tipo === 'despesa')) { const mm = mesDaCompra(kSel, l.data); conta2[mm] = (conta2[mm] || 0) + 1; }
+      const mesFat = Object.entries(conta2).sort((a, b) => b[1] - a[1])[0]?.[0] || C.mesAtual();
       const lista = [...(S.settings.pagImportadosLista || [])]; const jaPg = new Set(lista.map((x) => x.id)); let nPgF = 0;
-      for (const l of im.linhas.filter((x) => x.tipo !== 'despesa' && /pagamento/i.test(x.texto || x.descricao || ''))) { const id = l.id || `pgf-${l.data}-${l.valorAbs}`; if (jaPg.has(id)) continue; lista.push({ id, valor: l.valorAbs, data: l.data, cartaoId: ccId, mes: mesFat, lote }); nPgF++; }
+      for (const l of im.linhas.filter((x) => x.tipo !== 'despesa' && /pagamento/i.test(x.texto || x.descricao || ''))) { const id = l.id || `pgf-${l.data}-${l.valorAbs}`; if (jaPg.has(id)) continue; lista.push({ id, valor: l.valorAbs, data: l.data, cartaoId: ccId, lote }); nPgF++; }
       if (nPgF) await store.salvarSettings({ pagImportadosLista: lista });
       for (const l of compras) {
         await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: mesDaCompra(S.cartoes.find((x) => x.id === ccId), l.data), data: l.data, importId: l.id || '', lote }); }
       const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
-      await store.salvarSettings({ regrasImport: regras }); await realocarPagamentos(); const kk = S.cartoes.find((x) => x.id === ccId); const bk = kk?.banco || kk?.nome || ''; await registrar(compras.length, 'cartão', bk, 'fatura', mesDe(compras)); ui.importacao = null; fecharModal(); avisoCompleto(bk, 'fatura', `${compras.length} compras lançadas no cartão!`); return;
+      await store.salvarSettings({ regrasImport: regras }); await realocarPagamentos(); const kk = S.cartoes.find((x) => x.id === ccId); const bk = kk?.banco || kk?.nome || ''; const catAss = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa');
+      ui.assinaturas = catAss ? compras.filter((l) => l.catId === catAss.id).map((l) => ({ nome: nomeAssin(l.texto || l.descricao), parc: (l.texto || '').match(/Parcela (\d+)\/(\d+)/i), texto: l.texto, valor: l.valorAbs, mes: mesDaCompra(kSel, l.data), cartaoId: ccId, catId: catAss.id })) : [];
+      await registrar(compras.length, 'cartão', bk, 'fatura', mesFat); ui.importacao = null; fecharModal(); conferirFatura(ccId, mesFat, `${compras.length} compras lançadas no cartão!`); return;
     }
     im.banco = bancoConta;
     { const k = S.cartoes.find((x) => (x.banco || x.nome) === bancoConta && x.tipo === 'credito'); if (k && sel.some((l) => /D[ée]bito|Pix/i.test(l.forma || '') || /pix|d[ée]bito/i.test(l.descricao || ''))) await store.salvar('cartoes', { ...k, tipo: 'ambos' }); }
@@ -1334,7 +1376,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=118" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
