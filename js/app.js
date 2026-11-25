@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=73';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=73';
-import { VAPID_KEY } from './config.js?v=73';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=73';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=73';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=73';
+import * as C from './calc.js?v=74';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=74';
+import { VAPID_KEY } from './config.js?v=74';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=74';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=74';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=74';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}>F</div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flui</div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=74" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flui</div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
