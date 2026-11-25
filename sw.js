@@ -1,6 +1,6 @@
 // Flui — service worker: guarda os arquivos do app para abrir rápido e funcionar sem internet
-const VERSAO = 'flui-v87';
-const ARQUIVOS = ['./', './index.html', './css/app.css?v=87', './js/app.js?v=87', './js/calc.js?v=87', './js/store.js?v=87', './js/ui.js?v=87', './js/config.js?v=87', './js/icones.js?v=87', './js/importar.js?v=87', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png'];
+const VERSAO = 'flui-v88';
+const ARQUIVOS = ['./', './index.html', './css/app.css?v=88', './js/app.js?v=88', './js/calc.js?v=88', './js/store.js?v=88', './js/ui.js?v=88', './js/config.js?v=88', './js/icones.js?v=88', './js/importar.js?v=88', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ARQUIVOS.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
