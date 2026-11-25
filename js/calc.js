@@ -244,9 +244,13 @@ export function proximosVencimentos(st, hoje = new Date(), dias = 10) {
 // metas: valor atual = valor inicial + o que foi guardado na categoria vinculada
 export function progressoMeta(st, meta) {
   const desde = (m) => !meta.desde || difMeses(meta.desde, m) >= 0;
-  const lanc = meta.categoriaId ? sum(st.lancamentos.filter((l) => l.categoriaId === meta.categoriaId && l.tipo === 'guardar' && desde(l.mes)), (l) => l.valor) : 0;
+  // aceita também categorias de guardar com o mesmo nome (ex.: criada de novo sem querer)
+  const base = (st.categorias || []).find((c) => c.id === meta.categoriaId);
+  const norm = (x) => (x || '').trim().toLowerCase();
+  const ids = new Set([meta.categoriaId, ...(base ? st.categorias.filter((c) => c.tipo === 'guardar' && norm(c.nome) === norm(base.nome)).map((c) => c.id) : [])].filter(Boolean));
+  const lanc = meta.categoriaId ? sum(st.lancamentos.filter((l) => ids.has(l.categoriaId) && l.tipo === 'guardar' && desde(l.mes)), (l) => l.valor) : 0;
   // fixos de guardar marcados como feitos também contam
-  const fixos = meta.categoriaId ? sum(st.recorrencias.filter((r) => r.categoriaId === meta.categoriaId).flatMap((r) => Object.keys(r.pagos || {}).filter((m) => r.pagos[m] && desde(m) && recorrenciaNoMes(r, m) && !st.lancamentos.some((l) => l.recorrenciaId === r.id && l.mes === m)).map(() => Number(r.valor) || 0))) : 0;
+  const fixos = meta.categoriaId ? sum(st.recorrencias.filter((r) => ids.has(r.categoriaId) && (r.tipo || 'guardar') === 'guardar').flatMap((r) => Object.keys(r.pagos || {}).filter((m) => r.pagos[m] && desde(m) && recorrenciaNoMes(r, m) && !st.lancamentos.some((l) => l.recorrenciaId === r.id && l.mes === m)).map(() => Number(r.valor) || 0))) : 0;
   const guardado = fromCents(cents(lanc) + cents(fixos));
   const atual = fromCents(cents(meta.valorInicial) + cents(guardado));
   const alvo = Number(meta.alvo) || 0;
