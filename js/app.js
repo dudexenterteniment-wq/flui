@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=114';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=114';
-import { VAPID_KEY } from './config.js?v=114';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=114';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=114';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=114';
+import * as C from './calc.js?v=116';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=116';
+import { VAPID_KEY } from './config.js?v=116';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=116';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=116';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=116';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=114" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=116" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=114" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=116" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=114" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=116" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=114" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=116" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -663,29 +663,38 @@ function guardarPreferido(S) {
   const cont = {}; for (const x of [...S.lancamentos, ...S.recorrencias]) if (x.tipo === 'guardar' || S.categorias.find((c) => c.id === x.categoriaId)?.tipo === 'guardar') cont[x.categoriaId] = (cont[x.categoriaId] || 0) + 1;
   const id = Object.entries(cont).sort((a, b) => b[1] - a[1])[0]?.[0]; return S.categorias.find((c) => c.id === id && c.tipo === 'guardar' && !c.arquivada) || null;
 }
-// pagamentos de fatura vindos do extrato: abatem a fatura mais antiga em aberto (até 2 meses antes do pagamento)
+// fechamento do cartão (se não tiver, 7 dias antes do vencimento, como no Nubank)
+function diasCartao(k) { const V = parseInt(k?.vencimento, 10) || 0; const F = parseInt(k?.fechamento, 10) || (V ? (V > 7 ? V - 7 : V + 23) : 0); return { V, F }; }
+// em qual fatura (mês) cai uma compra feita na data d
+function mesDaCompra(k, d) { const { V, F } = diasCartao(k); const m = d.slice(0, 7); const dia = +d.slice(8, 10); if (!F) return m;
+  return F < V ? (dia > F ? m : C.addMes(m, -1)) : (dia > F ? C.addMes(m, 1) : m); }
+// qual fatura um pagamento feito na data d quita: a que já fechou (se pagou até o vencimento) ou a que está aberta
+function mesDoPagamento(k, d) { const { V, F } = diasCartao(k); if (!V) return C.addMes(d.slice(0, 7), -1);
+  const kk = { ...k, fechamento: F, vencimento: V }; const D = new Date(d + 'T12:00:00');
+  let ult = null; for (let i = -3; i <= 1; i++) { const m = C.addMes(d.slice(0, 7), i); if (C.dataFechamento(kk, m) < D) ult = m; }
+  if (!ult) return d.slice(0, 7); const venc = C.dataVencimento(kk, ult); return D <= new Date(venc.getTime() + 3 * 864e5) ? ult : C.addMes(ult, 1); }
 function realocarPagamentos() {
   const S = st(); const lista = S.settings.pagImportadosLista || []; const ant = S.settings.pagAlocado || {};
-  const base = { ...(S.settings.pagamentosFatura || {}) };
-  for (const [k, v] of Object.entries(ant)) { const r = Math.round(((Number(base[k]) || 0) - v) * 100) / 100; if (r > 0.005) base[k] = r; else delete base[k]; }
-  const aloc = {}; const atual = () => { const pg = { ...base }; for (const [k, v] of Object.entries(aloc)) pg[k] = Math.round(((Number(pg[k]) || 0) + v) * 100) / 100; return pg; };
-  for (const p of [...lista].sort((a, b) => a.data.localeCompare(b.data))) {
-    if (p.mes) { const k = `${p.cartaoId}|${p.mes}`; aloc[k] = Math.round(((aloc[k] || 0) + p.valor) * 100) / 100; continue; }
-    const m = p.data.slice(0, 7); let resto = p.valor; const meses = [C.addMes(m, -2), C.addMes(m, -1), m];
-    for (const mm of meses) { if (resto <= 0.005) break; const ab = C.fatura({ ...S, settings: { ...S.settings, pagamentosFatura: atual() } }, p.cartaoId, mm).aberto;
-      if (ab > 0.005) { const v = Math.min(ab, resto); const k = `${p.cartaoId}|${mm}`; aloc[k] = Math.round(((aloc[k] || 0) + v) * 100) / 100; resto -= v; } }
-    if (resto > 0.005) { const k = `${p.cartaoId}|${C.addMes(m, -1)}`; aloc[k] = Math.round(((aloc[k] || 0) + resto) * 100) / 100; }
-  }
-  return store.salvarSettings({ pagamentosFatura: atual(), pagAlocado: aloc });
+  const pg = { ...(S.settings.pagamentosFatura || {}) };
+  for (const [k, v] of Object.entries(ant)) { const r = Math.round(((Number(pg[k]) || 0) - v) * 100) / 100; if (r > 0.005) pg[k] = r; else delete pg[k]; }
+  const aloc = {};
+  for (const p of lista) { const k = S.cartoes.find((x) => x.id === p.cartaoId); if (!k) continue; const key = `${k.id}|${mesDoPagamento(k, p.data)}`; aloc[key] = Math.round(((aloc[key] || 0) + p.valor) * 100) / 100; }
+  for (const [k, v] of Object.entries(aloc)) pg[k] = Math.round(((Number(pg[k]) || 0) + v) * 100) / 100;
+  return store.salvarSettings({ pagamentosFatura: pg, pagAlocado: aloc });
 }
-function prepararImportacao(dados) {
+async function prepararImportacao(dados) {
+  // se o extrato tem transporte (Uber, metrô...) e a pessoa não tem essa categoria, cria
+  if (!st().categorias.some((c) => c.nome === 'Transporte' && c.tipo === 'despesa') && dados.itens.some((it) => entender(it).sugestao === 'Transporte'))
+    await store.salvar('categorias', { nome: 'Transporte', tipo: 'despesa', orcamento: 0, cor: '#1CB0F6', arquivada: false });
   const S = st(); const regras = S.settings.regrasImport || {};
   const porNome = (nome, tipo) => S.categorias.find((c) => c.nome === nome && c.tipo === tipo && !c.arquivada);
   const rendaDoMes = (mes, valor) => S.recorrencias.find((r) => r.tipo === 'entrada' && C.recorrenciaNoMes(r, mes) && Math.abs(r.valor - valor) < 0.005);
   const jaIds = new Set([...S.lancamentos, ...S.compras].map((l) => l.importId).filter(Boolean));
+  const outrosIds = new Set(S.categorias.filter((c) => c.nome === 'Outros').map((c) => c.id)); const aprendido = {};
+  for (const x of [...S.lancamentos, ...S.compras]) { if (!x.categoriaId || outrosIds.has(x.categoriaId)) continue; const k = chaveRegra(x.descricao || ''); if (k) aprendido[k] = x.categoriaId; }
   const linhas = dados.itens.map((it) => {
     const e = entender(it); const mes = it.data.slice(0, 7); const valor = Math.abs(it.valor);
-    const regra = regras[chaveRegra(it.texto)]; const cRegra = regra && S.categorias.find((c) => c.id === regra && c.tipo === e.tipo);
+    const regra = regras[chaveRegra(it.texto)] || aprendido[chaveRegra(it.texto)] || aprendido[chaveRegra(e.descricao || '')]; const cRegra = regra && S.categorias.find((c) => c.id === regra && c.tipo === e.tipo);
     const renda = e.tipo === 'entrada' ? rendaDoMes(mes, valor) : null;
     let cat = cRegra || (e.tipo === 'guardar' ? guardarPreferido(S) : null) || (renda ? S.categorias.find((c) => c.id === renda.categoriaId) : null) || porNome(e.sugestao, e.tipo)
       || (e.tipo === 'despesa' ? porNome('Outros', 'despesa') : S.categorias.find((c) => c.tipo === e.tipo && !c.arquivada));
@@ -1078,7 +1087,7 @@ document.addEventListener('change', async (e) => {
       const txt = arq.text ? await arq.text() : await new Promise((ok, erro) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = erro; r.readAsText(arq); });
       const dados = /<OFX>|OFXHEADER/i.test(txt) ? lerOFX(txt) : lerCSV(txt);
       if (!dados.itens.length) throw new Error('Não encontrei movimentações nesse arquivo.');
-      prepararImportacao(dados); ui.importacao.arquivo = arq.name; if (ui.impDestino) { const b = ui.impDestino; ui.importacao.banco = b;
+      await prepararImportacao(dados); ui.importacao.arquivo = arq.name; if (ui.impDestino) { const b = ui.impDestino; ui.importacao.banco = b;
         if (dados.cartao) { const S = st(); let k = S.cartoes.find((x) => ehCredito(x) && (x.banco || x.nome) === b);
           if (!k) { k = await store.salvar('cartoes', { nome: b, banco: b, tipo: 'credito', vencimento: '', cor: COR_BANCO[b] || '#268AFF' }); toast(`Criei o cartão ${b}. Depois coloque o dia do vencimento em Cartões.`); }
           ui.importacao.destino = 'cc:' + k.id; } else ui.importacao.destino = 'conta:' + b; } modalRevisarImport();
@@ -1087,7 +1096,9 @@ document.addEventListener('change', async (e) => {
   }
   if (t.matches('[data-imp-ok]')) { const l = ui.importacao.linhas[+t.dataset.impOk]; l.marcado = t.checked; t.closest('.imp-linha').classList.toggle('off', !t.checked);
     $('[data-imp-btn]').textContent = `Importar ${ui.importacao.linhas.filter((x) => x.marcado).length}`; return; }
-  if (t.matches('[data-imp-cat]')) { const l = ui.importacao.linhas[+t.dataset.impCat]; l.catId = t.value; l.mudou = true; return; }
+  if (t.matches('[data-imp-cat]')) { const ls = ui.importacao.linhas; const l = ls[+t.dataset.impCat]; l.catId = t.value; l.mudou = true; const k = chaveRegra(l.texto); let n = 0;
+    ls.forEach((x, i) => { if (x !== l && x.tipo === l.tipo && chaveRegra(x.texto) === k) { x.catId = t.value; x.mudou = true; const sel = document.querySelector(`[data-imp-cat="${i}"]`); if (sel) sel.value = t.value; n++; } });
+    if (n) toast(`Mudei também ${n} parecido${n > 1 ? 's' : ''}.`); return; }
 });
 document.addEventListener('input', (e) => {
   if (e.target.matches('[data-form=fixo] [name=valor]')) { const f = e.target.closest('form'); const d = f.querySelector('[data-desde]'); if (d) d.classList.toggle('oculto', Math.abs(parseValor(e.target.value) - Number(e.target.dataset.orig || 0)) < 0.005); }
@@ -1199,7 +1210,7 @@ document.addEventListener('submit', async (e) => {
       for (const l of im.linhas.filter((x) => x.tipo !== 'despesa' && /pagamento/i.test(x.texto || x.descricao || ''))) { const id = l.id || `pgf-${l.data}-${l.valorAbs}`; if (jaPg.has(id)) continue; lista.push({ id, valor: l.valorAbs, data: l.data, cartaoId: ccId, mes: mesFat, lote }); nPgF++; }
       if (nPgF) await store.salvarSettings({ pagImportadosLista: lista });
       for (const l of compras) {
-        await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: l.mes, data: l.data, importId: l.id || '', lote }); }
+        await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: mesDaCompra(S.cartoes.find((x) => x.id === ccId), l.data), data: l.data, importId: l.id || '', lote }); }
       const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
       await store.salvarSettings({ regrasImport: regras }); await realocarPagamentos(); const kk = S.cartoes.find((x) => x.id === ccId); const bk = kk?.banco || kk?.nome || ''; await registrar(compras.length, 'cartão', bk, 'fatura', mesDe(compras)); ui.importacao = null; fecharModal(); avisoCompleto(bk, 'fatura', `${compras.length} compras lançadas no cartão!`); return;
     }
@@ -1261,6 +1272,11 @@ async function garantirMetas() {
   if (mudou) await store.salvarSettings({ metasAuto: feitas });
 }
 async function migrar() {
+  // importações: compras no mês da fatura certa (pelo fechamento) e pagamentos na fatura certa
+  if (st().settings.importRegra !== 2) { const S = st();
+    for (const c of S.compras.filter((x) => x.importId && x.data && x.cartaoId)) { const k = S.cartoes.find((x) => x.id === c.cartaoId); const m = k ? mesDaCompra(k, c.data) : c.mesPrimeira; if (m !== c.mesPrimeira) await store.salvar('compras', { ...c, mesPrimeira: m }); }
+    if ((S.settings.pagImportadosLista || []).length) await realocarPagamentos();
+    await store.salvarSettings({ importRegra: 2 }); }
   await garantirMetas();
   // Pix vira Débito em todo lugar (mesmo dinheiro da conta)
   for (const col of ['lancamentos', 'recorrencias']) for (const x of st()[col].filter((i) => i.forma === 'Pix')) await store.salvar(col, { ...x, forma: 'Débito' });
@@ -1317,7 +1333,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=114" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=116" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
