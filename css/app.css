@@ -560,3 +560,6 @@ label.btn { position: relative; }
 .imp-para { font-size: 12px; font-weight: 800; color: var(--azul); margin-top: 6px; } .imp-cat.guardar { border-color: var(--azul); }
 .abas-plano .aba-fixos { color: #fff !important; background: #FF9600 !important; box-shadow: 0 3px 0 #D97F00 !important; border-color: #FF9600 !important; font-weight: 900; }
 .abas-plano .aba-fixos:not(.ativo) { opacity: .85; } .abas-plano .aba-fixos.ativo { opacity: 1; }
+.cc-acoes { display: flex; gap: 6px; align-items: center; }
+.cc-mover { width: 30px; height: 30px; border-radius: 50%; border: none; background: rgba(255,255,255,.3); color: #fff; font: inherit; font-weight: 900; font-size: 18px; line-height: 1; cursor: pointer; padding: 0; }
+.cc-mover:disabled { opacity: .3; cursor: default; }

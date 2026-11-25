@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=131';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=131';
-import { VAPID_KEY } from './config.js?v=131';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=131';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=131';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=131';
+import * as C from './calc.js?v=132';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=132';
+import { VAPID_KEY } from './config.js?v=132';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=132';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=132';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=132';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=131" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=132" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=131" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=132" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=131" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=132" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=131" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=132" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -222,9 +222,10 @@ function telaLancamentos() {
 }
 
 // ---------------- Cartões ----------------
+const cartoesOrdem = () => [...st().cartoes].sort((a, b) => (a.ordem ?? 999) - (b.ordem ?? 999));
 function telaCartoes() {
   const ms = meses();
-  const cartoes = st().cartoes;
+  const cartoes = cartoesOrdem();
   const semCartao = st().compras.some((c) => !c.cartaoId);
   const todos = [...cartoes, ...(semCartao ? [{ id: '', nome: 'Sem cartão definido', cor: '#AFAFAF', tipo: 'credito' }] : [])];
   if (!todos.some((c) => c.id === ui.cartaoSel)) ui.cartaoSel = todos[0]?.id;
@@ -255,7 +256,7 @@ function telaCartoes() {
   ${filtroPeriodo()}
 
   <div class="cartoes-fila">${todos.map((c) => `<div class="cc cartao ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
-      <div class="cc-l1"><span class="cc-nome">${esc(nomeCartao(c))}</span>${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão">✎</button>` : ''}</div>
+      <div class="cc-l1"><span class="cc-nome">${esc(nomeCartao(c))}</span><span class="cc-acoes">${c.id && c.id === ui.cartaoSel && cartoes.length > 1 ? `<button class="cc-mover" data-a="cartao-mover" data-id="${c.id}" data-v="-1" aria-label="Mover para a esquerda" ${cartoes[0].id === c.id ? 'disabled' : ''}>‹</button><button class="cc-mover" data-a="cartao-mover" data-id="${c.id}" data-v="1" aria-label="Mover para a direita" ${cartoes[cartoes.length - 1].id === c.id ? 'disabled' : ''}>›</button>` : ''}${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão">✎</button>` : ''}</span></div>
       <div class="cc-tipo">${c.id ? esc(nomeTipoCartao(c.tipo)) : 'Sem cartão'}</div><span class="cc-chip"></span>
       <div class="cc-l3">${temCred(c) ? `<span class="cc-venc">${c.vencimento ? `Vence ${c.vencimento} ${C.MESES_CURTOS[+C.addMes(mesRef(), 1).slice(5) - 1]}` : 'Fatura'}</span>${(() => { const fz = C.fatura(st(), c.id, mesRef()); return fz.total <= 0 ? '<span class="cc-venc">sem compras</span>' : fz.aberto <= 0 ? '<span class="cc-val">Paga ✓</span>' : `<span class="cc-val num"><small>falta</small>${brl(fz.aberto)}</span>`; })()}` : '<span class="cc-venc">Ver débito ›</span>'}</div></div>`).join('')}
     <button class="cc cartao cc-novo" data-a="novo-cartao">+ Adicionar cartão</button>
@@ -1041,6 +1042,8 @@ document.addEventListener('click', async (e) => {
       { const S2 = st(); const vivos = new Set([...S2.lancamentos, ...S2.compras].map((x) => x.lote).filter(Boolean)); const li = (S2.settings.importacoes || []).filter((x) => vivos.has(x.id)); if (li.length !== (S2.settings.importacoes || []).length) await store.salvarSettings({ importacoes: li }); }
       fecharModal(); toast(`Pronto, apaguei ${n} itens.`, true); render(); break; }
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
+    case 'cartao-mover': { const ls = cartoesOrdem(); const i = ls.findIndex((x) => x.id === el.dataset.id); const j = i + +el.dataset.v; if (i < 0 || j < 0 || j >= ls.length) break;
+      [ls[i], ls[j]] = [ls[j], ls[i]]; for (const [n, k] of ls.entries()) if (k.ordem !== n) await store.salvar('cartoes', { ...k, ordem: n }); render(); break; }
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
     case 'excluir-cartao': { const cid = $('[data-form=cartao]').dataset.id; const n = S.compras.filter((c) => c.cartaoId === cid).length;
@@ -1404,7 +1407,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=131" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=132" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
