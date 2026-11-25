@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=108';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=108';
-import { VAPID_KEY } from './config.js?v=108';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=108';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=108';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=108';
+import * as C from './calc.js?v=110';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=110';
+import { VAPID_KEY } from './config.js?v=110';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=110';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=110';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=110';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=108" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=110" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=108" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=110" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=108" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=110" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=108" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=110" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -670,6 +670,7 @@ function modalRevisarImport() {
       ${[...new Set([...(S.settings.bancos || []), ...(im.banco ? [im.banco] : [])])].map((b) => `<option value="conta:${esc(b)}" ${im.destino === 'conta:' + b ? 'selected' : ''}>Conta ${esc(b)} (débito e Pix)</option>`).join('')}
       ${S.cartoes.filter((k) => k.tipo !== 'debito').map((k) => `<option value="cc:${k.id}" ${im.destino === 'cc:' + k.id ? 'selected' : ''}>Fatura do cartão ${esc(nomeCartao(k))}</option>`).join('')}
       ${im.banco ? '' : '<option value="conta:" selected>Sem banco</option>'}</select></div>
+    ${!im.cartao && (im.destino || '').startsWith('cc:') ? '<p class="mini imp-aviso" style="margin:0 0 8px">Esse arquivo tem débito e Pix: os lançamentos entram na conta e o cartão passa a ser de débito e crédito.</p>' : ''}
     <p class="mini" style="margin:0 0 10px">${im.linhas.length} movimentações (${im.formato}). Desmarque o que não quiser e ajuste as categorias.</p>
     <div class="imp-lista">${im.linhas.map((l, i) => `<div class="imp-linha ${l.marcado ? '' : 'off'}">
       <input type="checkbox" data-imp-ok="${i}" ${l.marcado ? 'checked' : ''} ${l.ja ? 'disabled' : ''} aria-label="Importar">
@@ -750,15 +751,15 @@ function modalBoasVindas() {
     <section data-ob="4" class="oculto">${fala('Com o que você costuma gastar? Deixe marcado só o que faz sentido para você.')}
       <div class="campo"><div class="cats" data-ob-cats>${st().categorias.filter((c) => c.tipo === 'despesa' && !c.arquivada).sort(ordemCat).map((c) => `<button type="button" class="ativo" data-ob-cat="${c.id}">${catIcone(c, 16)} ${esc(c.nome)}</button>`).join('')}</div></div>
       <div style="display:flex;gap:8px"><input autocapitalize="sentences" class="inp" data-ob-cat-nova placeholder="Falta alguma? Digite o nome"><button type="button" class="btn pequeno" data-a="ob-cat-add">Adicionar</button></div></section>
-    <section data-ob="5" class="oculto">${fala('Em quais desses você tem cartão de crédito? Me conta o dia que a fatura vence que eu te aviso antes.')}
+    <section data-ob="5" class="oculto">${fala('Quais desses têm cartão? Escolha se é crédito, débito ou os dois. Me conta o dia que a fatura vence que eu te aviso antes.')}
       <div data-ob-cartoes></div></section>
     <div class="acoes"><button type="button" class="btn branco" data-a="ob-pular">Pular</button><button type="button" class="btn verde" data-a="ob-prox">Continuar</button></div></form>`);
 }
 function obCartoes(f) {
   const bancos = [...f.querySelectorAll('[data-banco-tg].ativo')].map((b) => b.dataset.bancoTg);
   const box = f.querySelector('[data-ob-cartoes]');
-  const antes = {}; box.querySelectorAll('[data-ob-cc]').forEach((r) => { antes[r.dataset.obCc] = { on: r.querySelector('input[type=checkbox]').checked, dia: r.querySelector('input[type=number]').value }; });
-  box.innerHTML = bancos.length ? bancos.map((b) => { const a = antes[b] || {}; return `<div class="ob-cc ${a.on ? 'on' : ''}" data-ob-cc="${esc(b)}"><label><input type="checkbox" ${a.on ? 'checked' : ''}> <b>${esc(b)}</b></label><span class="mini">vence dia</span><input class="inp" type="number" min="1" max="31" inputmode="numeric" placeholder="—" value="${esc(a.dia || '')}" data-ob-dia></div>`; }).join('') + '<p class="mini">Não tem cartão de crédito? É só tocar em Concluir.</p>'
+  const antes = {}; box.querySelectorAll('[data-ob-cc]').forEach((r) => { antes[r.dataset.obCc] = { on: r.querySelector('input[type=checkbox]').checked, dia: r.querySelector('input[type=number]').value, tipo: r.querySelector('[data-ob-tipo]').value }; });
+  box.innerHTML = bancos.length ? bancos.map((b) => { const a = antes[b] || {}; return `<div class="ob-cc ${a.on ? 'on' : ''}" data-ob-cc="${esc(b)}"><label><input type="checkbox" ${a.on ? 'checked' : ''}> <b>${esc(b)}</b></label><select class="inp ob-tipo" data-ob-tipo>${TIPOS_CARTAO.map(([v, n]) => `<option value="${v}" ${(a.tipo || 'credito') === v ? 'selected' : ''}>${n}</option>`).join('')}</select><span class="mini">vence dia</span><input class="inp" type="number" min="1" max="31" inputmode="numeric" placeholder="—" value="${esc(a.dia || '')}" data-ob-dia></div>`; }).join('') + '<p class="mini">Não tem cartão? É só tocar em Concluir.</p>'
     : '<p class="mini">Nenhum banco marcado. Dá para cadastrar cartões depois.</p>';
 }
 function obIr(f, n) {
@@ -1042,7 +1043,7 @@ document.addEventListener('change', async (e) => {
       const txt = arq.text ? await arq.text() : await new Promise((ok, erro) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = erro; r.readAsText(arq); });
       const dados = /<OFX>|OFXHEADER/i.test(txt) ? lerOFX(txt) : lerCSV(txt);
       if (!dados.itens.length) throw new Error('Não encontrei movimentações nesse arquivo.');
-      prepararImportacao(dados); ui.importacao.arquivo = arq.name; if (ui.impDestino) { ui.importacao.destino = ui.impDestino; if (ui.impDestino.startsWith('cc:') && !dados.cartao) ui.importacao.linhas.forEach((l) => { if (l.tipo !== 'despesa') { l.marcado = false; l.aviso = l.aviso || 'Pagamento ou estorno: não entra como compra.'; } }); } modalRevisarImport();
+      prepararImportacao(dados); ui.importacao.arquivo = arq.name; if (ui.impDestino) ui.importacao.destino = ui.impDestino; modalRevisarImport();
     } catch (err) { alert(err.message || 'Não consegui ler esse arquivo.'); } finally { t.value = ''; }
     return;
   }
@@ -1150,8 +1151,10 @@ document.addEventListener('submit', async (e) => {
     if (!sel.length) return alert('Nenhuma movimentação marcada.');
     const btn = $('[data-imp-btn]'); btn.disabled = true; btn.textContent = 'Importando...';
     const lote = 'imp-' + Date.now(); const registrar = (qtd, onde) => store.salvarSettings({ importacoes: [...(st().settings.importacoes || []), { id: lote, arquivo: im.arquivo || 'extrato', quando: new Date().toISOString(), qtd, onde }] });
-    const dest = im.destino || ''; const ccId = dest.startsWith('cc:') ? dest.slice(3) : ''; const bancoConta = dest.startsWith('conta:') ? dest.slice(6) : im.banco;
-    if (ccId) {
+    const dest = im.destino || ''; const ccId = dest.startsWith('cc:') ? dest.slice(3) : ''; let bancoConta = dest.startsWith('conta:') ? dest.slice(6) : im.banco;
+    if (ccId && !im.cartao) { // extrato da conta (débito/Pix) num cartão: o cartão passa a ser débito e crédito
+      const k = S.cartoes.find((x) => x.id === ccId); if (k) { if (k.tipo !== 'ambos') { await store.salvar('cartoes', { ...k, tipo: 'ambos' }); toast(`${nomeCartao(k)} agora é débito e crédito.`); } bancoConta = k.banco || k.nome || bancoConta; }
+    } else if (ccId) {
       const compras = sel.filter((l) => l.tipo === 'despesa');
       for (const l of compras) {
         await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: l.mes, data: l.data, importId: l.id || '', lote }); }
@@ -1159,10 +1162,17 @@ document.addEventListener('submit', async (e) => {
       await store.salvarSettings({ regrasImport: regras }); await registrar(compras.length, 'cartão'); ui.importacao = null; fecharModal(); toast(`${compras.length} compras lançadas no cartão!`, true); return;
     }
     im.banco = bancoConta;
-    for (const l of sel) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
+    // pagamentos de fatura que vieram no extrato da conta: viram "valor pago" da fatura do cartão desse banco (sem virar gasto)
+    const kc = S.cartoes.find((x) => ehCredito(x) && (x.banco || x.nome) === bancoConta) || (S.cartoes.filter(ehCredito).length === 1 ? S.cartoes.find(ehCredito) : null);
+    let nPag = 0;
+    if (kc) { const ja = new Set(S.settings.pagImportados || []); const pg = { ...(S.settings.pagamentosFatura || {}) }; const novos = [];
+      for (const l of im.linhas.filter((x) => x.descricao === 'Pagamento de fatura' && x.tipo === 'despesa' && !x.ja && !(x.id && ja.has(x.id)))) {
+        const k = `${kc.id}|${C.addMes(l.mes, -1)}`; pg[k] = Math.round(((Number(pg[k]) || 0) + l.valorAbs) * 100) / 100; if (l.id) novos.push(l.id); nPag++; l.marcado = false; }
+      if (nPag) await store.salvarSettings({ pagamentosFatura: pg, pagImportados: [...ja, ...novos] }); }
+    for (const l of sel.filter((x) => x.marcado)) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
     const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
     const bancos = S.settings.bancos || []; await store.salvarSettings({ regrasImport: regras, ...(im.banco && !bancos.includes(im.banco) ? { bancos: [...bancos, im.banco] } : {}) });
-    await registrar(sel.length, 'conta ' + (bancoConta || '')); ui.importacao = null; fecharModal(); toast(`${sel.length} lançamentos importados!`, true); return;
+    await registrar(sel.length, 'conta ' + (bancoConta || '')); ui.importacao = null; fecharModal(); toast(`${sel.filter((x) => x.marcado).length} lançamentos importados!${nPag ? ` ${nPag} pagamento(s) de fatura foram para o cartão.` : ''}`, true); return;
   }
   if (tipoF === 'decisao') {
     const cid = id; const m = f.dataset.m; const k = `${cid || 'sem'}|${m}`; const ab = +f.dataset.aberto; const acao = v('acao'); const prox = C.addMes(m, 1);
@@ -1187,7 +1197,7 @@ document.addEventListener('submit', async (e) => {
     for (const r of f.querySelectorAll('[data-ob-cc]')) {
       if (!r.querySelector('input[type=checkbox]').checked) continue;
       const b = r.dataset.obCc; const d = parseInt(r.querySelector('input[type=number]').value, 10);
-      await store.salvar('cartoes', { nome: b, banco: b, tipo: 'credito', vencimento: d >= 1 && d <= 31 ? d : '', cor: COR_BANCO[b] || '#268AFF' });
+      await store.salvar('cartoes', { nome: b, banco: b, tipo: r.querySelector('[data-ob-tipo]').value || 'credito', vencimento: d >= 1 && d <= 31 ? d : '', cor: COR_BANCO[b] || '#268AFF' });
     }
     for (const b of f.querySelectorAll('[data-ob-cat]:not(.ativo)')) { const c = S.categorias.find((x) => x.id === b.dataset.obCat); if (c) await store.salvar('categorias', { ...c, arquivada: true }); }
     let k = 0; for (const b of f.querySelectorAll('[data-ob-cat-nova].ativo')) { const nome = b.dataset.obCatNova; if (!S.categorias.some((c) => c.nome.toLowerCase() === nome.toLowerCase())) await store.salvar('categorias', { nome, tipo: 'despesa', orcamento: 0, cor: ['#268AFF', '#77C800', '#FF9600', '#CE82FF', '#FF4B4B', '#1CB0F6'][(S.categorias.length + k++) % 6], arquivada: false }); }
@@ -1264,7 +1274,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=108" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=110" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
