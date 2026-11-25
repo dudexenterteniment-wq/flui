@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=66';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=66';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=66';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=66';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=66';
+import * as C from './calc.js?v=67';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=67';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=67';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=67';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=67';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -433,7 +433,7 @@ const chipsStatus = (tipo, sel) => { if (tipo === 'guardar') return '<input type
   return `<label>Situação</label><div class="seg seg-status">${ops.map(([k, n]) => `<button type="button" class="t-neutro ${k === v ? 'ativo' : ''}" data-status="${k}">${n}</button>`).join('')}</div><input type="hidden" name="status" value="${v}">`; };
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
-  const mes = l.mes || (ui.periodo.tipo === 'mes' ? mesRef() : C.mesAtual());
+  const mes = l.mes || C.mesAtual();
   const hojeISO = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
   const dataPadrao = l.data || (l.mes ? (l.mes === C.mesAtual() ? hojeISO : `${l.mes}-01`) : (mes === C.mesAtual() ? hojeISO : `${mes}-01`));
   abrirModal(`<form data-form="lanc" data-id="${l.id || ''}">${topoModal(l.id ? 'Editar lançamento' : 'Novo lançamento')}
