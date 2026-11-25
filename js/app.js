@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=62';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=62';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=62';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=62';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=62';
+import * as C from './calc.js?v=63';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=63';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=63';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=63';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=63';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -314,7 +314,7 @@ function telaPlano() {
   if (aba === 'fixos') {
     const linhaFixo = (r, entrada) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: entrada ? '#77C800' : '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
-        <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'todo mês'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}${!entrada && r.diaVenc ? ` · dia ${r.diaVenc}` : ''}</div></div>
+        <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'todo mês'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}</div></div>
       <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
     return `<h1>Planejamento</h1>${abas}
     <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
@@ -524,7 +524,7 @@ function modalFixo(r = {}, salario = false) {
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, r.categoriaId || (salario ? catSal?.id : ''))}</div></div>
     <div class="duas"><div class="campo"><label>Começa em</label>${mesSelect('f-ini', r.inicio || C.mesAtual())}</div>
       <div class="campo"><label>Termina em <span class="opc">opcional</span></label><label class="chave mini" style="margin-bottom:6px"><input type="checkbox" name="semFim" ${r.id && !r.fim ? 'checked' : !r.id ? 'checked' : ''}> sem data para acabar</label>${mesSelect('f-fim', r.fim || C.addMes(C.mesAtual(), 11))}</div></div>
-    <div class="duas"><div class="campo"><label>Dia de vencimento <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" name="diaVenc" value="${r.diaVenc || ''}"></div>
+    <div class="duas"><div class="campo ${tipo === 'entrada' ? '' : 'oculto'}" data-dia-renda><label>Dia que recebe <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="diaVenc" placeholder="Ex.: 5" value="${tipo === 'entrada' ? (r.diaVenc || '') : ''}"></div>
       <div class="campo"><label>Frequência</label><select class="inp" name="frequencia"><option value="mensal">Mensal</option><option value="anual" ${r.frequencia === 'anual' ? 'selected' : ''}>Anual</option></select></div></div>
     <div class="duas"><div class="campo"><label>Forma <span class="opc">opcional</span></label><select class="inp" name="forma"><option value="">—</option>${FORMAS.map((f) => `<option ${f === r.forma ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
       <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', r.banco)}</div></div>
@@ -742,6 +742,7 @@ document.addEventListener('click', async (e) => {
     const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove();
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
     const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.toggle('oculto', t !== 'despesa');
+    const dr = f.querySelector('[data-dia-renda]'); if (dr) dr.classList.toggle('oculto', t !== 'entrada');
     const mo = f.querySelector('[data-a=mais-opcoes]'); if (mo && mo.textContent.startsWith('+')) mo.textContent = t === 'despesa' ? '+ Mais opções (data, vencimento, observação)' : '+ Mais opções (data, observação)';
     if (t === 'guardar' && !st().settings.dicaGuardar) { let d = f.querySelector('.dica-guardar'); if (!d) { d = document.createElement('div'); d.className = 'dica-guardar'; d.innerHTML = `${svgIcone('alvo', 18)}<span><b>O que você guarda vai para as Metas.</b> Cada categoria de guardar tem uma meta. Lá você define quanto quer juntar e acompanha a barra enchendo.</span>`; f.querySelector('[data-seg]')?.after(d); } store.salvarSettings({ dicaGuardar: true }); }
     const sel = f.status; if (sel) sel.innerHTML = (t === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('');
@@ -1013,11 +1014,11 @@ document.addEventListener('submit', async (e) => {
       if (C.difMeses(antigo.inicio, desde) > 0 && (!fim || C.difMeses(desde, fim) >= 0)) {
         const pagosAntes = {}; const pagosDepois = {}; for (const [m, ok] of Object.entries(antigo.pagos || {})) (C.difMeses(desde, m) >= 0 ? pagosDepois : pagosAntes)[m] = ok;
         await store.salvar('recorrencias', { ...antigo, fim: C.addMes(desde, -1), pagos: pagosAntes });
-        await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio: desde, fim, diaVenc: parseInt(v('diaVenc'), 10) || '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: pagosDepois });
+        await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio: desde, fim, diaVenc: v('tipo') === 'entrada' ? (parseInt(v('diaVenc'), 10) || '') : '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: pagosDepois });
         fecharModal(); toast(`Novo valor a partir de ${C.nomeMes(desde)}. Os meses antes não mudaram.`, true); return;
       }
     }
-    await store.salvar('recorrencias', { ...antigo, id, tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: parseInt(v('diaVenc'), 10) || '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: antigo.pagos || {} });
+    await store.salvar('recorrencias', { ...antigo, id, tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: v('tipo') === 'entrada' ? (parseInt(v('diaVenc'), 10) || '') : '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: antigo.pagos || {} });
     fecharModal(); toast('Fixo salvo!');
   }
   if (tipoF === 'cat') {
