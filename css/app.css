@@ -533,3 +533,4 @@ label.btn { position: relative; }
 .tour-txt { font-size: 15px; font-weight: 600; color: var(--cinza); line-height: 1.4; }
 .tour-balao .tour-acoes { margin-top: 14px; }
 .tour-pontos { display: flex; gap: 5px; } .tour-pontos i { width: 7px; height: 7px; border-radius: 50%; background: var(--linha); } .tour-pontos i.on { background: var(--azul); width: 18px; border-radius: 4px; }
+[data-ob-cats] button { display: inline-flex; align-items: center; gap: 6px; } [data-ob-cats] button svg { flex: none; } [data-ob-cats] button:not(.ativo) { opacity: .45; text-decoration: line-through; }

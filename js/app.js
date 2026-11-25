@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=103';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=103';
-import { VAPID_KEY } from './config.js?v=103';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=103';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=103';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=103';
+import * as C from './calc.js?v=104';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=104';
+import { VAPID_KEY } from './config.js?v=104';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=104';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=104';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=104';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=104" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=104" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=103" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=104" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=104" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -723,12 +723,12 @@ function lembreteSetup() {
     <div class="lista checklist">${itens.map((x) => `<div class="item ${x.ok ? 'ok' : ''}" ${x.ok ? '' : `data-a="setup-ir" data-v="${x.ir}"`}><span class="ck">${x.ok ? '✓' : ''}</span><div class="meio"><div class="titulo">${x.txt}</div></div>${x.ok ? '' : '<span class="link-mais">Fazer ›</span>'}</div>`).join('')}</div>
     <div class="acoes"><button class="btn branco pequeno" data-a="setup-nunca">Não mostrar de novo</button><button class="btn verde pequeno" data-a="fechar">Agora não</button></div>`);
 }
-const OB_PASSOS = 4;
+const OB_PASSOS = 5;
 function modalBoasVindas() {
   const fala = (t) => `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">${t}</div></div>`;
   abrirModal(`<form data-form="boas-vindas" data-passo="1">
     <div class="ob-topo"><button type="button" class="ob-voltar oculto" data-a="ob-voltar" aria-label="Voltar">‹</button><div class="ob-barra"><span style="width:25%"></span></div></div>
-    <section data-ob="1">${fala('Oi! Eu sou o Flui. Vou te fazer 4 perguntinhas rápidas para deixar tudo pronto para você.')}
+    <section data-ob="1">${fala('Oi! Eu sou o Flui. Vou te fazer 5 perguntinhas rápidas para deixar tudo pronto para você.')}
       <div class="campo"><label>Como posso te chamar?</label><input autocapitalize="sentences" class="inp" name="nome" placeholder="Seu nome" autocomplete="given-name"></div></section>
     <section data-ob="2" class="oculto">${fala('Quanto você recebe por mês? Assim eu já te mostro quanto sobra.')}
       <div class="campo"><label>Salário ou renda fixa por mês</label><input class="inp" name="salario" inputmode="decimal" placeholder="R$ 0,00"></div>
@@ -737,7 +737,10 @@ function modalBoasVindas() {
     <section data-ob="3" class="oculto">${fala('Quais bancos você usa? Só eles vão aparecer nas listas do app.')}
       <div class="campo">${chipsBancos([])}</div>
       <div style="display:flex;gap:8px"><input autocapitalize="sentences" class="inp" data-ob-banco-novo placeholder="Não achou? Digite o nome"><button type="button" class="btn pequeno" data-a="ob-banco-add">Adicionar</button></div></section>
-    <section data-ob="4" class="oculto">${fala('Em quais desses você tem cartão de crédito? Me conta o dia que a fatura vence que eu te aviso antes.')}
+    <section data-ob="4" class="oculto">${fala('Com o que você costuma gastar? Deixe marcado só o que faz sentido para você.')}
+      <div class="campo"><div class="cats" data-ob-cats>${st().categorias.filter((c) => c.tipo === 'despesa' && !c.arquivada).sort(ordemCat).map((c) => `<button type="button" class="ativo" data-ob-cat="${c.id}">${catIcone(c, 16)} ${esc(c.nome)}</button>`).join('')}</div></div>
+      <div style="display:flex;gap:8px"><input autocapitalize="sentences" class="inp" data-ob-cat-nova placeholder="Falta alguma? Digite o nome"><button type="button" class="btn pequeno" data-a="ob-cat-add">Adicionar</button></div></section>
+    <section data-ob="5" class="oculto">${fala('Em quais desses você tem cartão de crédito? Me conta o dia que a fatura vence que eu te aviso antes.')}
       <div data-ob-cartoes></div></section>
     <div class="acoes"><button type="button" class="btn branco" data-a="ob-pular">Pular</button><button type="button" class="btn verde" data-a="ob-prox">Continuar</button></div></form>`);
 }
@@ -750,7 +753,7 @@ function obCartoes(f) {
 }
 function obIr(f, n) {
   n = Math.max(1, Math.min(OB_PASSOS, n)); f.dataset.passo = n;
-  if (n === 4) obCartoes(f);
+  if (n === 5) obCartoes(f);
   f.querySelectorAll('[data-ob]').forEach((s) => s.classList.toggle('oculto', +s.dataset.ob !== n));
   f.querySelector('.ob-barra span').style.width = `${(n / OB_PASSOS) * 100}%`;
   f.querySelector('.ob-voltar').classList.toggle('oculto', n === 1);
@@ -800,8 +803,10 @@ document.addEventListener('click', async (e) => {
     if (ccBox && e.target.matches('[data-ob-dia]')) { const cb = ccBox.querySelector('input[type=checkbox]'); if (!cb.checked) { cb.checked = true; ccBox.classList.add('on'); } return; }
     const ob = e.target.closest('[data-a^=ob-]')?.dataset.a; const n = +obF.dataset.passo;
     if (ob === 'ob-voltar') return obIr(obF, n - 1);
-    if (ob === 'ob-pular') { if (n === 2) { obF.salario.value = ''; obF.diaSalario.value = ''; } if (n === 4) obF.querySelectorAll('[data-ob-cc] input[type=checkbox]').forEach((c) => { c.checked = false; }); return n === OB_PASSOS ? enviarForm(obF) : obIr(obF, n + 1); }
+    if (ob === 'ob-pular') { if (n === 2) { obF.salario.value = ''; obF.diaSalario.value = ''; } if (n === 5) obF.querySelectorAll('[data-ob-cc] input[type=checkbox]').forEach((c) => { c.checked = false; }); return n === OB_PASSOS ? enviarForm(obF) : obIr(obF, n + 1); }
     if (ob === 'ob-prox') { if (n === 2 && obF.salario.value && !(parseValor(obF.salario.value) > 0)) return alert('Digite um valor válido ou toque em Pular.'); return n === OB_PASSOS ? enviarForm(obF) : obIr(obF, n + 1); }
+    const catB = e.target.closest('[data-ob-cat]'); if (catB) { catB.classList.toggle('ativo'); return; }
+    if (ob === 'ob-cat-add') { const inp = obF.querySelector('[data-ob-cat-nova]'); const v = inp.value.trim(); if (!v) return; const b = document.createElement('button'); b.type = 'button'; b.className = 'ativo'; b.dataset.obCatNova = v; b.textContent = v; b.addEventListener('click', () => b.classList.toggle('ativo')); obF.querySelector('[data-ob-cats]').appendChild(b); inp.value = ''; return; }
     if (ob === 'ob-banco-add') { const inp = obF.querySelector('[data-ob-banco-novo]'); const v = inp.value.trim(); if (!v) return; const ex = [...obF.querySelectorAll('[data-banco-tg]')].find((b) => b.dataset.bancoTg.toLowerCase() === v.toLowerCase());
       if (ex) { ex.classList.add('ativo'); ex.textContent = '✓ ' + ex.dataset.bancoTg; } else { const b = document.createElement('button'); b.type = 'button'; b.className = 'ativo'; b.dataset.bancoTg = v; b.textContent = '✓ ' + v; obF.querySelector('[data-bancos]').appendChild(b); }
       inp.value = ''; return; }
@@ -1134,6 +1139,8 @@ document.addEventListener('submit', async (e) => {
       const b = r.dataset.obCc; const d = parseInt(r.querySelector('input[type=number]').value, 10);
       await store.salvar('cartoes', { nome: b, banco: b, tipo: 'credito', vencimento: d >= 1 && d <= 31 ? d : '', cor: COR_BANCO[b] || '#268AFF' });
     }
+    for (const b of f.querySelectorAll('[data-ob-cat]:not(.ativo)')) { const c = S.categorias.find((x) => x.id === b.dataset.obCat); if (c) await store.salvar('categorias', { ...c, arquivada: true }); }
+    let k = 0; for (const b of f.querySelectorAll('[data-ob-cat-nova].ativo')) { const nome = b.dataset.obCatNova; if (!S.categorias.some((c) => c.nome.toLowerCase() === nome.toLowerCase())) await store.salvar('categorias', { nome, tipo: 'despesa', orcamento: 0, cor: ['#268AFF', '#77C800', '#FF9600', '#CE82FF', '#FF4B4B', '#1CB0F6'][(S.categorias.length + k++) % 6], arquivada: false }); }
     await store.salvarSettings({ nome: v('nome'), onboarding: true, bancos });
     perguntarTour(v('nome'));
   }
@@ -1207,7 +1214,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=103" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=104" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
