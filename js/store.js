@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=104';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=105';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -156,16 +156,28 @@ export class Store {
     try { await f(); this.erro = null; } catch (e) { console.error(e); this.erro = e; window.dispatchEvent(new CustomEvent('flui:erro', { detail: e })); }
   }
   async juntarTudo(novo) {
-    // categorias com o mesmo nome viram a mesma; o resto entra se ainda não existir
-    const mapa = {};
+    // categorias e cartões iguais (mesmo nome) viram o mesmo; o resto entra se ainda não existir
+    const mapa = {}; const mapaCartao = {};
     for (const c of novo.categorias || []) {
       const igual = this.st.categorias.find((x) => x.id === c.id || (x.nome === c.nome && x.tipo === c.tipo));
       if (igual) mapa[c.id] = igual.id; else await this.salvar('categorias', { ...c });
     }
-    for (const col of COLECOES.filter((x) => x !== 'categorias')) {
-      const ids = new Set((this.st[col] || []).map((x) => x.id));
-      for (const it of novo[col] || []) { if (ids.has(it.id)) continue; await this.salvar(col, { ...it, ...(it.categoriaId && mapa[it.categoriaId] ? { categoriaId: mapa[it.categoriaId] } : {}) }); }
+    const nomeK = (k) => `${(k.banco || '').toLowerCase()}|${(k.apelido || k.nome || '').toLowerCase()}|${k.tipo || ''}`;
+    for (const k of novo.cartoes || []) {
+      const igual = this.st.cartoes.find((x) => x.id === k.id || nomeK(x) === nomeK(k));
+      if (igual) { mapaCartao[k.id] = igual.id; if (!igual.vencimento && k.vencimento) await this.salvar('cartoes', { ...igual, vencimento: k.vencimento, fechamento: igual.fechamento || k.fechamento || '' }); }
+      else await this.salvar('cartoes', { ...k });
     }
+    const ajusta = (it) => ({ ...it, ...(it.categoriaId && mapa[it.categoriaId] ? { categoriaId: mapa[it.categoriaId] } : {}), ...(it.cartaoId && mapaCartao[it.cartaoId] ? { cartaoId: mapaCartao[it.cartaoId] } : {}) });
+    for (const col of COLECOES.filter((x) => x !== 'categorias' && x !== 'cartoes')) {
+      const ids = new Set((this.st[col] || []).map((x) => x.id));
+      for (const it of novo[col] || []) { if (ids.has(it.id)) continue; await this.salvar(col, ajusta(it)); }
+    }
+    // pagamentos e decisões de fatura (ficam nas configurações), com o cartão já trocado
+    const ns = novo.settings || {}; const at = this.st.settings || {}; const novoK = (k) => { const [id, m] = k.split('|'); return `${mapaCartao[id] || id}|${m}`; };
+    const junta = (campo) => { const out = { ...(at[campo] || {}) }; for (const [k, v] of Object.entries(ns[campo] || {})) { const k2 = novoK(k); if (!(k2 in out)) out[k2] = v; } return out; };
+    await this.salvarSettings({ faturasPagas: junta('faturasPagas'), pagamentosFatura: junta('pagamentosFatura'), faturaDecisoes: junta('faturaDecisoes'),
+      parcelasPagas: { ...(ns.parcelasPagas || {}), ...(at.parcelasPagas || {}) }, bancos: [...new Set([...(at.bancos || []), ...(ns.bancos || [])])] });
   }
   exportar() { return JSON.stringify({ app: 'Flui', formato: 1, exportadoEm: new Date().toISOString(), dados: this.st }, null, 2); }
 }
