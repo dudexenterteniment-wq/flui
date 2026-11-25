@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=28';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=28';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=28';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=28';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=28';
+import * as C from './calc.js?v=29';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=29';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=29';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=29';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=29';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -247,7 +247,7 @@ function telaCartoes() {
     } else {
       const fs = ms.slice().reverse().map((m) => ({ m, f: C.fatura(st(), sel.id, m) })).filter((x) => x.f.total > 0);
       painel = cab + (fs.length ? fs.map(({ m, f }) => `<div class="grupo-mes">${C.nomeMes(m, true)}</div>${blocoFatura(sel, f, m)}`).join('') : vazio('💳', 'Nenhuma fatura neste período.'))
-        + '<p class="mini" style="margin-top:14px">Marque cada compra que já pagou, registre um valor pago ou selecione tudo. Cada compra conta uma vez só, como despesa na categoria dela; pagar a fatura não cria uma nova despesa.</p>';
+        + '<p class="mini" style="margin-top:14px">Marque cada compra que já pagou, registre um valor pago ou selecione tudo.</p>';
     }
   }
   return `
