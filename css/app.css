@@ -444,3 +444,5 @@ label.btn { position: relative; }
 .chips-tipo::-webkit-scrollbar { display: none; }
 .chips-tipo .chip { flex: 0 0 auto; min-width: 27%; padding: 8px 14px; font-size: 14px; scroll-snap-align: start; }
 .marca-icone { background: none; overflow: hidden; } .marca-icone img { width: 100%; height: 100%; display: block; }
+.i-verde { position: relative; display: inline-block; }
+.i-verde::after { content: ''; position: absolute; left: 50%; top: 0.28em; width: 0.21em; height: 0.21em; transform: translateX(-50%); border-radius: 50%; background: var(--verde); }
