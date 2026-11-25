@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=50';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=50';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=50';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=50';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=50';
+import * as C from './calc.js?v=51';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=51';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=51';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=51';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=51';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -241,7 +241,7 @@ function telaCartoes() {
     } else {
       const fs = ms.slice().reverse().map((m) => ({ m, f: C.fatura(st(), sel.id, m) })).filter((x) => x.f.total > 0);
       painel = cab + (fs.length ? fs.map(({ m, f }) => `<div class="grupo-mes">${C.nomeMes(m, true)}</div>${blocoFatura(sel, f, m)}`).join('') : vazio('💳', 'Nenhuma fatura neste período.'))
-        + '<p class="mini" style="margin-top:10px">Marque o que já pagou ou selecione tudo.</p>';
+;
     }
   }
   return `
@@ -270,26 +270,25 @@ const textoDecisao = (d, m) => d.acao === 'paguei' ? 'Você marcou que pagou est
 function blocoFatura(c, f, m) {
   const k = `${c.id || 'sem'}|${m}`; const aberta = (ui.faturasAbertas ||= new Set()).has(k); const n = f.itens.length;
   return `<div class="card fatura ${aberta ? 'aberta' : ''}">
-    <div class="fatura-topo" data-a="fatura-toggle" data-k="${k}" role="button" aria-expanded="${aberta}">
+    <div class="fatura-topo">
     <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}${c.vencimento ? `<span class="mini" style="font-weight:700;margin-left:6px">vence dia ${c.vencimento}</span>` : ''}</h3><span class="fat-valores"><span class="num fat-total">${brl(f.total)}</span>${f.pago > 0 ? `<span class="num fat-pago">${brl(f.pago)} pago</span>` : ''}</span></div>
     <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
     <div class="mini" style="display:flex;justify-content:flex-end;margin-bottom:10px"><span>${f.decisao && f.decisao.acao !== 'paguei' && f.aberto <= 0 ? `<b style="color:var(--azul)">${f.decisao.acao === 'passar' ? 'Passou para o próximo mês' : 'Parcelada'}</b>` : f.paga ? '<b class="pos">Fatura paga ✓</b>' : `Falta <b>${brl(f.aberto)}</b>`}</span></div>
-    <div class="fatura-ver">${aberta ? 'Esconder compras' : `Ver ${n} ${n === 1 ? 'compra' : 'compras'}`}<span class="seta">▾</span></div></div>
+    </div>
+    <div class="pagar-fatura">
+      <label><span>Quanto já paguei</span><input class="inp num" inputmode="decimal" placeholder="R$ 0,00" value="${f.pago > 0 && !f.paga ? valorInput(f.pago) : ''}" data-valor-fatura="${k}"></label>
+      <button class="btn pequeno" data-a="fatura-valor" data-k="${k}">Salvar</button>
+      ${f.paga ? `<button class="btn branco pequeno" data-a="fatura-valor-limpa" data-k="${k}">Desfazer</button>` : `<button class="btn verde pequeno" data-a="fatura-tudo-pago" data-k="${k}" data-id="${c.id}" data-m="${m}">Paguei tudo</button>`}
+    </div>
+    <div class="fatura-ver" data-a="fatura-toggle" data-k="${k}">${aberta ? 'Esconder compras' : `Ver ${n} ${n === 1 ? 'compra' : 'compras'}`}<span class="seta">▾</span></div>
     <div class="fatura-corpo ${aberta ? '' : 'oculto'}">
-    <label class="chave"><input type="checkbox" data-a="fatura-tudo" data-id="${c.id}" data-m="${m}" ${f.tudoMarcado ? 'checked' : ''}> Selecionar tudo (paguei a fatura inteira)</label>
-    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela, paga }) => `<div class="item" ${compra.transferencia ? 'style="cursor:default"' : `data-a="editar-compra" data-id="${compra.id}"`}>
-      <label data-stop="1" style="display:flex;align-items:center" title="Marcar como pago"><input type="checkbox" data-a="item-pago" data-id="${compra.id}" data-m="${m}" ${paga ? 'checked' : ''} style="width:24px;height:24px;accent-color:var(--verde)"></label>
-      <div class="meio"><div class="titulo" style="${paga ? 'text-decoration:line-through;color:var(--cinza)' : ''}">${esc(compra.descricao)}</div><div class="det">${compra.transferencia ? 'veio da fatura anterior · não é gasto novo' : esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
+    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela }) => `<div class="item" ${compra.transferencia ? 'style="cursor:default"' : `data-a="editar-compra" data-id="${compra.id}"`}>
+      <div class="meio"><div class="titulo">${esc(compra.descricao)}</div><div class="det">${compra.transferencia ? 'veio da fatura anterior · não é gasto novo' : esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
       <div class="valor num">${brl(parcela.valor)}</div></div>`).join('')}</div>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
-      <span class="mini">Quanto já paguei no total:</span>
-      <input class="inp num" style="width:130px;padding:8px 12px" inputmode="decimal" placeholder="R$ 0,00" data-valor-fatura="${k}">
-      <button class="btn pequeno" data-a="fatura-valor" data-k="${k}">Registrar</button>
-      ${f.avulso ? `<span class="mini">você pagou ${brl(f.avulso)} <button class="btn fantasma pequeno" data-a="fatura-valor-limpa" data-k="${k}">zerar</button></span>` : ''}
     </div>
     ${f.decisao ? `<div class="decisao-info"><span>${textoDecisao(f.decisao, m)}</span><button class="btn fantasma pequeno" data-a="desfazer-decisao" data-id="${c.id}" data-m="${m}">Desfazer</button></div>`
       : f.aberto > 0 ? `<button class="btn branco" style="width:100%;margin-top:12px" data-a="decidir-fatura" data-id="${c.id}" data-m="${m}">Não deu para pagar tudo? Passar ou parcelar</button>` : ''}
-    </div></div>`;
+    </div>`;
 }
 function comprometido(cartaoId) {
   const m0 = C.mesAtual(); let t = 0;
@@ -828,9 +827,11 @@ document.addEventListener('click', async (e) => {
     case 'excluir-meta': if (confirm('Excluir esta meta?')) { await store.remover('metas', $('[data-form=meta]').dataset.id); fecharModal(); } break;
     case 'fatura-valor': { const k = el.dataset.k; const inp = document.querySelector(`[data-valor-fatura="${k}"]`); const v = parseValor(inp?.value);
       if (!(v > 0)) { toast('Digite quanto você pagou.'); break; }
-      const pf = { ...(S.settings.pagamentosFatura || {}) }; pf[k] = v;
+      const pf = { ...(S.settings.pagamentosFatura || {}) }; pf[k] = v; if (!(v > 0)) { toast('Digite quanto você pagou.'); break; }
       await store.salvarSettings({ pagamentosFatura: pf }); toast(`Anotado: você pagou ${brl(v)} desta fatura.`); render(); break; }
-    case 'fatura-valor-limpa': { const pf = { ...(S.settings.pagamentosFatura || {}) }; delete pf[el.dataset.k]; await store.salvarSettings({ pagamentosFatura: pf }); render(); break; }
+    case 'fatura-tudo-pago': { const f0 = C.fatura(S, el.dataset.id || '', el.dataset.m); const pf = { ...(S.settings.pagamentosFatura || {}), [el.dataset.k]: f0.total };
+      await store.salvarSettings({ pagamentosFatura: pf }); toast('Fatura paga! 💚', true); render(); break; }
+    case 'fatura-valor-limpa': { const pf = { ...(S.settings.pagamentosFatura || {}), [el.dataset.k]: 0 }; const fp = { ...(S.settings.faturasPagas || {}) }; delete fp[el.dataset.k]; await store.salvarSettings({ pagamentosFatura: pf, faturasPagas: fp }); render(); break; }
     case 'cat-nova': {
       const w = el.closest('[data-cats-wrap]'); if (!w) break;
       el.outerHTML = `<span style="display:inline-flex;gap:6px;align-items:center" data-cat-nova-box><input autocapitalize="sentences" class="inp" style="padding:7px 12px;width:170px" placeholder="Nome da categoria" data-cat-nova-nome data-tipo-cat="${el.dataset.tipoCat}"><button type="button" class="btn pequeno verde" data-a="cat-nova-ok">OK</button></span>`;

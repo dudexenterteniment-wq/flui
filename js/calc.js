@@ -182,8 +182,10 @@ export function fatura(st, cartaoId, m) {
   const total = sum(itens, (x) => x.parcela.valor);
   const pagoItens = sum(itens.filter((x) => x.paga), (x) => x.parcela.valor);
   const avulso = Number(((st.settings || {}).pagamentosFatura || {})[`${cartaoId || 'sem'}|${m}`]) || 0;
-  // 'Paguei um valor' é o total pago da fatura; não soma de novo com as compras marcadas (vale o maior dos dois)
-  const pago = fromCents(Math.min(cents(total), Math.max(cents(pagoItens), cents(avulso))));
+  // o que vale é o VALOR pago da fatura; 'fatura paga' marca tudo; compras marcadas (versões antigas) só contam se não houver valor
+  const pgMap = (st.settings || {}).pagamentosFatura || {}; const temValor = Object.prototype.hasOwnProperty.call(pgMap, `${cartaoId || 'sem'}|${m}`);
+  const tudoPago = !!((st.settings || {}).faturasPagas || {})[`${cartaoId || 'sem'}|${m}`];
+  const pago = fromCents(Math.min(cents(total), tudoPago ? cents(total) : temValor ? cents(avulso) : cents(pagoItens)));
   const decisao = decisaoFatura(st, cartaoId, m);
   const transferido = decisao && (decisao.acao === 'passar' || decisao.acao === 'parcelar') ? fromCents(Math.min(cents(decisao.principal), cents(total) - cents(pago))) : 0;
   const aberto = fromCents(cents(total) - cents(pago) - cents(transferido));

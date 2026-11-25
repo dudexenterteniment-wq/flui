@@ -405,3 +405,8 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .aviso.amarelo { background: #FFF8D6; border-color: #FFE08A; }
 .aviso-fatura { border-color: #FFD24D; background: #FFF8D6; } .aviso-fatura .btn.verde { background: var(--laranja); box-shadow: 0 4px 0 #CC7800; }
 .aviso-fatura.vencida .btn.verde { background: var(--vermelho); box-shadow: 0 4px 0 var(--vermelho-esc); }
+
+.pagar-fatura { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin: 4px 0 12px; }
+.pagar-fatura label { flex: 1; min-width: 130px; display: grid; gap: 4px; } .pagar-fatura label span { font-size: 12px; font-weight: 900; color: var(--cinza); text-transform: uppercase; }
+.pagar-fatura .inp { padding: 9px 12px; }
+.fatura-ver { cursor: pointer; }
