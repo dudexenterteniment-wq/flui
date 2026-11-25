@@ -61,7 +61,7 @@ export function entender(it) {
   const partes = t.split(' - ').map((x) => x.trim());
   let forma = ''; let descricao = titulo(t);
   if (T.startsWith('COMPRA NO DEBITO')) { forma = 'Débito'; descricao = titulo(partes.slice(1).join(' - ')); }
-  else if (T.includes('PIX')) { forma = 'Pix'; descricao = (entrada ? 'Pix de ' : 'Pix para ') + titulo(partes[1] || ''); }
+  else if (T.includes('PIX')) { forma = 'Débito'; descricao = (entrada ? 'Pix de ' : 'Pix para ') + titulo(partes[1] || ''); }
   else if (T.startsWith('TRANSFERENCIA')) { forma = 'Transferência'; descricao = (entrada ? 'Transferência de ' : 'Transferência para ') + titulo(partes[1] || ''); }
   else if (T.startsWith('PAGAMENTO DE BOLETO')) { forma = 'Boleto'; descricao = 'Boleto ' + titulo(partes.slice(1).join(' - ')); }
   descricao = descricao.replace(/^Ifd\*/i, 'iFood · ').replace(/\s+/g, ' ').trim();

@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=63';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=63';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=63';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=63';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=63';
+import * as C from './calc.js?v=64';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=64';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=64';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=64';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=64';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -228,7 +228,7 @@ function telaCartoes() {
   const temCred = (c) => ehCredito(c); const temDeb = (c) => c.id && (c.tipo === 'debito' || c.tipo === 'ambos');
   if (sel) { const abas = [temCred(sel) && 'fatura', temDeb(sel) && 'debito'].filter(Boolean); if (!abas.includes(ui.abaCartao)) ui.abaCartao = abas[0]; }
   const totMes = (cid, m) => C.fatura(st(), cid, m).total;
-  const debitos = (c) => ms.flatMap((m) => C.movimentosDoMes(st(), m)).filter((x) => x.tipo !== 'entrada' && x.forma === 'Débito' && c.banco && x.banco === c.banco);
+  const debitos = (c) => ms.flatMap((m) => C.movimentosDoMes(st(), m)).filter((x) => x.tipo !== 'entrada' && (x.forma === 'Débito' || x.forma === 'Pix') && c.banco && x.banco === c.banco);
   const convite = (c) => temCred(c) && temDeb(c) ? 'Ver fatura e débito' : temDeb(c) ? 'Ver débito' : 'Ver fatura';
   let painel = '';
   if (sel) {
@@ -437,7 +437,7 @@ function modalLanc(l = {}) {
     <div class="campo"><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${l.valor ? valorInput(l.valor) : ''}" required autocomplete="off"></div>
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, l.categoriaId)}</div></div>
     <div class="campo"><label>Descrição <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="descricao" value="${esc(l.descricao || '')}" placeholder="Ex.: almoço com a equipe"></div>
-    <div class="campo"><label>Como pagou?</label><div class="cats">${['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${(l.forma || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma || '')}"></div>
+    <div class="campo"><label>Como pagou?</label><div class="cats">${['Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${((l.forma === 'Pix' ? 'Débito' : l.forma) || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma === 'Pix' ? 'Débito' : l.forma || '')}"></div>
     <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
     <div data-credito class="${l.forma === 'Crédito' && !l.id ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
@@ -1083,6 +1083,8 @@ async function garantirMetas() {
 }
 async function migrar() {
   await garantirMetas();
+  // Pix vira Débito em todo lugar (mesmo dinheiro da conta)
+  for (const col of ['lancamentos', 'recorrencias']) for (const x of st()[col].filter((i) => i.forma === 'Pix')) await store.salvar(col, { ...x, forma: 'Débito' });
   const S = st(); const velha = S.categorias.find((c) => c.nome === 'Fatura do cartão');
   if (velha) {
     let outros = S.categorias.find((c) => c.nome === 'Outros' && c.tipo === 'despesa');

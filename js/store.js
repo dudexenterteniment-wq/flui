@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=63';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=64';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -7,7 +7,7 @@ export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().to
 const CORES = ['#268AFF', '#77C800', '#FF9600', '#CE82FF', '#FF4B4B', '#1CB0F6', '#FFC800', '#2BDCA0', '#FF86D0', '#8E6CFF', '#A5683B', '#58A700', '#0F6BD8', '#E5A200', '#7C8A9A', '#3BB9A0'];
 export const BANCOS_CATALOGO = ['Nubank', 'Itaú', 'Bradesco', 'Banco do Brasil', 'Caixa', 'Santander', 'Inter', 'C6 Bank', 'Mercado Pago', 'PicPay', 'PagBank', 'Neon', 'Next', 'BTG Pactual', 'XP', 'Banco Pan', 'BV', 'Original', 'Digio', 'Will Bank', 'Agibank', 'Safra', 'Sicoob', 'Sicredi', 'Banrisul', 'BRB', 'Banco do Nordeste', 'Nomad', 'Wise', 'RecargaPay', 'Méliuz', 'Iti'];
 export const BANCOS_PADRAO = [];
-export const FORMAS = ['Pix', 'Débito', 'Dinheiro', 'Transferência', 'Boleto', 'Outro'];
+export const FORMAS = ['Débito', 'Dinheiro', 'Transferência', 'Boleto', 'Outro'];
 
 export function modeloInicial() {
   const c = (nome, tipo, orcamento = 0, i = 0) => ({ id: uid(), nome, tipo, orcamento, cor: CORES[i % CORES.length], arquivada: false });
