@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=58';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=58';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=58';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=58';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=58';
+import * as C from './calc.js?v=59';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=59';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=59';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=59';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=59';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -211,9 +211,8 @@ function telaLancamentos() {
   <hr class="fina">
   <div class="chips" style="margin-bottom:10px">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado'], ['fixos', 'Fixos']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
     ${ui.filtroCat ? `<button class="chip ativo" data-a="filtro-cat-limpa">${esc(catNome(ui.filtroCat))} ×</button>` : ''}</div>
-  ${ui.filtroTipo === 'fixos' ? '<div class="fixos-dica"><span class="mini">Repetem todo mês. Toque para editar.</span><span style="display:flex;gap:6px"><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button><button class="btn pequeno" data-a="novo-fixo">+ Fixo</button></span></div>' : ''}
+  ${ui.filtroTipo === 'fixos' ? '<div class="fixos-dica"><span></span><span style="display:flex;gap:6px"><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button><button class="btn pequeno" data-a="novo-fixo">+ Fixo</button></span></div>' : ''}
   <input class="inp" placeholder="Buscar por descrição, categoria, banco..." data-a="busca" value="${esc(ui.busca)}" style="margin-bottom:12px">
-  <div class="mini" style="margin-bottom:4px">Entradas <b class="pos">${brl(tot('entrada'))}</b> · Despesas <b>${brl(tot('despesa'))}</b> · Guardado <b>${brl(tot('guardar'))}</b></div>
   ${porMes.length ? porMes.map(([m, l]) => `<div class="grupo-mes">${C.nomeMes(m, true)}</div><div class="lista">${l.map(itemMov).join('')}</div>`).join('') : vazio('🔎', 'Nada por aqui neste período.')}
   `;
 }
