@@ -557,3 +557,4 @@ label.btn { position: relative; }
 .assin-linha .chave { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } .assin-linha .num { margin-left: auto; color: var(--cinza); font-weight: 800; }
 .assin-ate { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; } .assin-ate .inp { width: auto; padding: 6px 8px; }
 .imp-dica { background: #FFF6DB; border-radius: 10px; padding: 8px 10px; }
+.imp-para { font-size: 12px; font-weight: 800; color: var(--azul); margin-top: 6px; } .imp-cat.guardar { border-color: var(--azul); }
