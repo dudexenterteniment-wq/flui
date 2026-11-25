@@ -51,7 +51,7 @@ export const ICONE_POR_NOME = {
   'Academia': 'academia', 'Assinaturas': 'assinatura', 'Roupa': 'roupa', 'Presentes': 'presente', 'Dízimo': 'igreja', 'Ofertas e doações': 'coracao', 'Contas de casa': 'casa',
   'Outros': 'caixa', 'Juros e tarifas': 'juros', 'Fundo de emergência': 'boia', 'Reserva de emergência': 'boia', 'Investimentos': 'investimento', 'Investimento': 'investimento',
   'Viagem': 'mala', 'Viagens': 'mala', 'Salário': 'trabalho', 'Entrada extra': 'moedas', 'Freela': 'notebook', 'Presente recebido': 'estrela', 'Reembolso': 'reembolso',
-  'Venda': 'etiqueta', 'Rendimento': 'broto', 'Transporte': 'onibus', 'Uber': 'carro', 'Carro': 'carro', 'Saúde': 'saude', 'Educação': 'livro', 'Pet': 'pet', 'Beleza': 'brilho',
+  'Venda': 'etiqueta', 'Compras online': 'etiqueta', 'Rendimento': 'broto', 'Transporte': 'onibus', 'Uber': 'carro', 'Carro': 'carro', 'Saúde': 'saude', 'Educação': 'livro', 'Pet': 'pet', 'Beleza': 'brilho',
   'Lazer': 'ingresso', 'Casamento': 'anel', 'Casa': 'casa', 'Café': 'cafe', 'Música': 'musica', 'Celular': 'celular', 'Luz': 'luz', 'Conta de luz': 'luz',
 };
 export const svgIcone = (k, tam = 22) => `<svg viewBox="0 0 24 24" width="${tam}" height="${tam}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICS[k] || ICS.caixa}</svg>`;
