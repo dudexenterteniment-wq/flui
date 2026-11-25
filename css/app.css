@@ -558,3 +558,5 @@ label.btn { position: relative; }
 .assin-ate { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; } .assin-ate .inp { width: auto; padding: 6px 8px; }
 .imp-dica { background: #FFF6DB; border-radius: 10px; padding: 8px 10px; }
 .imp-para { font-size: 12px; font-weight: 800; color: var(--azul); margin-top: 6px; } .imp-cat.guardar { border-color: var(--azul); }
+.abas-plano .aba-fixos { color: #fff !important; background: #FF9600 !important; box-shadow: 0 3px 0 #D97F00 !important; border-color: #FF9600 !important; font-weight: 900; }
+.abas-plano .aba-fixos:not(.ativo) { opacity: .85; } .abas-plano .aba-fixos.ativo { opacity: 1; }
