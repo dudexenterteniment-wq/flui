@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=82';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=82';
-import { VAPID_KEY } from './config.js?v=82';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=82';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=82';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=82';
+import * as C from './calc.js?v=84';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=84';
+import { VAPID_KEY } from './config.js?v=84';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=84';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=84';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=84';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -32,20 +32,20 @@ const NAV = [
   ['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançamentos', ICON.lanc], ['cartoes', 'Cartões', ICON.cartao],
   ['plano', 'Planejamento', ICON.plano], ['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas],
   ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]];
-const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar', ICON.lanc], ['cartoes', 'Cartões', ICON.cartao], ['plano', 'Plano', ICON.plano], ['mais', 'Mais', ICON.mais]];
+const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar', ICON.lanc], ['relatorios', 'Análise', ICON.relat], ['cartoes', 'Cartões', ICON.cartao], ['plano', 'Plano', ICON.plano]];
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=82" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=84" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=82" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=84" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
     <aside class="lateral">${marca()}${NAV.map(([r, n, i]) => `<a class="nav-item ${r === rota ? 'ativo' : ''}" href="#${r}">${i}<span>${n}</span></a>`).join('')}
       <div style="margin-top:auto" class="mini">${store.modo === 'local' ? 'Modo de teste: dados só neste navegador' : esc(store.user.email)}</div></aside>
-    <main class="principal"><div class="topo-movel">${marca(true)}<span style="display:flex;align-items:center;gap:10px"><span class="sequencia">${seqHtml()}</span>${sino()}</span></div><div class="topo-desk">${sino()}</div>${tela()}</main>
-    <nav class="barra-inferior">${NAV_MOVEL.map(([r, n, i]) => `<a class="nav-item ${r === rota || (r === 'mais' && ['relatorios', 'metas', 'categorias', 'config'].includes(rota)) ? 'ativo' : ''}" href="#${r}">${i}<span>${n}</span></a>`).join('')}</nav>
+    <main class="principal"><div class="topo-movel">${marca(true)}<span style="display:flex;align-items:center;gap:10px"><span class="sequencia">${seqHtml()}</span>${sino()}<a class="sino botao-mais ${['mais', 'metas', 'categorias', 'config'].includes(rota) ? 'ativo' : ''}" href="#mais" aria-label="Mais">${ICON.mais}</a></span></div><div class="topo-desk">${sino()}</div>${tela()}</main>
+    <nav class="barra-inferior">${NAV_MOVEL.map(([r, n, i]) => `<a class="nav-item ${r === 'relatorios' ? 'nav-destaque' : ''} ${r === rota ? 'ativo' : ''}" href="#${r}">${r === 'relatorios' ? `<i class="nd-bola">${i}</i>` : i}<span>${n}</span></a>`).join('')}</nav>
     ${['inicio', 'lancamentos', 'cartoes'].includes(rota) ? '<button class="btn verde fab" data-a="novo-lanc" aria-label="Novo lançamento">+</button>' : ''}
   </div>${ui.modal ? ui.modal.html : ''}`;
   if (ui.modal?.depois) ui.modal.depois();
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=82" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=84" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=82" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=84" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -407,7 +407,7 @@ function blocoPush() {
   return '<p class="mini">Aviso quando a fatura fecha, quando vai vencer e no dia do salário.</p><button class="btn verde pequeno" data-a="push-ativar">Ativar notificações</button>';
 }
 function telaMais() {
-  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
+  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
 }
 function telaConfig() {
   const s = st().settings;
@@ -1178,7 +1178,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=82" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=84" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
