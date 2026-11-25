@@ -570,3 +570,7 @@ label.btn { position: relative; }
 body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
 .conta-resumo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; } .conta-resumo div { background: #F7F7F7; border-radius: 12px; padding: 8px 12px; } .conta-resumo span { display: block; font-size: 12px; font-weight: 800; color: var(--cinza); text-transform: uppercase; } .conta-resumo b { font-size: 18px; } .conta-resumo .pos { color: #58A700; } .conta-resumo .neg { color: var(--vermelho); }
 .aviso-falta { display: flex; align-items: center; gap: 10px; } .aviso-falta span { flex: 1; } .af-x { border: none; background: rgba(255,75,75,.15); color: var(--vermelho-esc, #C23434); width: 30px; height: 30px; border-radius: 50%; font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
+.metas-escolha { display: grid; gap: 8px; }
+.meta-op { display: flex; align-items: center; gap: 10px; width: 100%; background: #fff; border: 2px solid var(--linha); border-bottom-width: 4px; border-radius: 14px; padding: 10px 12px; font: inherit; text-align: left; cursor: pointer; color: inherit; }
+.meta-op.ativo { border-color: #58CC02; background: #F3FAEA; } .meta-op .cat-ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #fff; flex: none; }
+.mo-txt { flex: 1; min-width: 0; display: grid; gap: 3px; } .mo-txt small { color: var(--cinza); font-weight: 700; font-size: 12px; } .mo-prog { height: 7px; margin: 2px 0 0; }

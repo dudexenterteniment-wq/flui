@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=138';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=138';
-import { VAPID_KEY } from './config.js?v=138';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=138';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=138';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=138';
+import * as C from './calc.js?v=139';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=139';
+import { VAPID_KEY } from './config.js?v=139';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=139';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=139';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=139';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=138" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=139" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=138" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=139" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=138" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=139" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=138" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=139" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -458,7 +458,11 @@ const selBanco = (nome, v) => { const bs = st().settings.bancos || []; if (!v &&
 const chipsBancos = (sel) => { const todos = [...new Set([...BANCOS_CATALOGO, ...sel])]; return `<div class="cats" data-bancos>${todos.map((b) => `<button type="button" class="${sel.includes(b) ? 'ativo' : ''}" data-banco-tg="${esc(b)}">${sel.includes(b) ? '✓ ' : ''}${esc(b)}</button>`).join('')}</div>`; };
 const FIM = ['Outros', 'Fatura do cartão'];
 const ordemCat = (a, b) => (FIM.indexOf(a.nome) - FIM.indexOf(b.nome)) || a.nome.localeCompare(b.nome, 'pt-BR');
-const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic" style="background:${c.cor}">${catIcone(c, 14)}</span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
+const metasEscolha = (sel) => { const S = st(); const cats = S.categorias.filter((c) => c.tipo === 'guardar' && (!c.arquivada || c.id === sel)).sort(ordemCat);
+  return `<div class="metas-escolha" data-cats>${cats.map((c) => { const mt = S.metas.find((m) => m.categoriaId === c.id); const pg = mt ? C.progressoMeta(S, mt) : null;
+    return `<button type="button" class="meta-op ${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic" style="background:${c.cor}">${catIcone(c, 16)}</span><span class="mo-txt"><b>${esc(mt?.nome || c.nome)}</b>${pg && pg.alvo > 0 ? `<span class="prog verde mo-prog"><i style="width:${Math.round(pg.pct * 100)}%"></i></span><small>${brl0(pg.atual)} de ${brl0(pg.alvo)}</small>` : `<small>${pg ? brl0(pg.atual) + ' guardados' : 'sem objetivo definido'}</small>`}</span></button>`; }).join('')}
+    <button type="button" class="meta-op nova" data-a="cat-nova" data-tipo-cat="guardar"><span class="cat-ic" style="background:none;border:2px dashed var(--linha);color:var(--azul)">+</span><span class="mo-txt"><b style="color:var(--azul)">Novo objetivo</b><small>ex.: viagem, carro, reserva</small></span></button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`; };
+const chipsCat = (tipo, sel) => tipo === 'guardar' ? metasEscolha(sel) : `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic" style="background:${c.cor}">${catIcone(c, 14)}</span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
 
 const chipsStatus = (tipo, sel) => { if (tipo === 'guardar') return '<input type="hidden" name="status" value="pago">';
   const ops = tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'Vou receber']] : [['pago', 'Pago'], ['pendente', 'Vou pagar']];
@@ -473,7 +477,7 @@ function modalLanc(l = {}) {
     <div class="seg" data-seg="tipo">${[['despesa', 'Despesa'], ['entrada', 'Entrada'], ['guardar', 'Guardar']].map(([t, n]) => `<button type="button" class="t-${t} ${t === tipo ? 'ativo' : ''}" data-tipo="${t}">${n}</button>`).join('')}</div>
     <input type="hidden" name="tipo" value="${tipo}">
     <div class="campo"><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${l.valor ? valorInput(l.valor) : ''}" required autocomplete="off"></div>
-    <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, l.categoriaId)}</div></div>
+    <div class="campo"><label data-cat-label>${tipo === 'guardar' ? 'Para qual objetivo?' : 'Categoria'}</label><div data-cats-wrap>${chipsCat(tipo, l.categoriaId)}</div></div>
     <div class="campo"><label>Descrição <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="descricao" value="${esc(l.descricao || '')}" placeholder="Ex.: almoço com a equipe"></div>
     <div class="campo"><label>Como pagou?</label><div class="cats">${['Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" class="${((l.forma === 'Pix' ? 'Débito' : l.forma) || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma === 'Pix' ? 'Débito' : l.forma || '')}"></div>
     <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', l.banco)}</div>
@@ -892,7 +896,7 @@ document.addEventListener('click', async (e) => {
   if (tipoBtn) {
     const f = tipoBtn.closest('form'); const t = tipoBtn.dataset.tipo; f.tipo.value = t;
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
-    const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove();
+    const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove(); const lb = f.querySelector('[data-cat-label]'); if (lb) lb.textContent = t === 'guardar' ? 'Para qual objetivo?' : 'Categoria';
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
     const sw = f.querySelector('[data-status-wrap]'); if (sw) sw.innerHTML = chipsStatus(t, '');
     const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.add('oculto');
@@ -1446,7 +1450,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=138" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=139" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
