@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=48';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=48';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=48';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=48';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=48';
+import * as C from './calc.js?v=49';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=49';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=49';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=49';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=49';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -133,7 +133,7 @@ function avisos() {
         : { k, cor: 'laranja', ic: '👀', txt: `Olha quem está quase passando do limite! Você já usou <b>${pct(x.pct)}</b> do orçamento de ${esc(x.cat.nome.toLowerCase())}. Vamos ficar de olho?` });
     }
   }
-  for (const { cartao, m, f, fechou, venceu, vence } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: venceu ? 'vermelho' : 'azul', ic: venceu ? '⚠️' : '💳', txt: venceu ? `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} <b>venceu dia ${vence.getDate()}</b> com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` : `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()} com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
+  for (const { cartao, m, f, fechou, venceu, vence } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: venceu ? 'vermelho' : 'amarelo', ic: venceu ? '⚠️' : '💳', txt: venceu ? `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} <b>venceu dia ${vence.getDate()}</b> com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` : `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()} com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
   for (const v of C.proximosVencimentos(st(), hoje, 7)) {
     const k = `venc|${v.tipo}|${v.ref}|${v.mes || ''}`; if (vistos[k]) continue;
     const dias = Math.round((v.data - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) / 864e5);
