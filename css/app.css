@@ -582,7 +582,7 @@ body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
 @keyframes avisoIn { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 [hidden] { display: none !important; }
 .mes-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.repete-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 2px solid var(--borda, #E5E5E5); border-bottom-width: 4px; border-radius: 14px; font-weight: 800; color: var(--cinza, #777); cursor: pointer; user-select: none; background: #fff; }
+.repete-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 2px solid var(--borda, #E5E5E5); border-bottom-width: 4px; border-radius: 14px; font-weight: 800; color: var(--verde-esc); cursor: pointer; user-select: none; background: #fff; }
 .repete-chip input { position: absolute; opacity: 0; pointer-events: none; }
-.repete-chip:has(input:checked) { border-color: #1CB0F6; background: #E5F5FE; color: #1899D6; }
+.repete-chip:has(input:checked) { border-color: var(--verde); background: var(--verde-claro); color: var(--verde-esc); }
 .repete-box { margin: -6px 0 14px; }
