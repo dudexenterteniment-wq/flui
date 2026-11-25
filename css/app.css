@@ -535,3 +535,8 @@ label.btn { position: relative; }
 .tour-pontos { display: flex; gap: 5px; } .tour-pontos i { width: 7px; height: 7px; border-radius: 50%; background: var(--linha); } .tour-pontos i.on { background: var(--azul); width: 18px; border-radius: 4px; }
 [data-ob-cats] button { display: inline-flex; align-items: center; gap: 6px; } [data-ob-cats] button svg { flex: none; } [data-ob-cats] button:not(.ativo) { opacity: .45; text-decoration: line-through; }
 .op-dec:disabled { opacity: .45; cursor: default; }
+.imp-dests { display: grid; gap: 8px; }
+.imp-dest { display: flex; align-items: center; gap: 12px; width: 100%; background: #fff; border: 2px solid var(--linha); border-bottom-width: 4px; border-radius: 16px; padding: 10px 12px; font: inherit; text-align: left; cursor: pointer; color: inherit; }
+.imp-dest.ativo { border-color: var(--azul); background: var(--azul-claro); }
+.imp-dest b { display: block; } .imp-dest small { display: block; color: var(--cinza); font-weight: 600; }
+.imp-dest-cor { width: 34px; height: 24px; border-radius: 6px; flex: none; } .imp-ok { margin-left: auto; color: var(--azul); font-weight: 900; }
