@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=45';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=45';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=45';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=45';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=45';
+import * as C from './calc.js?v=46';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=46';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=46';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=46';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=46';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -133,7 +133,7 @@ function avisos() {
         : { k, cor: 'laranja', ic: '👀', txt: `Olha quem está quase passando do limite! Você já usou <b>${pct(x.pct)}</b> do orçamento de ${esc(x.cat.nome.toLowerCase())}. Vamos ficar de olho?` });
     }
   }
-  for (const { cartao, m, f } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: 'azul', ic: '💳', txt: `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.nomeMes(m)} fechou com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
+  for (const { cartao, m, f, fechou } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: 'azul', ic: '💳', txt: `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()} com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
   for (const v of C.proximosVencimentos(st(), hoje, 7)) {
     const k = `venc|${v.tipo}|${v.ref}|${v.mes || ''}`; if (vistos[k]) continue;
     const dias = Math.round((v.data - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) / 864e5);
@@ -152,7 +152,6 @@ function telaInicio() {
   const leg = ui.legendaToda ? desp : desp.slice(0, 4);
   return `
   <h1 class="titulo-pag">Início</h1>
-  ${bannerFaturas()}
   ${filtroPeriodo()}
   <div class="grade g4 kpis">
     ${kpi('Entrou', r.entradas, 'verde')}${kpi('Gastou', r.despesas, 'laranja')}${kpi('Guardou', r.guardado, 'azul')}
