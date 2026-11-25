@@ -1,5 +1,5 @@
 // Flui — utilidades de interface: formatação, ícones, gráficos em SVG (sem dependências)
-import { nomeMes } from './calc.js?v=145';
+import { nomeMes } from './calc.js?v=146';
 
 const FMT = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 export const brl = (v) => FMT.format(Number(v) || 0);
@@ -75,4 +75,11 @@ export function toast(msg, festa = false) {
   document.querySelectorAll('.toast').forEach((t) => t.remove());
   const t = document.createElement('div'); t.className = 'toast' + (festa ? ' festa' : ''); t.textContent = msg;
   document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+
+export function aviso(msg) {
+  document.querySelectorAll('.aviso-app').forEach((t) => t.remove());
+  const t = document.createElement('div'); t.className = 'aviso-app'; t.setAttribute('role', 'alert'); t.textContent = msg;
+  t.addEventListener('click', () => t.remove());
+  document.body.appendChild(t); setTimeout(() => t.remove(), 4500);
 }
