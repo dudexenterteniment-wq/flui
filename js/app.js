@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=33';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=33';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=33';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=33';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=33';
+import * as C from './calc.js?v=34';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=34';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=34';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=34';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=34';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -84,9 +84,9 @@ function filtroPeriodo() {
   const tipos = [['mes', 'Mês'], ['ano', 'Ano'], ['custom', 'Personalizado']];
   if (p.tipo === 'tri' || p.tipo === 'sem') p.tipo = 'mes';
   return `<div class="periodo">
-    ${p.tipo !== 'custom' ? `<button class="seta" data-a="per-ant" aria-label="Anterior">‹</button><div class="rotulo">${esc(cap(C.nomePeriodo(p)))}</div><button class="seta" data-a="per-prox" aria-label="Próximo">›</button>` :
-      `<div class="chips">${mesSelect('per-de', p.de)} <span class="mini">até</span> ${mesSelect('per-ate', p.ate)}</div>`}
     <div class="seg-periodo">${tipos.map(([t, n]) => `<button class="${p.tipo === t ? 'ativo' : ''}" data-a="per-tipo" data-v="${t}">${n}</button>`).join('')}</div>
+    ${p.tipo !== 'custom' ? `<div class="per-nav"><button class="seta" data-a="per-ant" aria-label="Anterior">‹</button><div class="rotulo">${esc(cap(C.nomePeriodo(p)))}</div><button class="seta" data-a="per-prox" aria-label="Próximo">›</button></div>` :
+      `<div class="per-nav per-custom"><span class="per-lin"><span class="mini">De</span>${mesSelect('per-de', p.de)}</span><span class="per-lin"><span class="mini">até</span>${mesSelect('per-ate', p.ate)}</span></div>`}
   </div>`;
 }
 function mesSelect(nome, valor) {

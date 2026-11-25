@@ -339,3 +339,17 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .limites-topo .mini { display: block; margin-top: 2px; } .limites-card .estourou-linha:first-of-type { margin-top: 8px; }
 .seta-lim { font-size: 18px; color: var(--azul); transition: transform .2s; } .seta-lim.aberta { transform: rotate(180deg); }
 .meta-alvo { align-items: flex-end; } .meta-alvo label { display: grid; gap: 4px; flex: 1; min-width: 110px; } .meta-alvo small { font-size: 12px; color: var(--cinza); } .meta-alvo .inp { width: 100%; }
+
+/* período centralizado */
+.periodo { display: flex; flex-direction: column; align-items: stretch; gap: 8px; background: var(--fundo-2); border-radius: 18px; padding: 6px; margin-bottom: 12px; }
+.periodo .seg-periodo { display: grid; grid-template-columns: repeat(3, 1fr); background: transparent; padding: 0; }
+.periodo .seg-periodo button { padding: 7px 0; text-align: center; }
+.per-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 2px 2px; }
+.per-nav .rotulo { flex: 1; text-align: center; font-weight: 900; font-size: 16px; min-width: 0; }
+.per-nav .seta { width: 36px; height: 36px; border-radius: 12px; border: none; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.1); color: var(--tinta); font-size: 18px; font-weight: 900; cursor: pointer; }
+.per-custom { justify-content: center; flex-wrap: wrap; }
+@media (min-width: 900px) { .periodo { max-width: 460px; } }
+/* gráfico maior no início */
+.bloco-pizza .pizza-wrap svg { width: 168px; height: 168px; }
+@media (max-width: 380px) { .bloco-pizza .pizza-wrap svg { width: 140px; height: 140px; } }
+.per-custom { gap: 6px 12px; } .per-lin { display: inline-flex; align-items: center; gap: 6px; } .per-lin .mini { width: 22px; text-align: right; font-weight: 800; }
