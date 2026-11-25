@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=32';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=32';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=32';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=32';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=32';
+import * as C from './calc.js?v=33';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=33';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=33';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=33';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=33';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -378,7 +378,7 @@ function telaCategorias() {
 
 // ---------------- Mais / Configurações ----------------
 function telaMais() {
-  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações e backup', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
+  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
 }
 function telaConfig() {
   const s = st().settings;
@@ -388,9 +388,6 @@ function telaConfig() {
   <div class="card"><h3>Sua conta</h3><p class="mini">${store.modo === 'local' ? 'Modo de teste: os dados ficam só neste navegador.' : `Conectada como <b>${esc(store.user.email)}</b>. Seus dados ficam salvos na sua conta e aparecem em qualquer aparelho em que você entrar.`}</p>
     <div class="campo"><label>Como o Flui te chama</label><input autocapitalize="sentences" class="inp" data-a="nome" value="${esc(s.nome || '')}" placeholder="Seu nome"></div>
     <button class="btn branco pequeno" data-a="sair">Sair da conta</button></div>
-  <div class="card" id="bancos"><h3>Meus bancos</h3><p class="mini">Marque os bancos que você usa.</p>
-    <div style="margin:10px 0">${chipsBancos(s.bancos || [])}</div>
-    <div style="display:flex;gap:8px"><input autocapitalize="sentences" class="inp" id="novo-banco" placeholder="Não achou? Digite o nome"><button class="btn pequeno" data-a="banco-add">Adicionar</button></div></div>
   <div class="card"><h3>Instalar na tela inicial</h3>
     ${ui.installEvt ? '<p class="mini">Seu navegador permite instalar o Flui como app.</p><button class="btn pequeno" data-a="instalar">Instalar o Flui</button>' :
       ios ? '<p class="mini">No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.</p>' :
@@ -406,7 +403,7 @@ function abrirModal(html, depois) { ui.modal = { html: `<div class="fundo-modal"
 function fecharModal() { ui.modal = null; render(); }
 const topoModal = (t) => `<div class="modal-topo"><h2>${t}</h2><button class="x" type="button" data-a="fechar" aria-label="Fechar">×</button></div>`;
 const selBanco = (nome, v) => { const bs = st().settings.bancos || [];
-  if (!bs.length && !v) return `<input type="hidden" name="${nome}" value=""><div class="mini" style="padding:10px 0">Você ainda não escolheu seus bancos. <a href="#config" data-a="fechar-ir-config">Escolher meus bancos</a></div>`;
+  if (!bs.length && !v) return `<input type="hidden" name="${nome}" value=""><div class="mini" style="padding:10px 0">Você ainda não escolheu seus bancos. <a href="#categorias" data-a="fechar-ir-config">Escolher meus bancos</a></div>`;
   return `<select class="inp" name="${nome}"><option value="">—</option>${bs.map((b) => `<option ${b === v ? 'selected' : ''}>${esc(b)}</option>`).join('')}${v && !bs.includes(v) ? `<option selected>${esc(v)}</option>` : ''}</select>`; };
 const chipsBancos = (sel) => { const todos = [...new Set([...BANCOS_CATALOGO, ...sel])]; return `<div class="cats" data-bancos>${todos.map((b) => `<button type="button" class="${sel.includes(b) ? 'ativo' : ''}" data-banco-tg="${esc(b)}">${sel.includes(b) ? '✓ ' : ''}${esc(b)}</button>`).join('')}</div>`; };
 const FIM = ['Outros', 'Fatura do cartão'];
@@ -824,7 +821,7 @@ document.addEventListener('click', async (e) => {
       const form = w.closest('form'); w.innerHTML = chipsCat(tipo, nova.id); form.categoriaId.value = nova.id; if (tipo === 'guardar') await garantirMetas(); metaHint(form);
       toast(existe ? 'Essa categoria já existia, selecionei ela.' : `Categoria "${nome}" criada!`); break; }
     case 'banco-add': { const v = $('#novo-banco').value.trim(); if (v && !(S.settings.bancos || []).includes(v)) await store.salvarSettings({ bancos: [...(S.settings.bancos || []), v] }); break; }
-    case 'fechar-ir-config': ui.modal = null; location.hash = '#config'; render(); break;
+    case 'fechar-ir-config': ui.modal = null; ui.abaCats = 'bancos'; location.hash = '#categorias'; render(); break;
     case 'banco-del': if (confirm(`Remover "${el.dataset.v}" da lista? Lançamentos antigos mantêm o nome.`)) await store.salvarSettings({ bancos: S.settings.bancos.filter((b) => b !== el.dataset.v) }); break;
     case 'exportar': baixar(`flui-backup-${new Date().toISOString().slice(0, 10)}.json`, store.exportar()); toast('Backup baixado.'); break;
     case 'instalar': ui.installEvt.prompt(); ui.installEvt = null; break;
