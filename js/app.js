@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=46';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=46';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=46';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=46';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=46';
+import * as C from './calc.js?v=47';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=47';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=47';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=47';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=47';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -133,7 +133,7 @@ function avisos() {
         : { k, cor: 'laranja', ic: '👀', txt: `Olha quem está quase passando do limite! Você já usou <b>${pct(x.pct)}</b> do orçamento de ${esc(x.cat.nome.toLowerCase())}. Vamos ficar de olho?` });
     }
   }
-  for (const { cartao, m, f, fechou } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: 'azul', ic: '💳', txt: `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()} com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
+  for (const { cartao, m, f, fechou, venceu, vence } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: venceu ? 'vermelho' : 'azul', ic: venceu ? '⚠️' : '💳', txt: venceu ? `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} <b>venceu dia ${vence.getDate()}</b> com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` : `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()} com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
   for (const v of C.proximosVencimentos(st(), hoje, 7)) {
     const k = `venc|${v.tipo}|${v.ref}|${v.mes || ''}`; if (vistos[k]) continue;
     const dias = Math.round((v.data - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) / 864e5);
@@ -259,8 +259,8 @@ function telaCartoes() {
 }
 function bannerFaturas() {
   const ocultas = ui.faturasOcultas ||= new Set();
-  return C.faturasParaDecidir(st(), hoje).filter(({ cartao, m }) => !ocultas.has(`${cartao.id}|${m}`)).map(({ cartao, m, f, fechou }) => `<div class="aviso-fatura">
-    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()}</b><div class="mini">${cartao.vencimento ? `vence dia ${cartao.vencimento} · ` : ''}${brl(f.aberto)} em aberto</div></div>
+  return C.faturasParaDecidir(st(), hoje).filter(({ cartao, m }) => !ocultas.has(`${cartao.id}|${m}`)).map(({ cartao, m, f, fechou, venceu, vence }) => `<div class="aviso-fatura ${venceu ? 'vencida' : ''}">
+    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.MESES_LONGOS[+m.slice(5) - 1]} ${venceu ? `venceu dia ${vence.getDate()}` : `fechou no dia ${fechou.getDate()}`}</b><div class="mini">${!venceu && cartao.vencimento ? `vence dia ${cartao.vencimento} · ` : ''}${brl(f.aberto)} em aberto</div></div>
     <button class="btn verde pequeno" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher</button>
     <button class="af-x" data-a="ocultar-aviso-fatura" data-k="${cartao.id}|${m}" aria-label="Fechar aviso">×</button></div>`).join('');
 }

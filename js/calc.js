@@ -205,7 +205,9 @@ export function faturasParaDecidir(st, hoje = new Date()) {
     for (const m of [addMes(mA, -2), addMes(mA, -1), mA, addMes(mA, 1)]) {
       const fe = dataFechamento(c, m); if (!fe || fe > d0) continue;
       const f = fatura(st, c.id, m); if (f.decisao || f.aberto <= 0) continue;
-      out.push({ cartao: c, m, f, fechou: fe });
+      const V = parseInt(c.vencimento, 10); let vence = null;
+      if (V) { const [y, mo] = m.split('-').map(Number); vence = new Date(y, mo - 1, Math.min(V, new Date(y, mo, 0).getDate())); }
+      out.push({ cartao: c, m, f, fechou: fe, vence, venceu: !!vence && vence < d0 });
     }
   }
   return out;

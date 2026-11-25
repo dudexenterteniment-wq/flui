@@ -399,3 +399,4 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .lim-campo { display: grid; gap: 2px; text-align: right; flex: none; } .lim-campo span { font-size: 11px; font-weight: 900; color: var(--cinza); text-transform: uppercase; }
 .lim-inp { width: 86px; }
 .lim-cab { display: flex; justify-content: space-between; padding-right: 14px; }
+.aviso-fatura.vencida { border-color: var(--vermelho); background: var(--vermelho-claro); } .aviso-fatura.vencida .af-txt b { color: var(--vermelho-esc); }
