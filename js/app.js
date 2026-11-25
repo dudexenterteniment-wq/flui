@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=29';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=29';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=29';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=29';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=29';
+import * as C from './calc.js?v=30';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=30';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=30';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=30';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=30';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -163,11 +163,6 @@ function telaInicio() {
     ${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), totDesp)}
       <div class="legenda">${leg.map((x) => `<div><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}</span><span class="pc">${pct(x.real / totDesp)}</span></div>`).join('')}
       ${desp.length > 4 ? `<button class="link-mais" data-a="legenda-toggle" style="justify-self:start">${ui.legendaToda ? 'Ver menos' : `Ver mais (${desp.length - 4})`}</button>` : ''}</div></div>` : '<p class="mini" style="margin:0">Nenhum gasto neste período ainda.</p>'}</div>
-  <div class="card"><div class="linha-acao" style="margin:0 0 6px"><h3>Seus limites</h3><a class="link-mais" href="#plano">Planejamento ›</a></div>
-    ${vis.length ? `<p class="mini" style="margin:0 0 8px">${passaram ? `<b class="neg">${passaram} ${passaram === 1 ? 'passou' : 'passaram'} do limite</b> · ${vis.length - passaram} dentro` : '<b class="pos">Tudo dentro do limite</b>'}</p>
-      <div class="lista">${(ui.limitesTodos ? vis : vis.slice(0, 3)).map(orcLinha).join('')}</div>
-      ${vis.length > 3 ? `<button class="link-mais" style="margin-top:8px" data-a="limites-toggle">${ui.limitesTodos ? 'Ver menos' : `Ver mais (${vis.length - 3})`}</button>` : ''}`
-      : '<p class="mini" style="margin:0">Defina quanto quer gastar em cada categoria no <a href="#plano">Planejamento</a>.</p>'}</div>
   <div class="linha-acao"><h3>Últimos lançamentos</h3><a class="link-mais" href="#lancamentos">Ver todos ›</a></div>
   ${ultimos.length ? `<div class="lista">${ultimos.slice(0, 3).map((l) => itemMov(movDeLanc(l))).join('')}</div>` : '<p class="mini">Seus lançamentos aparecem aqui.</p>'}
   <div class="dica"><span class="dica-ic">${MASCOTE}</span><span>${falaDoFlui(r, rows)}</span></div>`;
@@ -309,10 +304,15 @@ function telaPlano() {
   const totOrc = C.sum(desp, (c) => c.orcamento);
   const fixos = st().recorrencias.filter((r) => r !== sal);
   const m = C.mesAtual();
+  const visP = C.porCategoria(st(), [m]).filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0).sort((a, b) => (b.real / b.orcado) - (a.real / a.orcado));
   const estour = C.porCategoria(st(), [m]).filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0 && x.real > x.orcado).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
   return `
   <h1>Planejamento</h1><p class="sub">Quanto você quer gastar por mês em cada coisa.</p>
-  ${estour.length ? `<div class="card estourou-card"><h3 style="margin:0 0 8px">Passaram do limite em ${C.nomeMes(m)}</h3>${estour.map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:30px;height:30px;border-radius:9px')}<span class="meio">${esc(x.cat.nome)}<small>${brl(x.real)} de ${brl(x.orcado)}</small></span><b class="neg num">+${brl(x.real - x.orcado)}</b></div>`).join('')}</div>` : ''}
+  <div class="card limites-card"><button class="limites-topo" data-a="limites-plano">
+      <span><h3 style="margin:0">Meus limites</h3><span class="mini">${visP.length ? (estour.length ? `<b class="neg">${estour.length} ${estour.length === 1 ? 'passou' : 'passaram'} do limite</b> · ${visP.length - estour.length} dentro` : '<b class="pos">Tudo dentro do limite</b>') + ` em ${C.nomeMes(m)}` : 'defina abaixo quanto quer gastar'}</span></span>
+      ${visP.length ? `<span class="seta-lim ${ui.limitesPlano ? 'aberta' : ''}">▾</span>` : ''}</button>
+    ${ui.limitesPlano ? `<div class="lista" style="margin-top:10px">${visP.map(orcLinha).join('')}</div>`
+      : estour.slice(0, 2).map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:30px;height:30px;border-radius:9px')}<span class="meio">${esc(x.cat.nome)}<small>${brl(x.real)} de ${brl(x.orcado)}</small></span><b class="neg num">+${brl(x.real - x.orcado)}</b></div>`).join('')}</div>
   <div class="card"><div class="linha-acao" style="margin:0"><div><h3>Salário por mês</h3><div class="mini">${sal ? `desde ${C.nomeMes(sal.inicio)}${sal.fim ? ` até ${C.nomeMes(sal.fim)}` : ''} · entra sozinho todo mês` : 'ainda não definido'}</div></div>
     <button class="btn ${sal ? 'branco' : ''} pequeno" data-a="${sal ? 'editar-fixo' : 'novo-salario'}" data-id="${sal?.id || ''}">${sal ? brl(sal.valor) : 'Definir'}</button></div>
     <p class="mini" style="margin:10px 0 0">Se num mês você lançar o salário recebido em Lançamentos, o previsto não é somado de novo.</p></div>
@@ -784,6 +784,7 @@ document.addEventListener('click', async (e) => {
     case 'tour-prox': ui.tour++; if (ui.tour >= TOUR.length) { ui.tour = null; document.querySelector('.tour')?.remove(); location.hash = '#plano'; toast('Agora é com você: comece pelo planejamento!', true); } else desenharTour(); break;
     case 'tour-sair': ui.tour = null; document.querySelector('.tour')?.remove(); break;
     case 'ver-tour': ui.tour = 0; ui.rota = ''; desenharTour(); break;
+    case 'limites-plano': ui.limitesPlano = !ui.limitesPlano; render(); break;
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;

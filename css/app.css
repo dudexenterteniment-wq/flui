@@ -335,3 +335,6 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .tour-acoes button { border: none; background: none; font: inherit; font-weight: 900; color: var(--cinza); cursor: pointer; padding: 6px 10px; text-transform: uppercase; font-size: 13px; }
 .tour-acoes button.ok { background: var(--verde); color: #fff; border-radius: 10px; box-shadow: 0 3px 0 var(--verde-esc); }
 .acoes-topo .btn { white-space: nowrap; }
+.limites-topo { display: flex; justify-content: space-between; align-items: center; width: 100%; background: none; border: none; padding: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.limites-topo .mini { display: block; margin-top: 2px; } .limites-card .estourou-linha:first-of-type { margin-top: 8px; }
+.seta-lim { font-size: 18px; color: var(--azul); transition: transform .2s; } .seta-lim.aberta { transform: rotate(180deg); }
