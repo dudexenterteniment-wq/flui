@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=64';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=64';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=64';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=64';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=64';
+import * as C from './calc.js?v=65';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=65';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=65';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=65';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=65';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -427,10 +427,15 @@ const FIM = ['Outros', 'Fatura do cartão'];
 const ordemCat = (a, b) => (FIM.indexOf(a.nome) - FIM.indexOf(b.nome)) || a.nome.localeCompare(b.nome, 'pt-BR');
 const chipsCat = (tipo, sel) => `<div class="cats" data-cats>${st().categorias.filter((c) => c.tipo === tipo && (!c.arquivada || c.id === sel)).sort(ordemCat).map((c) => `<button type="button" class="${c.id === sel ? 'ativo' : ''}" data-cat="${c.id}"><span class="cat-ic" style="background:${c.cor}">${catIcone(c, 14)}</span>${esc(c.nome)}</button>`).join('')}<button type="button" data-a="cat-nova" data-tipo-cat="${tipo}" style="border-style:dashed;color:var(--azul)">+ Adicionar</button></div><input type="hidden" name="categoriaId" value="${sel || ''}">`;
 
+const chipsStatus = (tipo, sel) => { if (tipo === 'guardar') return '<input type="hidden" name="status" value="pago">';
+  const ops = tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'Vou receber']] : [['pago', 'Pago'], ['pendente', 'Vou pagar']];
+  const v = ops.some((o) => o[0] === sel) ? sel : ops[0][0];
+  return `<label>Situação</label><div class="seg seg-status">${ops.map(([k, n]) => `<button type="button" class="t-neutro ${k === v ? 'ativo' : ''}" data-status="${k}">${n}</button>`).join('')}</div><input type="hidden" name="status" value="${v}">`; };
 function modalLanc(l = {}) {
   const tipo = l.tipo || 'despesa';
   const mes = l.mes || (ui.periodo.tipo === 'mes' ? mesRef() : C.mesAtual());
-  const extras = !!(l.data || l.vencimento || l.obs || (l.status && !['pago', 'recebido'].includes(l.status)));
+  const hojeISO = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+  const dataPadrao = l.data || (l.mes ? (l.mes === C.mesAtual() ? hojeISO : `${l.mes}-01`) : (mes === C.mesAtual() ? hojeISO : `${mes}-01`));
   abrirModal(`<form data-form="lanc" data-id="${l.id || ''}">${topoModal(l.id ? 'Editar lançamento' : 'Novo lançamento')}
     <div class="seg" data-seg="tipo">${[['despesa', 'Despesa'], ['entrada', 'Entrada'], ['guardar', 'Guardar']].map(([t, n]) => `<button type="button" class="t-${t} ${t === tipo ? 'ativo' : ''}" data-tipo="${t}">${n}</button>`).join('')}</div>
     <input type="hidden" name="tipo" value="${tipo}">
@@ -443,18 +448,13 @@ function modalLanc(l = {}) {
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
         <div class="campo"><label>Cartão</label>${selCartao('', true)}</div></div>
       <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
-    <div class="campo"><label>Mês</label>${mesSelect('l-mes', mes)}</div>
+    <div class="campo"><label>Quando</label><input class="inp" type="date" name="data" value="${dataPadrao}" required></div>
+    <div class="campo" data-status-wrap>${chipsStatus(tipo, l.status)}</div>
+    <div class="campo ${tipo === 'despesa' && l.status === 'pendente' ? '' : 'oculto'}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div>
     ${l.id ? '' : `<label class="chave" style="margin:-4px 0 10px"><input type="checkbox" name="repete" data-a="repete-tg"> Repete todo mês</label>
     <div data-repete class="oculto repete-box"><div class="campo" style="margin:0"><label>Até quando?</label>
       <label class="chave mini" style="margin-bottom:6px"><input type="checkbox" name="repeteSemFim" checked data-a="repete-fim-tg"> Sem data para acabar</label>
       <div data-repete-fim class="oculto">${mesSelect('l-fim', C.addMes(mes, 11))}</div></div></div>`}
-    <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, vencimento, observação)'}</button>
-    <div data-extras class="${extras ? '' : 'oculto'}">
-      <div class="duas"><div class="campo"><label>Data <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${l.data || ''}"></div>
-        <div class="campo"><label>Observação <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="obs" value="${esc(l.obs || '')}"></div></div>
-      <div class="duas"><div class="campo ${tipo !== 'despesa' ? 'oculto' : ''}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
-      <div class="campo"><label>Situação</label><select class="inp" name="status">${(tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}" ${l.status === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-    </div>
     <div class="acoes">${l.id ? '<button type="button" class="btn branco" data-a="excluir-lanc">Excluir</button>' : ''}<button class="btn verde" type="submit">${l.id ? 'Salvar' : 'Lançar'}</button></div>
   </form>`, () => { const v = $('[name=valor]'); if (v && !l.id) v.focus(); });
 }
@@ -730,6 +730,8 @@ document.addEventListener('click', async (e) => {
   if (catBtn) { const w = catBtn.closest('form'); w.querySelectorAll('[data-cat]').forEach((b) => b.classList.toggle('ativo', b === catBtn)); w.categoriaId.value = catBtn.dataset.cat; metaHint(w); return; }
   if (e.target.matches('[data-a=repete-tg]')) { e.target.closest('form').querySelector('[data-repete]').classList.toggle('oculto', !e.target.checked); return; }
   if (e.target.matches('[data-a=repete-fim-tg]')) { e.target.closest('form').querySelector('[data-repete-fim]').classList.toggle('oculto', e.target.checked); return; }
+  const stBtn = e.target.closest('[data-status]');
+  if (stBtn) { const f = stBtn.closest('form'); f.status.value = stBtn.dataset.status; f.querySelectorAll('[data-status]').forEach((b) => b.classList.toggle('ativo', b === stBtn)); f.querySelector('[data-venc]')?.classList.toggle('oculto', stBtn.dataset.status !== 'pendente'); return; }
   const icBtn = e.target.closest('[data-icone]');
   if (icBtn) { const w = icBtn.closest('form'); w.querySelectorAll('[data-icone]').forEach((b) => b.classList.toggle('ativo', b === icBtn)); w.icone.value = icBtn.dataset.icone; return; }
   const corBtn = e.target.closest('[data-cor]');
@@ -741,7 +743,8 @@ document.addEventListener('click', async (e) => {
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
     const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove();
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
-    const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.toggle('oculto', t !== 'despesa');
+    const sw = f.querySelector('[data-status-wrap]'); if (sw) sw.innerHTML = chipsStatus(t, '');
+    const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.add('oculto');
     const dr = f.querySelector('[data-dia-renda]'); if (dr) dr.classList.toggle('oculto', t !== 'entrada');
     const mo = f.querySelector('[data-a=mais-opcoes]'); if (mo && mo.textContent.startsWith('+')) mo.textContent = t === 'despesa' ? '+ Mais opções (data, vencimento, observação)' : '+ Mais opções (data, observação)';
     if (t === 'guardar' && !st().settings.dicaGuardar) { let d = f.querySelector('.dica-guardar'); if (!d) { d = document.createElement('div'); d.className = 'dica-guardar'; d.innerHTML = `${svgIcone('alvo', 18)}<span><b>O que você guarda vai para as Metas.</b> Cada categoria de guardar tem uma meta. Lá você define quanto quer juntar e acompanha a barra enchendo.</span>`; f.querySelector('[data-seg]')?.after(d); } store.salvarSettings({ dicaGuardar: true }); }
@@ -971,17 +974,17 @@ document.addEventListener('submit', async (e) => {
     const valor = parseValor(v('valor')); if (!(valor > 0)) return alert('Digite um valor maior que zero.');
     if (!v('categoriaId')) return alert('Escolha uma categoria.');
     if (!id && f.repete?.checked && v('forma') !== 'Crédito') {
-      const inicio = lerMes('l-mes', f); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
+      const inicio = (v('data') || C.mesAtual()).slice(0, 7); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
       if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
       await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: '', frequencia: 'mensal', forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: true, pagos: {} });
       fecharModal(); toast(fim ? `Vai se repetir até ${C.nomeMes(fim)}.` : 'Vai se repetir todo mês.', true); return; }
     if (v('forma') === 'Crédito' && !id && v('tipo') === 'despesa') {
       const n = Math.max(1, parseInt(v('parcelas'), 10) || 1);
-      await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: lerMes('l-mes', f), data: v('data') });
+      await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: (v('data') || C.mesAtual()).slice(0, 7), data: v('data') });
       fecharModal(); toast(n > 1 ? `Lançado no crédito em ${n}x!` : 'Lançado no crédito!', true); return; }
     const antigo = S.lancamentos.find((x) => x.id === id) || {};
     const novo = !id;
-    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('tipo') !== 'despesa' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: v('obs') });
+    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: (v('data') || C.mesAtual()).slice(0, 7), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('tipo') !== 'despesa' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: antigo.obs || '' });
     fecharModal(); toast(novo ? (v('tipo') === 'guardar' ? 'Guardado! Seu eu do futuro agradece. 💚' : 'Prontinho, lançado!') : 'Salvo!', novo);
   }
   if (tipoF === 'compra') {

@@ -426,3 +426,4 @@ a.tag-neg { text-decoration: none; }
 .checklist .ck { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--linha); display: grid; place-items: center; font-weight: 900; color: #fff; flex: none; }
 .checklist .item.ok .ck { background: var(--verde); border-color: var(--verde); }
 .chips-tipo { flex-wrap: nowrap; gap: 5px; } .chips-tipo .chip { flex: 1 1 auto; padding: 6px 4px; font-size: 12.5px; text-align: center; white-space: nowrap; min-width: 0; }
+.seg-status { margin: 0; } .seg-status button { padding: 10px 6px; font-size: 13px; }
