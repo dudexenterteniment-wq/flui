@@ -15,7 +15,7 @@ export function lerOFX(txt) {
     if (!d || !Number.isFinite(valor)) continue;
     itens.push({ data: `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`, valor, id: tag(b, 'FITID'), texto: tag(b, 'MEMO') || tag(b, 'NAME') });
   }
-  return { formato: 'OFX', banco: nomeBanco(banco, fid), itens };
+  return { formato: 'OFX', banco: nomeBanco(banco, fid), cartao: /<CREDITCARDMSGSRSV1>|<CCSTMTRS>/i.test(txt), itens };
 }
 
 // ---------- CSV (Nubank: Data,Valor,Identificador,Descrição; aceita ; e vírgula decimal) ----------
@@ -24,10 +24,12 @@ export function lerCSV(txt) {
   if (!linhas.length) return { formato: 'CSV', banco: '', itens: [] };
   const sep = (linhas[0].match(/;/g) || []).length > (linhas[0].match(/,/g) || []).length ? ';' : ',';
   const cab = linhas[0].split(sep).map((c) => semAcento(c.replace(/"/g, '').trim()));
-  const iData = cab.findIndex((c) => c.startsWith('DATA'));
+  const iData = cab.findIndex((c) => c.startsWith('DATA') || c === 'DATE');
   const iValor = cab.findIndex((c) => c.startsWith('VALOR') || c === 'AMOUNT');
   const iId = cab.findIndex((c) => c.startsWith('IDENTIFICADOR') || c === 'ID');
   const iDesc = cab.findIndex((c) => c.startsWith('DESCRI') || c.startsWith('TITLE') || c.startsWith('HISTORICO') || c.startsWith('LANCAMENTO') || c.startsWith('ESTABELECIMENTO'));
+  // fatura de cartão (Nubank: date,title,amount): compra vem positiva, pagamento negativo
+  const cartao = cab.includes('TITLE') && cab.includes('AMOUNT');
   if (iData < 0 || iValor < 0) throw new Error('Não reconheci as colunas desse CSV. Tente o arquivo OFX do seu banco: ele funciona com quase todos.');
   const itens = [];
   for (const l of linhas.slice(1)) {
@@ -41,9 +43,10 @@ export function lerCSV(txt) {
     const valor = parseFloat(v);
     if (!aa || !Number.isFinite(valor)) continue;
     const data = dd.length === 4 ? `${dd}-${mm}-${aa}` : `${aa.length === 2 ? '20' + aa : aa}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-    itens.push({ data, valor, id: iId >= 0 ? cols[iId] : '', texto: iDesc >= 0 ? cols[iDesc] : '' });
+    const texto = iDesc >= 0 ? cols[iDesc] : '';
+    itens.push({ data, valor: cartao ? -valor : valor, id: iId >= 0 ? cols[iId] : (cartao ? `cc-${data}-${valor}-${texto}` : ''), texto });
   }
-  return { formato: 'CSV', banco: cab.includes('IDENTIFICADOR') ? 'Nubank' : '', itens };
+  return { formato: 'CSV', banco: cab.includes('IDENTIFICADOR') || (cartao && cab.join(',') === 'DATE,TITLE,AMOUNT') ? 'Nubank' : '', cartao, itens };
 }
 
 function nomeBanco(org, fid) {

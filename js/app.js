@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=105';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=105';
-import { VAPID_KEY } from './config.js?v=105';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=105';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=105';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=105';
+import * as C from './calc.js?v=107';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=107';
+import { VAPID_KEY } from './config.js?v=107';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=107';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=107';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=107';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=105" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=107" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=105" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=107" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=105" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=107" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=105" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=107" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -441,6 +441,7 @@ function telaConfig() {
       '<p class="mini">No Android (Chrome): toque nos <b>três pontinhos</b> e em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>. No computador, use o ícone de instalar na barra de endereço.</p>'}</div>
   <div class="card"><h3>Backup</h3><p class="mini">Guarde uma cópia dos seus dados.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn verde pequeno" data-a="baixar-planilha">Baixar planilha (Excel)</button><button class="btn pequeno" data-a="exportar">Baixar backup</button><label class="btn branco pequeno" style="cursor:pointer">Restaurar backup<input type="file" data-a="importar" class="arquivo-oculto"></label></div></div>
+  <div class="card"><h3>Apagar dados</h3><p class="mini">Apague tudo, um mês ou uma importação que deu errado.</p><button class="btn branco pequeno" data-a="zerar" style="color:var(--vermelho)">Apagar dados</button></div>
   <div class="card"><h3>Notificações</h3>${blocoPush()}</div>
   ${store.modo === 'local' ? '' : '<button class="btn-excluir" data-a="excluir-conta">Excluir minha conta</button>'}
   <p class="mini" style="text-align:center;margin-top:18px">Flui · versão 1.0</p>`;
@@ -641,7 +642,7 @@ function prepararImportacao(dados) {
   const S = st(); const regras = S.settings.regrasImport || {};
   const porNome = (nome, tipo) => S.categorias.find((c) => c.nome === nome && c.tipo === tipo && !c.arquivada);
   const rendaDoMes = (mes, valor) => S.recorrencias.find((r) => r.tipo === 'entrada' && C.recorrenciaNoMes(r, mes) && Math.abs(r.valor - valor) < 0.005);
-  const jaIds = new Set(S.lancamentos.map((l) => l.importId).filter(Boolean));
+  const jaIds = new Set([...S.lancamentos, ...S.compras].map((l) => l.importId).filter(Boolean));
   const linhas = dados.itens.map((it) => {
     const e = entender(it); const mes = it.data.slice(0, 7); const valor = Math.abs(it.valor);
     const regra = regras[chaveRegra(it.texto)]; const cRegra = regra && S.categorias.find((c) => c.id === regra && c.tipo === e.tipo);
@@ -650,17 +651,24 @@ function prepararImportacao(dados) {
       || (e.tipo === 'despesa' ? porNome('Outros', 'despesa') : S.categorias.find((c) => c.tipo === e.tipo && !c.arquivada));
     const ja = it.id && jaIds.has(it.id);
     const parecido = !ja && S.lancamentos.some((l) => l.mes === mes && l.tipo === e.tipo && Math.abs((Number(l.valor) || 0) - valor) < 0.005 && !l.importId);
-    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido, ja,
-      aviso: ja ? 'Já importado antes.' : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
+    const pagFatura = dados.cartao && e.tipo !== 'despesa';
+    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido && !pagFatura, ja,
+      aviso: ja ? 'Já importado antes.' : pagFatura ? 'Pagamento ou estorno da fatura: não entra como compra.' : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
   });
-  ui.importacao = { banco: dados.banco || (st().settings?.bancos?.length === 1 ? st().settings.bancos[0] : ''), formato: dados.formato, linhas };
+  const banco = dados.banco || (S.settings?.bancos?.length === 1 ? S.settings.bancos[0] : '');
+  const cc = dados.cartao ? (S.cartoes.find((k) => k.tipo !== 'debito' && (k.banco || k.nome) === banco) || S.cartoes.find((k) => k.tipo !== 'debito')) : null;
+  ui.importacao = { banco, formato: dados.formato, linhas, cartao: !!dados.cartao, destino: cc ? 'cc:' + cc.id : 'conta:' + banco };
 }
 function modalRevisarImport() {
   const im = ui.importacao; const S = st();
   const opts = (tipo, sel) => S.categorias.filter((c) => c.tipo === tipo && !c.arquivada).sort(ordemCat).map((c) => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.nome)}</option>`).join('');
   const n = im.linhas.filter((l) => l.marcado).length;
   abrirModal(`<form data-form="importar">${topoModal('Conferir importação')}
-    <p class="mini" style="margin:0 0 10px">${im.linhas.length} movimentações do <b>${esc(im.banco)}</b> (${im.formato}). Desmarque o que não quiser e ajuste as categorias. O Flui lembra das suas escolhas na próxima vez.</p>
+    <div class="campo"><label>Isso é de onde?</label><select class="inp" data-imp-destino>
+      ${[...new Set([...(S.settings.bancos || []), ...(im.banco ? [im.banco] : [])])].map((b) => `<option value="conta:${esc(b)}" ${im.destino === 'conta:' + b ? 'selected' : ''}>Conta ${esc(b)} (débito e Pix)</option>`).join('')}
+      ${S.cartoes.filter((k) => k.tipo !== 'debito').map((k) => `<option value="cc:${k.id}" ${im.destino === 'cc:' + k.id ? 'selected' : ''}>Fatura do cartão ${esc(nomeCartao(k))}</option>`).join('')}
+      ${im.banco ? '' : '<option value="conta:" selected>Sem banco</option>'}</select></div>
+    <p class="mini" style="margin:0 0 10px">${im.linhas.length} movimentações (${im.formato}). Desmarque o que não quiser e ajuste as categorias.</p>
     <div class="imp-lista">${im.linhas.map((l, i) => `<div class="imp-linha ${l.marcado ? '' : 'off'}">
       <input type="checkbox" data-imp-ok="${i}" ${l.marcado ? 'checked' : ''} ${l.ja ? 'disabled' : ''} aria-label="Importar">
       <div class="imp-meio"><div class="imp-desc">${esc(l.descricao)}</div>
@@ -908,6 +916,32 @@ document.addEventListener('click', async (e) => {
       abrirModal(`${topoModal('Saldo na conta')}<form data-form="saldo-conta"><p style="margin:0 0 12px">O Flui calcula: tudo que entrou menos tudo que você pagou e guardou. Se não bater com o banco, coloque aqui o valor certo e ele segue contando a partir dele.</p>
         <div class="campo"><label>Saldo no banco hoje</label><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${sc === null ? '' : valorInput(sc)}" required autocomplete="off"></div>
         <button class="btn verde" style="width:100%">Salvar</button></form>`); break; }
+    case 'zerar': { const imps = (st().settings.importacoes || []).slice().reverse(); const antigas = st().lancamentos.some((l) => l.importId && !l.lote);
+      abrirModal(`${topoModal('Apagar dados')}<p style="margin:0 0 12px">O que você quer apagar?</p>
+        <div class="opcoes-dec">
+        <button type="button" class="op-dec" data-a="zerar-tipo" data-v="mes"><span class="op-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><span><b>Um mês</b><small>Lançamentos, compras no cartão e pagamentos daquele mês</small></span></button>
+        <button type="button" class="op-dec" data-a="zerar-tipo" data-v="imp" ${imps.length || antigas ? '' : 'disabled'}><span class="op-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span><span><b>Uma importação</b><small>${imps.length || antigas ? 'Desfaz um extrato importado' : 'Você ainda não importou nada'}</small></span></button>
+        <button type="button" class="op-dec" data-a="zerar-tipo" data-v="tudo"><span class="op-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></span><span><b>Tudo</b><small>Começar do zero. Categorias, bancos e cartões ficam.</small></span></button></div>
+        <div data-zerar-box></div>`); break; }
+    case 'zerar-tipo': { const box = $('[data-zerar-box]'); const t = el.dataset.v; const imps = (st().settings.importacoes || []).slice().reverse(); const antigas = st().lancamentos.filter((l) => l.importId && !l.lote).length;
+      box.innerHTML = t === 'mes' ? `<div class="campo" style="margin-top:12px"><label>Qual mês?</label><input class="inp" type="month" data-zerar-mes value="${C.mesAtual()}"></div><button class="btn vermelho-btn" style="width:100%" data-a="zerar-ok" data-v="mes">Apagar este mês</button>`
+        : t === 'imp' ? `<div class="lista" style="margin-top:12px">${imps.map((x) => `<button class="item" data-a="zerar-ok" data-v="imp" data-id="${x.id}" style="width:100%;background:none;border:none;border-top:2px solid var(--linha);font:inherit;text-align:left;cursor:pointer;color:inherit"><div class="meio"><div class="titulo">${esc(x.arquivo)}</div><div class="det">${new Date(x.quando).toLocaleDateString('pt-BR')} · ${x.qtd} itens · ${esc(x.onde || '')}</div></div><div class="valor neg">Apagar</div></button>`).join('')}
+          ${antigas ? `<button class="item" data-a="zerar-ok" data-v="imp" data-id="antigas" style="width:100%;background:none;border:none;border-top:2px solid var(--linha);font:inherit;text-align:left;cursor:pointer;color:inherit"><div class="meio"><div class="titulo">Importações antigas</div><div class="det">${antigas} lançamentos importados antes desta opção existir</div></div><div class="valor neg">Apagar</div></button>` : ''}</div>`
+        : `<p style="margin:12px 0" class="mini">Antes de apagar, o Flui baixa um backup para você poder voltar atrás.</p><button class="btn vermelho-btn" style="width:100%" data-a="zerar-ok" data-v="tudo">Apagar tudo</button>`; break; }
+    case 'zerar-ok': { const S = st(); const t = el.dataset.v; let lanc = [], comp = [], extra = {}, desc = '';
+      if (t === 'mes') { const m = $('[data-zerar-mes]').value; if (!m) break; lanc = S.lancamentos.filter((l) => l.mes === m); comp = S.compras.filter((c) => c.mesPrimeira === m);
+        const tira = (o) => Object.fromEntries(Object.entries(o || {}).filter(([k]) => !k.endsWith('|' + m))); extra = { pagamentosFatura: tira(S.settings.pagamentosFatura), faturasPagas: tira(S.settings.faturasPagas), faturaDecisoes: tira(S.settings.faturaDecisoes) }; desc = C.nomeMes(m, true); }
+      else if (t === 'imp') { const id = el.dataset.id; lanc = S.lancamentos.filter((l) => id === 'antigas' ? l.importId && !l.lote : l.lote === id); comp = S.compras.filter((c) => c.lote === id); extra = { importacoes: (S.settings.importacoes || []).filter((x) => x.id !== id) }; desc = 'essa importação'; }
+      else { lanc = S.lancamentos; comp = S.compras; desc = 'TUDO'; }
+      const n = lanc.length + comp.length + (t === 'tudo' ? S.recorrencias.length : 0);
+      if (!confirm(`Apagar ${desc}? São ${n} itens. Não dá para desfazer${t === 'tudo' ? ' (mas vou baixar um backup antes)' : ''}.`)) break;
+      if (t === 'tudo') { baixar(`flui-antes-de-apagar-${new Date().toISOString().slice(0, 10)}.json`, store.exportar());
+        for (const r of S.recorrencias) await store.remover('recorrencias', r.id); for (const mt of S.metas) await store.salvar('metas', { ...mt, valorInicial: 0 });
+        extra = { pagamentosFatura: {}, faturasPagas: {}, faturaDecisoes: {}, parcelasPagas: {}, importacoes: [], saldoBase: null }; }
+      for (const l of lanc) await store.remover('lancamentos', l.id); for (const c of comp) await store.remover('compras', c.id);
+      if (Object.keys(extra).length) await store.salvarSettings(extra);
+      { const S2 = st(); const vivos = new Set([...S2.lancamentos, ...S2.compras].map((x) => x.lote).filter(Boolean)); const li = (S2.settings.importacoes || []).filter((x) => vivos.has(x.id)); if (li.length !== (S2.settings.importacoes || []).length) await store.salvarSettings({ importacoes: li }); }
+      fecharModal(); toast(`Pronto, apaguei ${n} itens.`, true); render(); break; }
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
@@ -1004,12 +1038,13 @@ document.addEventListener('change', async (e) => {
       const txt = arq.text ? await arq.text() : await new Promise((ok, erro) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = erro; r.readAsText(arq); });
       const dados = /<OFX>|OFXHEADER/i.test(txt) ? lerOFX(txt) : lerCSV(txt);
       if (!dados.itens.length) throw new Error('Não encontrei movimentações nesse arquivo.');
-      prepararImportacao(dados); modalRevisarImport();
+      prepararImportacao(dados); ui.importacao.arquivo = arq.name; modalRevisarImport();
     } catch (err) { alert(err.message || 'Não consegui ler esse arquivo.'); } finally { t.value = ''; }
     return;
   }
   if (t.matches('[data-imp-ok]')) { const l = ui.importacao.linhas[+t.dataset.impOk]; l.marcado = t.checked; t.closest('.imp-linha').classList.toggle('off', !t.checked);
     $('[data-imp-btn]').textContent = `Importar ${ui.importacao.linhas.filter((x) => x.marcado).length}`; return; }
+  if (t.matches('[data-imp-destino]')) { ui.importacao.destino = t.value; return; }
   if (t.matches('[data-imp-cat]')) { const l = ui.importacao.linhas[+t.dataset.impCat]; l.catId = t.value; l.mudou = true; return; }
 });
 document.addEventListener('input', (e) => {
@@ -1109,10 +1144,20 @@ document.addEventListener('submit', async (e) => {
     const im = ui.importacao; const sel = im.linhas.filter((l) => l.marcado && !l.ja);
     if (!sel.length) return alert('Nenhuma movimentação marcada.');
     const btn = $('[data-imp-btn]'); btn.disabled = true; btn.textContent = 'Importando...';
-    for (const l of sel) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
+    const lote = 'imp-' + Date.now(); const registrar = (qtd, onde) => store.salvarSettings({ importacoes: [...(st().settings.importacoes || []), { id: lote, arquivo: im.arquivo || 'extrato', quando: new Date().toISOString(), qtd, onde }] });
+    const dest = im.destino || ''; const ccId = dest.startsWith('cc:') ? dest.slice(3) : ''; const bancoConta = dest.startsWith('conta:') ? dest.slice(6) : im.banco;
+    if (ccId) {
+      const compras = sel.filter((l) => l.tipo === 'despesa');
+      for (const l of compras) {
+        await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: l.mes, data: l.data, importId: l.id || '', lote }); }
+      const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
+      await store.salvarSettings({ regrasImport: regras }); await registrar(compras.length, 'cartão'); ui.importacao = null; fecharModal(); toast(`${compras.length} compras lançadas no cartão!`, true); return;
+    }
+    im.banco = bancoConta;
+    for (const l of sel) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
     const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
     const bancos = S.settings.bancos || []; await store.salvarSettings({ regrasImport: regras, ...(im.banco && !bancos.includes(im.banco) ? { bancos: [...bancos, im.banco] } : {}) });
-    ui.importacao = null; fecharModal(); toast(`${sel.length} lançamentos importados!`, true); return;
+    await registrar(sel.length, 'conta ' + (bancoConta || '')); ui.importacao = null; fecharModal(); toast(`${sel.length} lançamentos importados!`, true); return;
   }
   if (tipoF === 'decisao') {
     const cid = id; const m = f.dataset.m; const k = `${cid || 'sem'}|${m}`; const ab = +f.dataset.aberto; const acao = v('acao'); const prox = C.addMes(m, 1);
@@ -1214,7 +1259,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=105" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=107" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
