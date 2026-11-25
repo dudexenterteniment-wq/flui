@@ -523,3 +523,4 @@ label.btn { position: relative; }
 @media (min-width: 821px) { .principal > h1:first-of-type, .principal > .linha-acao:first-of-type, .principal > .titulo-linha:first-of-type { margin-right: 64px; } }
 @media (min-width: 821px) { .topo-desk ~ h1, .topo-desk ~ .linha-acao, .topo-desk ~ .titulo-linha { margin-right: 64px; } }
 .aviso-falta { background: #FFE5E5; color: var(--vermelho-esc, #C23434); border-radius: 14px; padding: 10px 14px; font-weight: 700; margin: -4px 0 14px; } .aviso-falta b { color: var(--vermelho); }
+.an-trio button.gasto-alto { background: #fff; color: var(--vermelho); } .an-trio button.gasto-alto span { opacity: 1; }
