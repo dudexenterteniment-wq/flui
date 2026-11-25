@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=91';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=91';
-import { VAPID_KEY } from './config.js?v=91';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=91';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=91';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=91';
+import * as C from './calc.js?v=92';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=92';
+import { VAPID_KEY } from './config.js?v=92';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=92';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=92';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=92';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=92" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=92" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=91" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=92" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=92" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -346,62 +346,47 @@ function telaPlano() {
 function telaRelatorios() {
   const S = st(); const ms = meses(); const ult = ms[ms.length - 1]; const cur = C.mesAtual();
   const r = C.resumo(S, ms);
-  const pctTxt = (v) => `${Math.round(v * 100)}%`;
-  const card = (rot, titulo, corpo = '', cls = '') => `<div class="card an-card ${cls}"><div class="an-rot">${rot}</div><h3 class="an-tit">${titulo}</h3>${corpo}</div>`;
-  const cards = [];
-  // 1. sobrou / guardou
-  if (r.entradas > 0 || r.despesas > 0) {
-    const sobra = r.entradas - r.despesas - r.guardado;
-    const tit = r.entradas <= 0 ? `Você gastou ${brl(r.despesas)}` : r.guardado > 0 ? `Você guardou <b class="pos">${pctTxt(r.guardado / r.entradas)}</b> do que entrou`
-      : sobra >= 0 ? `Sobrou <b class="pos">${brl(sobra)}</b> do que entrou` : `Faltou <b class="neg">${brl(-sobra)}</b> para fechar a conta`;
-    cards.push(card('Resultado', tit, `<div class="grade g3 kpis" style="margin:12px 0 0">${kpiIr('Entrou', r.entradas, 'verde', 'entrada')}${kpiIr('Gastou', r.despesas, 'laranja', 'despesa')}${kpiIr('Guardou', r.guardado, 'azul', 'metas')}</div>`));
-  }
-  // 2. comparação com o mês anterior (só quando olha um mês)
-  if (ms.length === 1) {
-    const ant = C.addMes(ult, -1); const ra = C.resumo(S, [ant]);
-    if (ra.despesas > 0 && r.despesas > 0) {
-      const d = r.despesas / ra.despesas - 1; const ca = Object.fromEntries(C.porCategoria(S, [ant]).map((x) => [x.cat.id, x.real]));
-      const subiu = C.porCategoria(S, ms).filter((x) => x.cat.tipo === 'despesa').map((x) => ({ x, dif: x.real - (ca[x.cat.id] || 0) })).sort((a, b) => b.dif - a.dif)[0];
-      const tit = Math.abs(d) < 0.03 ? `Você gastou quase igual a ${C.nomeMes(ant, true).split(' ')[0]}` : d > 0 ? `Você gastou <b class="neg">${pctTxt(d)} a mais</b> que em ${C.nomeMes(ant, true).split(' ')[0]}` : `Você gastou <b class="pos">${pctTxt(-d)} a menos</b> que em ${C.nomeMes(ant, true).split(' ')[0]}`;
-      cards.push(card('Comparado ao mês anterior', tit, d > 0 && subiu && subiu.dif > 0 ? `<p class="an-sub">Principalmente em <b>${esc(subiu.x.cat.nome)}</b> (+${brl(subiu.dif)})</p>` : ''));
-    }
-  }
-  // 3. para onde foi (com limites)
+  const P = (v) => `${Math.round(v * 100)}%`;
+  const mesNome = (m) => C.nomeMes(m, true).split(' ')[0];
+  if (!(r.entradas > 0 || r.despesas > 0)) return `<h1>Análise</h1>${filtroPeriodo()}${vazio('📊', 'Lance algumas coisas para ver sua análise aqui.')}`;
+  // 1. destaque principal
+  const sobra = r.entradas - r.despesas - r.guardado;
+  const [big, frase, tom] = r.entradas <= 0 ? [brl(r.despesas), 'foi o que você gastou', 'azul']
+    : r.guardado > 0 ? [P(r.guardado / r.entradas), `do que entrou foi guardado${sobra > 0 ? ` e ainda sobraram ${brl(sobra)}` : ''}`, 'verde']
+    : sobra >= 0 ? [brl(sobra), `sobrou do que entrou (${P(sobra / r.entradas)})`, 'verde'] : [brl(-sobra), 'gastou a mais do que entrou', 'vermelho'];
+  const heroi = `<div class="an-heroi ${tom}"><div class="an-big num">${big}</div><div class="an-frase">${frase}</div>
+    <div class="an-trio">${[['Entrou', r.entradas, 'entrada'], ['Gastou', r.despesas, 'despesa'], ['Guardou', r.guardado, 'metas']].map(([n, v, ir]) => `<button data-a="kpi-ir" data-v="${ir}"><span>${n}</span><b class="num">${brl(v)}</b></button>`).join('')}</div></div>`;
+  // 2. para onde foi (top 3)
   const desp = C.porCategoria(S, ms).filter((x) => x.cat.tipo === 'despesa' && x.real > 0).sort((a, b) => b.real - a.real);
-  if (desp.length) {
-    const max = desp[0].real; const est = desp.filter((x) => x.orcado > 0 && x.real > x.orcado);
-    const lin = desp.slice(0, ui.anTodas ? 99 : 5).map((x) => { const lim = x.orcado > 0 ? x.orcado * ms.length / ms.length : 0; const passou = lim > 0 && x.real > lim;
-      return `<button class="an-cat" data-a="filtro-cat-ir" data-id="${x.cat.id}">${bolaCat(x.cat, 'width:32px;height:32px;border-radius:10px')}<div class="meio"><div class="an-cat-l"><span>${esc(x.cat.nome)}</span><b class="num ${passou ? 'neg' : ''}">${brl(x.real)}</b></div>
-        <div class="an-barra"><i style="width:${Math.min(100, x.real / Math.max(max, lim || 0) * 100)}%;background:${passou ? 'var(--vermelho)' : x.cat.cor}"></i>${lim ? `<em style="left:${Math.min(100, lim / Math.max(max, lim) * 100)}%"></em>` : ''}</div>
-        ${passou ? `<div class="an-passou">Passou ${brl(x.real - lim)} do limite</div>` : ''}</div></button>`; }).join('');
-    cards.push(card('Para onde foi', est.length ? `<b class="neg">${est.length === 1 ? `${esc(est[0].cat.nome)} passou do limite` : `${est.length} categorias passaram do limite`}</b>` : `${esc(desp[0].cat.nome)} foi seu maior gasto`,
-      `<div class="an-cats">${lin}</div>${desp.length > 5 ? `<button class="link-mais an-mais" data-a="an-todas">${ui.anTodas ? 'Ver menos' : `Ver todas (${desp.length})`}</button>` : ''}`));
-  }
-  // 4. renda comprometida com fixos
+  const totD = C.sum(desp, (x) => x.real) || 1;
+  const est = desp.filter((x) => x.orcado > 0 && x.real > x.orcado);
+  const top = desp.slice(0, ui.anTodas ? 99 : 3).map((x) => { const passou = x.orcado > 0 && x.real > x.orcado; const max = Math.max(desp[0].real, x.orcado || 0);
+    return `<button class="an-cat" data-a="filtro-cat-ir" data-id="${x.cat.id}">${bolaCat(x.cat, 'width:36px;height:36px;border-radius:11px')}<div class="meio"><div class="an-cat-l"><span>${esc(x.cat.nome)}</span><b class="num ${passou ? 'neg' : ''}">${brl(x.real)}</b></div>
+      <div class="an-barra"><i style="width:${x.real / max * 100}%;background:${passou ? 'var(--vermelho)' : x.cat.cor}"></i>${x.orcado > 0 ? `<em style="left:${x.orcado / max * 100}%"></em>` : ''}</div>
+      ${passou ? `<div class="an-passou">Passou ${brl(x.real - x.orcado)} do limite</div>` : ''}</div></button>`; }).join('');
+  const onde = desp.length ? `<div class="card an-card"><div class="an-cab"><div><div class="an-big2 num">${P(desp[0].real / totD)}</div><div class="an-frase2">dos gastos foram em <b>${esc(desp[0].cat.nome)}</b></div></div>
+    ${est.length ? `<span class="an-alerta">${est.length} passou do limite</span>` : ''}</div><div class="an-cats">${top}</div>
+    ${desp.length > 3 ? `<button class="link-mais an-mais" data-a="an-todas">${ui.anTodas ? 'Ver menos' : `Ver todas (${desp.length})`}</button>` : ''}</div>` : '';
+  // 3. destaques
+  const linhas = [];
+  if (ms.length === 1) { const ant = C.addMes(ult, -1); const ra = C.resumo(S, [ant]);
+    if (ra.despesas > 0 && r.despesas > 0) { const d = r.despesas / ra.despesas - 1;
+      linhas.push([Math.abs(d) < 0.03 ? '=' : `${d > 0 ? '+' : '−'}${P(Math.abs(d))}`, d > 0.03 ? 'neg' : 'pos', `de gastos comparado a ${mesNome(ant)}`]); } }
   const fixos = C.sum(ms.flatMap((m) => C.movimentosDoMes(S, m)).filter((x) => x.origem === 'fixo' && x.tipo === 'despesa'), (x) => x.valor);
-  if (r.entradas > 0 && fixos > 0) {
-    const p = fixos / r.entradas;
-    cards.push(card('Contas fixas', `<b class="${p > 0.6 ? 'neg' : ''}">${pctTxt(p)}</b> da sua renda já sai sozinho todo mês`,
-      `<div class="an-barra grossa"><i style="width:${Math.min(100, p * 100)}%;background:var(--laranja)"></i></div><p class="an-sub">${brl(fixos)} em fixos · sobram ${brl(Math.max(0, r.entradas - fixos))} para o resto</p>`));
-  }
-  // 5. previsão do mês (só no mês atual)
-  if (ms.length === 1 && ult === cur && r.despesas > 0) {
-    const hoje = new Date(); const dia = hoje.getDate(); const diasMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
-    const varia = r.despesas - fixos; const prev = fixos + varia / dia * diasMes; const sobraPrev = r.entradas - prev - r.guardado;
-    if (dia >= 3) cards.push(card('Previsão', `No ritmo atual, você termina ${C.nomeMes(cur, true).split(' ')[0]} gastando <b>${brl(prev)}</b>`,
-      r.entradas > 0 ? `<p class="an-sub">${sobraPrev >= 0 ? `Sobrariam <b class="pos">${brl(sobraPrev)}</b>` : `Faltariam <b class="neg">${brl(-sobraPrev)}</b>`} no fim do mês</p>` : ''));
-  }
-  // 6. evolução (6 meses até o fim do período)
+  if (ms.length === 1 && ult === cur) { const hoje = new Date(); const dia = hoje.getDate(); const dm = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+    if (dia >= 3 && r.entradas > 0) { const prev = fixos + (r.despesas - fixos) / dia * dm; const sp = r.entradas - prev - r.guardado;
+      linhas.push([brl(Math.abs(sp)), sp >= 0 ? 'pos' : 'neg', sp >= 0 ? `devem sobrar no fim de ${mesNome(cur)}, no ritmo atual` : `devem faltar no fim de ${mesNome(cur)}, no ritmo atual`]); } }
+  if (r.entradas > 0 && fixos > 0) linhas.push([P(fixos / r.entradas), fixos / r.entradas > 0.6 ? 'neg' : 'lar', 'da renda já vai para contas fixas']);
+  if (r.pendente > 0) linhas.push([brl(r.pendente), 'neg', 'ainda a pagar']);
+  const dest = linhas.length ? `<div class="card an-card"><div class="an-rot">Destaques</div>${linhas.map(([n, c, t]) => `<div class="an-dest"><b class="num ${c}">${n}</b><span>${t}</span></div>`).join('')}</div>` : '';
+  // evolução (escondida)
   let seis = C.rangeMeses(C.addMes(ult, -5), ult); let rs = seis.map((m) => C.resumo(S, [m]));
   while (seis.length > 2 && !(rs[0].entradas || rs[0].despesas)) { seis = seis.slice(1); rs = rs.slice(1); }
-  if (rs.filter((x) => x.entradas > 0 || x.despesas > 0).length >= 2) {
-    const meds = rs.slice(0, -1).filter((x) => x.despesas > 0); const med = meds.length ? C.sum(meds, (x) => x.despesas) / meds.length : 0; const ultimo = rs[rs.length - 1].despesas;
-    const tit = med && ultimo ? (ultimo > med * 1.05 ? `Seus gastos estão <b class="neg">acima</b> da sua média` : ultimo < med * 0.95 ? `Seus gastos estão <b class="pos">abaixo</b> da sua média` : 'Seus gastos estão na média') : 'Últimos meses';
-    cards.push(card('Evolução', tit, (() => { const mx = Math.max(1, ...rs.map((x) => Math.max(x.entradas, x.despesas)));
-      return `<div class="an-evo">${seis.map((m, k) => `<div class="an-evo-col"><div class="an-evo-barras"><i style="height:${rs[k].entradas / mx * 100}%;background:#77C800"></i><i style="height:${rs[k].despesas / mx * 100}%;background:#FF9600"></i></div><span>${C.MESES_CURTOS[Number(m.slice(5, 7)) - 1]}</span></div>`).join('')}</div>
-      <div class="an-leg"><span><i style="background:#77C800"></i>Entrou</span><span><i style="background:#FF9600"></i>Gastou</span></div>`; })()));
-  }
-  return `<h1>Análise</h1>${filtroPeriodo()}${cards.length ? cards.join('') : vazio('📊', 'Lance algumas coisas para ver sua análise aqui.')}`;
+  const mx = Math.max(1, ...rs.map((x) => Math.max(x.entradas, x.despesas)));
+  const evo = seis.length >= 2 ? (ui.anEvo ? `<div class="card an-card"><div class="an-rot">Evolução</div><div class="an-evo">${seis.map((m, k) => `<div class="an-evo-col"><div class="an-evo-barras"><i style="height:${rs[k].entradas / mx * 100}%;background:#77C800"></i><i style="height:${rs[k].despesas / mx * 100}%;background:#FF9600"></i></div><span>${C.MESES_CURTOS[Number(m.slice(5, 7)) - 1]}</span></div>`).join('')}</div>
+      <div class="an-leg"><span><i style="background:#77C800"></i>Entrou</span><span><i style="background:#FF9600"></i>Gastou</span></div><button class="link-mais an-mais" data-a="an-evo">Esconder</button></div>`
+    : `<button class="btn branco an-ver-evo" data-a="an-evo">Ver evolução dos meses</button>`) : '';
+  return `<h1>Análise</h1>${filtroPeriodo()}${heroi}${onde}${dest}${evo}`;
 }
 function telaMetas() {
   return `<div class="linha-acao" style="margin-top:0"><h1>Metas</h1><button class="btn verde pequeno" data-a="nova-meta">+ Nova meta</button></div>
@@ -852,6 +837,7 @@ document.addEventListener('click', async (e) => {
       else modalFixo({ ...S.recorrencias.find((x) => x.id === id) });
       break; }
     case 'ver-cat': ui.filtroCat = id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
+    case 'an-evo': ui.anEvo = !ui.anEvo; render(); break;
     case 'an-todas': ui.anTodas = !ui.anTodas; render(); break;
     case 'filtro-cat-ir': ui.filtroCat = el.dataset.id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
     case 'kpi-ir': if (el.dataset.v === 'metas') location.hash = '#metas'; else { ui.filtroTipo = el.dataset.v; location.hash = '#lancamentos'; } break;
@@ -1214,7 +1200,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=91" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=92" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho

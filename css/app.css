@@ -506,3 +506,17 @@ label.btn { position: relative; }
 .an-leg { display: flex; gap: 14px; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--cinza); } .an-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; }
 .an-card .grade.g3.kpis .kpi { padding: 8px 6px; } .an-card .grade.g3.kpis .kpi .val { font-size: 12.5px; letter-spacing: -0.02em; } .an-card .grade.g3.kpis { gap: 6px; }
 .marca-link { display: flex; align-items: center; gap: 4px; text-decoration: none; color: inherit; } .marca-seta { color: var(--cinza); font-size: 14px; margin-top: 4px; }
+.an-heroi { border-radius: 22px; padding: 20px 18px 16px; color: #fff; margin-bottom: 14px; }
+.an-heroi.verde { background: #58CC02; box-shadow: 0 5px 0 #46A302; } .an-heroi.azul { background: var(--azul); box-shadow: 0 5px 0 #1A6FD6; } .an-heroi.vermelho { background: var(--vermelho); box-shadow: 0 5px 0 var(--vermelho-esc); }
+.an-big { font-size: 46px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; } .an-frase { font-size: 16px; font-weight: 800; margin-top: 6px; opacity: .95; }
+.an-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 16px; }
+.an-trio button { background: rgba(255,255,255,.18); border: none; border-radius: 12px; padding: 8px 6px; color: #fff; text-align: left; font: inherit; cursor: pointer; min-width: 0; }
+.an-trio span { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; opacity: .9; } .an-trio b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.an-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.an-big2 { font-size: 34px; font-weight: 900; line-height: 1; color: var(--laranja, #FF9600); } .an-frase2 { font-weight: 700; margin-top: 4px; }
+.an-alerta { background: #FFE5E5; color: var(--vermelho); font-weight: 800; font-size: 12px; border-radius: 10px; padding: 5px 9px; white-space: nowrap; }
+.an-dest { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 2px solid var(--linha); } .an-dest:first-of-type { border-top: none; }
+.an-dest b { font-size: 24px; font-weight: 900; min-width: 92px; } .an-dest b.pos { color: #58A700; } .an-dest b.neg { color: var(--vermelho); } .an-dest b.lar { color: var(--laranja, #FF9600); }
+.an-dest span { font-weight: 700; color: var(--cinza-esc, #4B4B4B); line-height: 1.3; }
+.an-ver-evo { width: 100%; margin-top: 4px; }
+.an-dest { flex-direction: column; gap: 2px; } .an-dest b { min-width: 0; font-size: 26px; } .an-rot + .an-dest { border-top: none; padding-top: 4px; }
