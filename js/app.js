@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=35';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=35';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=35';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=35';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=35';
+import * as C from './calc.js?v=36';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=36';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=36';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=36';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=36';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -260,9 +260,11 @@ function telaCartoes() {
   ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
 }
 function bannerFaturas() {
-  return C.faturasParaDecidir(st(), hoje).map(({ cartao, m, f }) => `<div class="aviso-fatura" style="border-color:${cartao.cor || 'var(--azul)'}">
-    <div><b>A fatura ${esc(nomeCartao(cartao))} de ${C.nomeMes(m)} fechou</b><div class="mini">Ficaram <b>${brl(f.aberto)}</b> em aberto. O que você fez com ela?</div></div>
-    <button class="btn pequeno" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher</button></div>`).join('');
+  const ocultas = ui.faturasOcultas ||= new Set();
+  return C.faturasParaDecidir(st(), hoje).filter(({ cartao, m }) => !ocultas.has(`${cartao.id}|${m}`)).map(({ cartao, m, f }) => `<div class="aviso-fatura">
+    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.nomeMes(m)} fechou</b><div class="mini">${brl(f.aberto)} em aberto</div></div>
+    <button class="btn verde pequeno" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher</button>
+    <button class="af-x" data-a="ocultar-aviso-fatura" data-k="${cartao.id}|${m}" aria-label="Fechar aviso">×</button></div>`).join('');
 }
 const textoDecisao = (d, m) => d.acao === 'paguei' ? 'Você marcou que pagou esta fatura.'
   : d.acao === 'passar' ? `${brl(d.principal)} passou para a fatura de ${C.nomeMes(C.addMes(m, 1))}${d.juros > 0 ? `, com ${brl(d.juros)} de juros` : ''}.`
@@ -796,6 +798,7 @@ document.addEventListener('click', async (e) => {
     case 'tour-sair': ui.tour = null; document.querySelector('.tour')?.remove(); break;
     case 'ver-tour': ui.tour = 0; ui.rota = ''; desenharTour(); break;
     case 'limites-plano': ui.limitesPlano = !ui.limitesPlano; render(); break;
+    case 'ocultar-aviso-fatura': (ui.faturasOcultas ||= new Set()).add(el.dataset.k); render(); break;
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
