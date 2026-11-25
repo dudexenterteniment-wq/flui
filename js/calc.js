@@ -128,7 +128,7 @@ export function resumo(st, meses) {
   const despesas = sum(por('despesa'), (x) => x.valor);
   const guardado = sum(por('guardar'), (x) => x.valor);
   const cartao = sum(movs.filter((x) => x.origem === 'cartao'), (x) => x.valor);
-  const pendNaoCartao = sum(movs.filter((x) => x.origem !== 'cartao' && x.tipo !== 'entrada' && (x.status === 'pendente' || x.status === 'previsto')), (x) => x.valor);
+  const pendNaoCartao = sum(movs.filter((x) => x.origem !== 'cartao' && x.tipo === 'despesa' && (x.status === 'pendente' || x.status === 'previsto')), (x) => x.valor);
   const ids = [...new Set(st.compras.map((c) => c.cartaoId || ''))];
   const abertoCartao = sum(meses.flatMap((m) => ids.map((id) => fatura(st, id, m).aberto)));
   const pendente = fromCents(cents(pendNaoCartao) + cents(abertoCartao));
@@ -249,7 +249,9 @@ export function progressoMeta(st, meta) {
   const ids = new Set([meta.categoriaId, ...(base ? st.categorias.filter((c) => c.tipo === 'guardar' && norm(c.nome) === norm(base.nome)).map((c) => c.id) : [])].filter(Boolean));
   const lanc = meta.categoriaId ? sum(st.lancamentos.filter((l) => ids.has(l.categoriaId) && l.tipo === 'guardar' && desde(l.mes)), (l) => l.valor) : 0;
   // fixos de guardar marcados como feitos também contam
-  const fixos = meta.categoriaId ? sum(st.recorrencias.filter((r) => ids.has(r.categoriaId) && (r.tipo || 'guardar') === 'guardar').flatMap((r) => Object.keys(r.pagos || {}).filter((m) => r.pagos[m] && desde(m) && recorrenciaNoMes(r, m) && !st.lancamentos.some((l) => l.recorrenciaId === r.id && l.mes === m)).map(() => Number(r.valor) || 0))) : 0;
+  // fixos de guardar contam sozinhos em cada mês que já chegou (do início até o mês atual)
+  const ate = mesAtual(); const fixos = meta.categoriaId ? sum(st.recorrencias.filter((r) => ids.has(r.categoriaId) && (r.tipo || 'guardar') === 'guardar' && r.ativa !== false).flatMap((r) => {
+    const out = []; for (let m = r.inicio; m && difMeses(m, ate) >= 0; m = addMes(m, 1)) { if (r.fim && difMeses(r.fim, m) > 0) break; if (desde(m) && recorrenciaNoMes(r, m) && !st.lancamentos.some((l) => l.recorrenciaId === r.id && l.mes === m)) out.push(Number(r.valor) || 0); } return out; })) : 0;
   const guardado = fromCents(cents(lanc) + cents(fixos));
   const atual = fromCents(cents(meta.valorInicial) + cents(guardado));
   const alvo = Number(meta.alvo) || 0;

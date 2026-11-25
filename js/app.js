@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=43';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=43';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=43';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=43';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=43';
+import * as C from './calc.js?v=44';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=44';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=44';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=44';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=44';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -316,7 +316,7 @@ function telaPlano() {
     const linhaFixo = (r, entrada) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: entrada ? '#77C800' : '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
         <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'todo mês'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}${!entrada && r.diaVenc ? ` · dia ${r.diaVenc}` : ''}</div></div>
-      <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
+      <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
     return `<h1>Planejamento</h1>${abas}
     <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
     <div class="card bloco-fixo entra"><div class="linha-acao" style="margin:0 0 8px"><h3>Entra todo mês</h3><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button></div>
