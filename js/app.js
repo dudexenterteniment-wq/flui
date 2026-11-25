@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=36';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=36';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=36';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=36';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=36';
+import * as C from './calc.js?v=39';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=39';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=39';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=39';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=39';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -303,7 +303,9 @@ function comprometido(cartaoId) {
 function telaPlano() {
   const m0 = C.mesAtual();
   const todasRendas = st().recorrencias.filter((r) => r.tipo === 'entrada');
-  const rendas = todasRendas.filter((r) => !r.fim || C.difMeses(m0, r.fim) >= 0).sort((a, b) => b.valor - a.valor);
+  const sucessor = (r) => r.fim && todasRendas.find((x) => x !== r && x.categoriaId === r.categoriaId && (x.nome || '') === (r.nome || '') && x.inicio === C.addMes(r.fim, 1));
+  const anterior = (r) => todasRendas.find((x) => x !== r && sucessor(x) === r);
+  const rendas = todasRendas.filter((r) => (!r.fim || C.difMeses(m0, r.fim) >= 0) && !sucessor(r)).sort((a, b) => b.valor - a.valor);
   const rendaMes = C.sum(todasRendas.filter((r) => C.recorrenciaNoMes(r, m0)), (r) => r.valor);
   const sal = rendaMes > 0 ? { valor: rendaMes } : null;
   const desp = st().categorias.filter((c) => !c.arquivada && c.tipo !== 'entrada').sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'guardar' ? 1 : -1) || ordemCat(a, b));
@@ -314,26 +316,26 @@ function telaPlano() {
   const estour = C.porCategoria(st(), [m]).filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0 && x.real > x.orcado).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
   return `
   <h1>Planejamento</h1>
-  <div class="card limites-card"><button class="limites-topo" data-a="limites-plano">
-      <span><h3 style="margin:0">Meus limites</h3><span class="mini">${visP.length ? (estour.length ? `<b class="neg">${estour.length} ${estour.length === 1 ? 'passou' : 'passaram'} do limite</b> · ${visP.length - estour.length} dentro` : '<b class="pos">Tudo dentro do limite</b>') + ` em ${C.nomeMes(m)}` : 'defina abaixo quanto quer gastar'}</span></span>
-      ${visP.length ? `<span class="seta-lim ${ui.limitesPlano ? 'aberta' : ''}">▾</span>` : ''}</button>
-    ${ui.limitesPlano ? `<div class="lista" style="margin-top:10px">${visP.map(orcLinha).join('')}</div>`
-      : estour.slice(0, 2).map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:30px;height:30px;border-radius:9px')}<span class="meio">${esc(x.cat.nome)}<small>${brl(x.real)} de ${brl(x.orcado)}</small></span><b class="neg num">+${brl(x.real - x.orcado)}</b></div>`).join('')}</div>
   <div class="card"><div class="linha-acao" style="margin:0 0 8px"><h3>Renda fixa</h3><button class="btn pequeno" data-a="novo-salario">+ Renda</button></div>
-    ${rendas.length ? `<div class="lista">${rendas.map((r) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: '#77C800' }, 'width:34px;height:34px;border-radius:10px')}
-      <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}</div><div class="det">${C.recorrenciaNoMes(r, m) ? 'todo mês' : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'terminou'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}</div></div>
+    ${rendas.length ? `<div class="lista rendas">${rendas.map((r) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: '#77C800' }, 'width:34px;height:34px;border-radius:10px')}
+      <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}</div><div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.recorrenciaNoMes(r, m) ? 'todo mês' : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'terminou'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}</div></div>
       <div class="valor num pos">${brl(r.valor)}</div></div>`).join('')}</div>` : '<p class="mini" style="margin:0">Salário ou outra renda que entra todo mês.</p>'}</div>
-  <div class="linha-acao"><h2>Orçamento por categoria</h2><span class="mini">total ${brl(totOrc)} / mês${sal ? ` · sobra planejada <b class="${sal.valor - totOrc < 0 ? 'neg' : 'pos'}">${brl(sal.valor - totOrc)}</b>` : ''}</span></div>
-  <div class="lista">${desp.map((c) => `<div class="item" style="cursor:default">${bolaCat(c)}
-    <div class="meio"><div class="titulo">${esc(c.nome)}</div><div class="det">${c.tipo === 'guardar' ? 'guardar' : 'despesa'}</div></div>
-    <input class="inp num" style="width:130px;text-align:right" inputmode="decimal" placeholder="0,00" value="${c.orcamento ? valorInput(c.orcamento) : ''}" data-a="orc" data-id="${c.id}"></div>`).join('')}</div>
-  <div class="linha-acao"><h2>Custos fixos e recorrentes</h2><button class="btn pequeno" data-a="novo-fixo">+ Novo fixo</button></div>
+  <div class="linha-acao"><h2>Custos fixos</h2><button class="btn pequeno" data-a="novo-fixo">+ Novo fixo</button></div>
   ${fixos.length ? `<div class="lista">${fixos.map((r) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">
     ${bolaCat(cat(r.categoriaId) || { nome: catNome(r.categoriaId), cor: catCor(r.categoriaId) })}
     <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
       <div class="det">${[catNome(r.categoriaId), `${C.nomeMes(r.inicio)} → ${r.fim ? C.nomeMes(r.fim) : 'sem fim'}`, r.diaVenc ? `vence dia ${r.diaVenc}` : '', r.banco].filter(Boolean).map(esc).join(' · ')}</div></div>
     <div style="text-align:right"><div class="valor num">${brl(r.valor)}</div>${C.recorrenciaNoMes(r, m) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago em ${C.nomeMes(m)}</label>` : ''}</div></div>`).join('')}</div>` : vazio('🔁', 'Academia, assinaturas, dízimo... cadastre aqui o que se repete todo mês.')}
-  `;
+  
+  <div class="card limites-card"><button class="limites-topo" data-a="limites-plano">
+      <span><h3 style="margin:0">Meus limites</h3><span class="mini">${visP.length ? (estour.length ? `<b class="neg">${estour.length} ${estour.length === 1 ? 'passou' : 'passaram'} do limite</b> · ${visP.length - estour.length} dentro` : '<b class="pos">Tudo dentro do limite</b>') + ` em ${C.nomeMes(m)}` : 'defina abaixo quanto quer gastar'}</span></span>
+      ${visP.length ? `<span class="seta-lim ${ui.limitesPlano ? 'aberta' : ''}" aria-label="${ui.limitesPlano ? 'Fechar' : 'Ver todos'}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>` : ''}</button>
+    ${ui.limitesPlano ? `<div class="lista" style="margin-top:10px">${visP.map(orcLinha).join('')}</div>`
+      : estour.slice(0, 1).map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:30px;height:30px;border-radius:9px')}<span class="meio">${esc(x.cat.nome)}<small>${brl(x.real)} de ${brl(x.orcado)}</small></span><b class="neg num">+${brl(x.real - x.orcado)}</b></div>`).join('')}</div>
+  <div class="linha-acao"><h2>Orçamento por categoria</h2><span class="mini">total ${brl(totOrc)} / mês${sal ? ` · sobra planejada <b class="${sal.valor - totOrc < 0 ? 'neg' : 'pos'}">${brl(sal.valor - totOrc)}</b>` : ''}</span></div>
+  <div class="lista">${desp.map((c) => `<div class="item" style="cursor:default">${bolaCat(c)}
+    <div class="meio"><div class="titulo">${esc(c.nome)}</div><div class="det">${c.tipo === 'guardar' ? 'guardar' : 'despesa'}</div></div>
+    <input class="inp num" style="width:130px;text-align:right" inputmode="decimal" placeholder="0,00" value="${c.orcamento ? valorInput(c.orcamento) : ''}" data-a="orc" data-id="${c.id}"></div>`).join('')}</div>`;
 }
 
 // ---------------- Relatórios ----------------
