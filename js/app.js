@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=59';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=59';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=59';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=59';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=59';
+import * as C from './calc.js?v=60';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=60';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=60';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=60';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=60';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -638,7 +638,8 @@ function modalRevisarImport() {
 }
 // ---------------- tour rápido ----------------
 const TOUR = [
-  { rota: 'plano', alvo: '[data-a=orc]', txt: 'Comece por aqui: diga quanto quer gastar por mês em cada categoria.' },
+  { rota: 'plano', alvo: '[data-a=aba-plano][data-v=fixos]', txt: 'Comece aqui: em Renda e fixos, coloque seu salário e o que sai todo mês (academia, dízimo...). Eles entram sozinhos.' },
+  { rota: 'plano', alvo: '[data-a=orc]', txt: 'Depois, diga quanto quer gastar por mês em cada categoria.' },
   { rota: 'inicio', alvo: '.fab', txt: 'Toque no + para lançar um gasto, uma entrada ou algo que guardou.' },
   { rota: 'lancamentos', alvo: '[data-a=importar-extrato]', txt: 'Tem Nubank? Importe o extrato e o Flui lança tudo para você.' },
   { rota: 'cartoes', alvo: '.cc, [data-a=novo-cartao]', txt: 'Seus cartões e faturas ficam aqui. Toque no cartão para ver a fatura.' },
@@ -802,11 +803,11 @@ document.addEventListener('click', async (e) => {
       const ini = parseValor(document.querySelector(`[data-meta-ini="${id}"]`)?.value) || 0;
       const mt = S.metas.find((x) => x.id === id); await store.salvar('metas', { ...mt, alvo: v, valorInicial: ini }); toast('Meta definida! Agora é ver a barra encher.', true); break; }
     case 'aba-cats': ui.abaCats = el.dataset.v; render(); break;
-    case 'tour-sim': ui.modal = null; ui.tour = 0; ui.rota = ''; desenharTour(); break;
-    case 'tour-nao': fecharModal(); location.hash = '#plano'; toast('Comece pelo planejamento: quanto quer gastar por mês.', true); break;
-    case 'tour-prox': ui.tour++; if (ui.tour >= TOUR.length) { ui.tour = null; document.querySelector('.tour')?.remove(); location.hash = '#plano'; toast('Agora é com você: comece pelo planejamento!', true); } else desenharTour(); break;
+    case 'tour-sim': ui.modal = null; ui.abaPlano = 'limites'; ui.tour = 0; ui.rota = ''; desenharTour(); break;
+    case 'tour-nao': fecharModal(); ui.abaPlano = 'fixos'; location.hash = '#plano'; toast('Comece colocando sua renda e seus fixos.', true); break;
+    case 'tour-prox': ui.tour++; if (ui.tour >= TOUR.length) { ui.tour = null; document.querySelector('.tour')?.remove(); ui.abaPlano = 'fixos'; location.hash = '#plano'; render(); toast('Agora é com você: comece pela renda e pelos fixos!', true); } else desenharTour(); break;
     case 'tour-sair': ui.tour = null; document.querySelector('.tour')?.remove(); break;
-    case 'ver-tour': ui.tour = 0; ui.rota = ''; desenharTour(); break;
+    case 'ver-tour': ui.abaPlano = 'limites'; ui.tour = 0; ui.rota = ''; desenharTour(); break;
     case 'limites-plano': ui.limitesPlano = !ui.limitesPlano; render(); break;
     case 'ocultar-aviso-fatura': (ui.faturasOcultas ||= new Set()).add(el.dataset.k); render(); break;
     case 'aba-plano': ui.abaPlano = el.dataset.v; render(); break;
