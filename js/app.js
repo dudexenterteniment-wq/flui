@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=126';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=126';
-import { VAPID_KEY } from './config.js?v=126';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=126';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=126';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=126';
+import * as C from './calc.js?v=127';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=127';
+import { VAPID_KEY } from './config.js?v=127';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=127';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=127';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=127';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=126" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=127" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=126" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=127" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=126" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=127" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=126" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=127" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -318,7 +318,7 @@ function telaPlano() {
   if (aba === 'fixos') {
     const linhaFixo = (r, entrada) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: entrada ? '#77C800' : '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
-        <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'todo mês'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}</div></div>
+        <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}` : r.fim ? `por ${C.difMeses(r.inicio, r.fim) + 1} ${C.difMeses(r.inicio, r.fim) ? 'meses' : 'mês'} · ${C.nomeMes(r.inicio)} a ${C.nomeMes(r.fim)}` : C.difMeses(m, r.inicio) > 0 ? 'a partir de ' + C.nomeMes(r.inicio) : 'todo mês'}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}</div></div>
       <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && r.forma !== 'Crédito' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
     return `<h1>Planejamento</h1>${abas}
     <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
@@ -654,7 +654,8 @@ const NOMES_ASSIN = [[/UBER\W*ONE/i, 'Uber One'], [/NETFLIX/i, 'Netflix'], [/SPO
   [/CLUBE ?IFOOD|IFOOD ?CLUB/i, 'Clube iFood'], [/MELI/i, 'Meli+'], [/ADOBE/i, 'Adobe'], [/LINKEDIN/i, 'LinkedIn'], [/MICROSOFT|MSFT/i, 'Microsoft 365'], [/SMART ?FIT/i, 'Smart Fit']];
 const nomeAssin = (t) => (NOMES_ASSIN.find(([re]) => re.test(t)) || [])[1] || t.replace(/ - Parcela \d+\/\d+$/i, '').replace(/^[A-Z]{2,4}\s?\*/i, '').trim();
 function perguntarAssinaturas(banco) {
-  const lst = (ui.assinaturas || []).filter((a, i, arr) => arr.findIndex((x) => chaveRegra(x.texto) === chaveRegra(a.texto)) === i); if (!lst.length) return false;
+  const jaTem = (a) => st().recorrencias.some((r) => r.forma === 'Crédito' && (chaveRegra(r.obsImport || '') === chaveRegra(a.texto) || (r.nome || '').toLowerCase() === a.nome.toLowerCase()));
+  const lst = (ui.assinaturas || []).filter((a, i, arr) => arr.findIndex((x) => chaveRegra(x.texto) === chaveRegra(a.texto)) === i && !jaTem(a)); if (!lst.length) { ui.assinaturas = []; return false; }
   ui.assinaturas = lst;
   abrirModal(`<form data-form="assinaturas" data-banco="${esc(banco)}">${topoModal('Assinaturas')}
     <p style="margin:0 0 12px">Achei estas assinaturas na fatura. Quer que elas entrem sozinhas todo mês, como gasto fixo no cartão?</p>
@@ -1334,6 +1335,8 @@ async function garantirMetas() {
   if (mudou) await store.salvarSettings({ metasAuto: feitas });
 }
 async function migrar() {
+  // assinaturas criadas duas vezes (mesmo nome, valor, cartão e início): fica uma só
+  { const vistos = new Set(); for (const r of [...st().recorrencias]) { if (!r.obsImport) continue; const k = [r.nome, r.valor, r.cartaoId, r.inicio].join('|'); if (vistos.has(k)) await store.remover('recorrencias', r.id); else vistos.add(k); } }
   // importações: compras no mês da fatura certa (pelo fechamento) e pagamentos na fatura certa
   if (st().settings.importRegra !== 5) { const S = st();
     for (const c of S.compras.filter((x) => x.importId && x.data && x.cartaoId)) { const k = S.cartoes.find((x) => x.id === c.cartaoId); const m = k ? mesDaCompra(k, c.data) : c.mesPrimeira; if (m !== c.mesPrimeira) await store.salvar('compras', { ...c, mesPrimeira: m }); }
@@ -1395,7 +1398,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=126" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=127" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
