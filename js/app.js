@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=53';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=53';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=53';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=53';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=53';
+import * as C from './calc.js?v=54';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=54';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=54';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=54';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=54';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -133,7 +133,7 @@ function avisos() {
         : { k, cor: 'laranja', ic: '👀', txt: `Olha quem está quase passando do limite! Você já usou <b>${pct(x.pct)}</b> do orçamento de ${esc(x.cat.nome.toLowerCase())}. Vamos ficar de olho?` });
     }
   }
-  for (const { cartao, m, f, fechou, venceu, vence } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: venceu ? 'vermelho' : 'amarelo', ic: venceu ? '⚠️' : '💳', txt: venceu ? `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} <b>venceu dia ${vence.getDate()}</b> com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` : `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou no dia ${fechou.getDate()} com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
+  for (const { cartao, m, f, fechou, venceu, vence } of C.faturasParaDecidir(st(), hoje)) if (!vistos[`dec|${cartao.id}|${m}`]) out.push({ k: `dec|${cartao.id}|${m}`, cor: venceu ? 'vermelho' : 'amarelo', ic: venceu ? '⚠️' : '💳', txt: venceu ? `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} <b>venceu dia ${vence.getDate()} de ${C.MESES_LONGOS[vence.getMonth()]}</b> com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` : `A fatura <b>${esc(nomeCartao(cartao))}</b> de ${C.MESES_LONGOS[+m.slice(5) - 1]} fechou dia ${fechou.getDate()} de ${C.MESES_LONGOS[fechou.getMonth()]}${vence ? ` e vence dia ${vence.getDate()}` : ''}, com ${brl(f.aberto)} em aberto. <a href="#cartoes" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher o que fazer</a>` });
   for (const v of C.proximosVencimentos(st(), hoje, 7)) {
     const k = `venc|${v.tipo}|${v.ref}|${v.mes || ''}`; if (vistos[k]) continue;
     const dias = Math.round((v.data - new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())) / 864e5);
@@ -252,7 +252,7 @@ function telaCartoes() {
   <div class="cartoes-fila">${todos.map((c) => `<div class="cc cartao ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
       <div class="cc-l1"><span class="cc-nome">${esc(nomeCartao(c))}</span>${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão">✎</button>` : ''}</div>
       <div class="cc-tipo">${c.id ? esc(nomeTipoCartao(c.tipo)) : 'Sem cartão'}</div><span class="cc-chip"></span>
-      <div class="cc-l3">${temCred(c) ? `<span class="cc-venc">${c.vencimento ? `Vence dia ${c.vencimento}` : 'Fatura'}</span>${(() => { const fz = C.fatura(st(), c.id, mesRef()); return fz.total > 0 && fz.aberto <= 0 ? '<span class="cc-val">Paga ✓</span>' : `<span class="cc-val num"><small>falta</small>${brl(fz.aberto)}</span>`; })()}` : '<span class="cc-venc">Ver débito ›</span>'}</div></div>`).join('')}
+      <div class="cc-l3">${temCred(c) ? `<span class="cc-venc">${c.vencimento ? `Vence ${c.vencimento} ${C.MESES_CURTOS[+C.addMes(mesRef(), 1).slice(5) - 1]}` : 'Fatura'}</span>${(() => { const fz = C.fatura(st(), c.id, mesRef()); return fz.total > 0 && fz.aberto <= 0 ? '<span class="cc-val">Paga ✓</span>' : `<span class="cc-val num"><small>falta</small>${brl(fz.aberto)}</span>`; })()}` : '<span class="cc-venc">Ver débito ›</span>'}</div></div>`).join('')}
     <button class="cc cartao cc-novo" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
   ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
@@ -260,7 +260,7 @@ function telaCartoes() {
 function bannerFaturas() {
   const ocultas = ui.faturasOcultas ||= new Set();
   return C.faturasParaDecidir(st(), hoje).filter(({ cartao, m }) => !ocultas.has(`${cartao.id}|${m}`)).map(({ cartao, m, f, fechou, venceu, vence }) => `<div class="aviso-fatura ${venceu ? 'vencida' : ''}">
-    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.MESES_LONGOS[+m.slice(5) - 1]} ${venceu ? `venceu dia ${vence.getDate()}` : `fechou no dia ${fechou.getDate()}`}</b><div class="mini">${!venceu && cartao.vencimento ? `vence dia ${cartao.vencimento} · ` : ''}${brl(f.aberto)} em aberto</div></div>
+    <div class="af-txt"><b>Fatura ${esc(nomeCartao(cartao))} de ${C.MESES_LONGOS[+m.slice(5) - 1]} ${venceu ? `venceu dia ${vence.getDate()}` : `fechou dia ${fechou.getDate()} ${C.MESES_CURTOS[fechou.getMonth()]}`}</b><div class="mini">${!venceu && vence ? `vence ${vence.getDate()} ${C.MESES_CURTOS[vence.getMonth()]} · ` : ''}${brl(f.aberto)} em aberto</div></div>
     <button class="btn verde pequeno" data-a="decidir-fatura" data-id="${cartao.id}" data-m="${m}">Escolher</button>
     <button class="af-x" data-a="ocultar-aviso-fatura" data-k="${cartao.id}|${m}" aria-label="Fechar aviso">×</button></div>`).join('');
 }
@@ -271,7 +271,7 @@ function blocoFatura(c, f, m) {
   const k = `${c.id || 'sem'}|${m}`; const aberta = (ui.faturasAbertas ||= new Set()).has(k); const n = f.itens.length;
   return `<div class="card fatura ${aberta ? 'aberta' : ''}">
     <div class="fatura-topo">
-    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}${c.vencimento ? `<span class="mini" style="font-weight:700;margin-left:6px">vence dia ${c.vencimento}</span>` : ''}</h3><span class="fat-valores"><span class="num fat-total">${brl(f.total)}</span>${f.pago > 0 ? `<span class="num fat-pago">${brl(f.pago)} pago</span>` : ''}</span></div>
+    <div class="linha-acao" style="margin:0 0 4px"><h3><span class="ponto" style="background:${c.cor || '#AFAFAF'}"></span>${esc(nomeCartao(c))}${c.vencimento ? `<span class="mini" style="font-weight:700;margin-left:6px">vence ${c.vencimento} ${C.MESES_CURTOS[+C.addMes(m, 1).slice(5) - 1]}</span>` : ''}</h3><span class="fat-valores"><span class="num fat-total">${brl(f.total)}</span>${f.pago > 0 ? `<span class="num fat-pago">${brl(f.pago)} pago</span>` : ''}</span></div>
     <div class="prog ${f.paga ? '' : 'azul'}" style="margin:8px 0 6px"><i style="width:${f.total ? Math.round((f.pago / f.total) * 100) : 0}%"></i></div>
     <div class="mini" style="display:flex;justify-content:flex-end;margin-bottom:10px"><span>${f.decisao && f.decisao.acao !== 'paguei' && f.aberto <= 0 ? `<b style="color:var(--azul)">${f.decisao.acao === 'passar' ? 'Passou para o próximo mês' : 'Parcelada'}</b>` : f.paga ? '<b class="pos">Fatura paga ✓</b>' : `<b class="neg">Falta ${brl(f.aberto)}</b>`}</span></div>
     </div>

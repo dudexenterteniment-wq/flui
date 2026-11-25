@@ -192,13 +192,14 @@ export function fatura(st, cartaoId, m) {
   return { itens, total, pagoItens, avulso, pago, transferido, decisao, aberto, paga: total > 0 && aberto <= 0, tudoMarcado: itens.length > 0 && itens.every((x) => x.paga) };
 }
 
-// data em que a fatura do mês m fecha (com dia de fechamento) ou vence (sem ele)
+// fatura do mês m = compras de m. Ela vence no mês seguinte (dia V de m+1).
+// Fecha dia F: em m+1 se F vem antes do vencimento (ex.: fecha 3, vence 10), senão no próprio mês m (ex.: fecha 26, vence 5).
+const dataDoDia = (mm, dia) => { const [y, mo] = mm.split('-').map(Number); const ult = new Date(y, mo, 0).getDate(); return new Date(y, mo - 1, Math.min(dia, ult)); };
+export function dataVencimento(cartao, m) { const V = parseInt(cartao.vencimento, 10); return V ? dataDoDia(addMes(m, 1), V) : null; }
 export function dataFechamento(cartao, m) {
-  const dataDe = (mm, dia) => { const [y, mo] = mm.split('-').map(Number); const ult = new Date(y, mo, 0).getDate(); return new Date(y, mo - 1, Math.min(dia, ult)); };
   const F = parseInt(cartao.fechamento, 10); const V = parseInt(cartao.vencimento, 10);
-  if (F) return V && F > V ? dataDe(addMes(m, -1), F) : dataDe(m, F);
-  if (V) return dataDe(m, V);
-  return null;
+  if (F) return V && F > V ? dataDoDia(m, F) : dataDoDia(addMes(m, 1), F);
+  return dataVencimento(cartao, m);
 }
 // faturas que já fecharam com valor em aberto e ainda sem escolha
 export function faturasParaDecidir(st, hoje = new Date()) {
@@ -208,8 +209,7 @@ export function faturasParaDecidir(st, hoje = new Date()) {
     for (const m of [addMes(mA, -2), addMes(mA, -1), mA, addMes(mA, 1)]) {
       const fe = dataFechamento(c, m); if (!fe || fe > d0) continue;
       const f = fatura(st, c.id, m); if (f.decisao || f.aberto <= 0) continue;
-      const V = parseInt(c.vencimento, 10); let vence = null;
-      if (V) { const [y, mo] = m.split('-').map(Number); vence = new Date(y, mo - 1, Math.min(V, new Date(y, mo, 0).getDate())); }
+      const vence = dataVencimento(c, m);
       out.push({ cartao: c, m, f, fechou: fe, vence, venceu: !!vence && vence < d0 });
     }
   }
@@ -229,13 +229,13 @@ export function proximosVencimentos(st, hoje = new Date(), dias = 10) {
       const d = dataDe(m, r.diaVenc);
       if (d >= d0 && d <= lim) out.push({ tipo: 'fixo', nome: r.nome, valor: r.valor, data: d, ref: r.id, mes: m });
     }
-    for (const c of st.cartoes) {
-      if (!c.vencimento) continue;
-      const f = fatura(st, c.id, m);
-      if (f.paga || f.total <= 0) continue;
-      const d = dataDe(m, c.vencimento);
-      if (d >= d0 && d <= lim) out.push({ tipo: 'fatura', nome: `Fatura ${c.apelido || c.banco || c.nome}`, valor: f.aberto, data: d, ref: c.id, mes: m });
-    }
+  }
+  for (const m of [addMes(mesAtual(hoje), -1), mesAtual(hoje)]) for (const c of st.cartoes) {
+    if (!c.vencimento) continue;
+    const f = fatura(st, c.id, m);
+    if (f.paga || f.total <= 0) continue;
+    const d = dataVencimento(c, m);
+    if (d >= d0 && d <= lim) out.push({ tipo: 'fatura', nome: `Fatura ${c.apelido || c.banco || c.nome}`, valor: f.aberto, data: d, ref: c.id, mes: m });
   }
   for (const l of st.lancamentos) {
     if (!l.vencimento || l.status !== 'pendente') continue;
