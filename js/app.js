@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=26';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=26';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=26';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=26';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=26';
+import * as C from './calc.js?v=28';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=28';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=28';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=28';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=28';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -29,8 +29,8 @@ const mesRef = () => meses()[meses().length - 1];
 // ======================= RENDER =======================
 const NAV = [
   ['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançamentos', ICON.lanc], ['cartoes', 'Cartões', ICON.cartao],
-  ['plano', 'Planejamento', ICON.plano], ['relatorios', 'Relatórios', ICON.relat], ['metas', 'Metas', ICON.metas],
-  ['categorias', 'Categorias', ICON.cats], ['config', 'Configurações', ICON.config]];
+  ['plano', 'Planejamento', ICON.plano], ['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas],
+  ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]];
 const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar', ICON.lanc], ['cartoes', 'Cartões', ICON.cartao], ['plano', 'Plano', ICON.plano], ['mais', 'Mais', ICON.mais]];
 
 function render() {
@@ -48,6 +48,7 @@ function render() {
     <button class="btn verde fab" data-a="novo-lanc" aria-label="Novo lançamento">+</button>
   </div>${ui.modal ? ui.modal.html : ''}`;
   if (ui.modal?.depois) ui.modal.depois();
+  desenharTour();
 }
 const SINO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>';
 function sino() { const n = avisos().length; return `<button class="sino" data-a="notificacoes" aria-label="Notificações${n ? ` (${n})` : ''}">${SINO}${n ? `<span class="badge">${n > 9 ? '9+' : n}</span>` : ''}</button>`; }
@@ -80,11 +81,12 @@ const ERROS_AUTH = { 'auth/invalid-credential': 'E-mail ou senha incorretos.', '
 // ---------------- filtro de período ----------------
 function filtroPeriodo() {
   const p = ui.periodo;
-  const tipos = [['mes', 'Mês'], ['tri', 'Trimestre'], ['sem', 'Semestre'], ['ano', 'Ano'], ['custom', 'Personalizado']];
+  const tipos = [['mes', 'Mês'], ['ano', 'Ano'], ['custom', 'Personalizado']];
+  if (p.tipo === 'tri' || p.tipo === 'sem') p.tipo = 'mes';
   return `<div class="periodo">
     ${p.tipo !== 'custom' ? `<button class="seta" data-a="per-ant" aria-label="Anterior">‹</button><div class="rotulo">${esc(cap(C.nomePeriodo(p)))}</div><button class="seta" data-a="per-prox" aria-label="Próximo">›</button>` :
       `<div class="chips">${mesSelect('per-de', p.de)} <span class="mini">até</span> ${mesSelect('per-ate', p.ate)}</div>`}
-    <div class="chips">${tipos.map(([t, n]) => `<button class="chip ${p.tipo === t ? 'ativo' : ''}" data-a="per-tipo" data-v="${t}">${n}</button>`).join('')}</div>
+    <div class="seg-periodo">${tipos.map(([t, n]) => `<button class="${p.tipo === t ? 'ativo' : ''}" data-a="per-tipo" data-v="${t}">${n}</button>`).join('')}</div>
   </div>`;
 }
 function mesSelect(nome, valor) {
@@ -147,33 +149,28 @@ function telaInicio() {
   const desp = rows.filter((x) => x.cat.tipo === 'despesa' && x.real > 0).sort((a, b) => b.real - a.real);
   const totDesp = C.sum(desp, (x) => x.real);
   const ultimos = [...st().lancamentos].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
+  const leg = ui.legendaToda ? desp : desp.slice(0, 4);
   return `
-  <h1>Início</h1>
+  <h1 class="titulo-pag">Início</h1>
   ${bannerFaturas()}
   ${filtroPeriodo()}
-  <div class="grade g4">
+  <div class="grade g4 kpis">
     ${kpi('Entrou', r.entradas, 'verde')}${kpi('Gastou', r.despesas, 'laranja')}${kpi('Guardou', r.guardado, 'azul')}
     <div class="kpi destaque ${r.saldo < 0 ? 'negativo' : ''}"><div class="rot">Sobrou</div><div class="val num">${brl(r.saldo)}</div></div>
   </div>
-<!--kpi2-->  <div class="grade g2" style="margin-top:12px">
-    <a class="kpi" href="#cartoes" style="text-decoration:none;color:inherit"><div class="rot" style="color:#9B5DE5">No cartão</div><div class="val num" style="font-size:20px">${brl(r.cartao)}</div><div class="mini">${r.despesas > 0 ? pct(r.cartao / r.despesas) + ' do que você gastou' : '&nbsp;'}</div></a>
-    <div class="kpi"><div class="rot" style="color:var(--cinza)">A pagar</div><div class="val num" style="font-size:20px">${brl(r.pendente)}</div><div class="mini">fixos e faturas ainda não marcados como pagos</div></div>
-  </div>
-  <div class="flui-fala" style="margin-top:16px"><div class="mascote">${MASCOTE}</div><div class="balao">${falaDoFlui(r, rows)}</div></div>
-  <div class="grade g2 empilha" style="margin-top:4px">
-    <div><h2 style="margin-bottom:2px">Seus limites</h2><p class="mini" style="margin:0 0 12px">${vis.length ? (passaram ? `<b class="neg">${passaram} passaram do limite</b> · ${vis.length - passaram} dentro` : `<b class="pos">Tudo dentro do limite</b>`) : ''}</p>
-      ${vis.length ? `<div class="lista">${(ui.limitesTodos ? vis : vis.slice(0, 5)).map(orcLinha).join('')}</div>
-        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
-          ${vis.length > 5 ? `<button class="btn fantasma pequeno" data-a="limites-toggle">${ui.limitesTodos ? '− Ver menos' : `+ Ver mais (${vis.length - 5})`}</button>` : '<span></span>'}
-          <a class="btn pequeno" href="#plano" style="background:var(--laranja);box-shadow:0 4px 0 #CC7800;text-decoration:none">Mudar planejamento</a></div>` : vazio('🎯', 'Defina quanto quer gastar em cada categoria em <a href="#plano">Planejamento</a>.')}
-    </div>
-    <div><h2>Para onde foi o dinheiro</h2>
-      <div class="card">${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), totDesp)}
-        <div class="legenda">${desp.map((x) => `<div><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}</span><span class="pc">${pct(x.real / totDesp)}</span></div>`).join('')}</div></div>` : vazio('🍩', 'Nenhum gasto neste período ainda.')}</div>
-    </div>
-  </div>
-  <div class="linha-acao"><h2>Últimos lançamentos</h2><a class="btn fantasma" href="#lancamentos">Ver todos</a></div>
-  ${ultimos.length ? `<div class="lista">${ultimos.map((l) => itemMov(movDeLanc(l))).join('')}</div>` : vazio('✍️', 'Seus lançamentos aparecem aqui.')}`;
+  <div class="linha-mini"><a href="#cartoes">No cartão <b class="num">${brl(r.cartao)}</b></a><span>A pagar <b class="num">${brl(r.pendente)}</b></span></div>
+  <div class="card bloco-pizza"><div class="linha-acao" style="margin:0 0 8px"><h3>Para onde foi o dinheiro</h3><a class="link-mais" href="#relatorios">Análise ›</a></div>
+    ${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), totDesp)}
+      <div class="legenda">${leg.map((x) => `<div><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}</span><span class="pc">${pct(x.real / totDesp)}</span></div>`).join('')}
+      ${desp.length > 4 ? `<button class="link-mais" data-a="legenda-toggle" style="justify-self:start">${ui.legendaToda ? 'Ver menos' : `Ver mais (${desp.length - 4})`}</button>` : ''}</div></div>` : '<p class="mini" style="margin:0">Nenhum gasto neste período ainda.</p>'}</div>
+  <div class="card"><div class="linha-acao" style="margin:0 0 6px"><h3>Seus limites</h3><a class="link-mais" href="#plano">Planejamento ›</a></div>
+    ${vis.length ? `<p class="mini" style="margin:0 0 8px">${passaram ? `<b class="neg">${passaram} ${passaram === 1 ? 'passou' : 'passaram'} do limite</b> · ${vis.length - passaram} dentro` : '<b class="pos">Tudo dentro do limite</b>'}</p>
+      <div class="lista">${(ui.limitesTodos ? vis : vis.slice(0, 3)).map(orcLinha).join('')}</div>
+      ${vis.length > 3 ? `<button class="link-mais" style="margin-top:8px" data-a="limites-toggle">${ui.limitesTodos ? 'Ver menos' : `Ver mais (${vis.length - 3})`}</button>` : ''}`
+      : '<p class="mini" style="margin:0">Defina quanto quer gastar em cada categoria no <a href="#plano">Planejamento</a>.</p>'}</div>
+  <div class="linha-acao"><h3>Últimos lançamentos</h3><a class="link-mais" href="#lancamentos">Ver todos ›</a></div>
+  ${ultimos.length ? `<div class="lista">${ultimos.slice(0, 3).map((l) => itemMov(movDeLanc(l))).join('')}</div>` : '<p class="mini">Seus lançamentos aparecem aqui.</p>'}
+  <div class="dica"><span class="dica-ic">${MASCOTE}</span><span>${falaDoFlui(r, rows)}</span></div>`;
 }
 const kpi = (rot, v, cor) => `<div class="kpi ${cor}"><div class="rot">${rot}</div><div class="val num">${brl(v)}</div></div>`;
 const vazio = (ic, t) => `<div class="card vazio"><div class="grande">${ic}</div>${t}</div>`;
@@ -213,8 +210,10 @@ function telaLancamentos() {
   const porMes = ms.slice().reverse().map((m) => [m, movs.filter((x) => x.mes === m)]).filter(([, l]) => l.length);
   const tot = (t) => C.sum(movs.filter((x) => x.tipo === t), (x) => x.valor);
   return `
-  <div class="linha-acao" style="margin-top:0"><h1>Lançamentos</h1><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn branco" data-a="importar-extrato">Importar extrato</button><button class="btn verde" data-a="novo-lanc">+ Novo lançamento</button></span></div>
+  <h1>Lançamentos</h1>
+  <div class="acoes-topo"><button class="btn branco pequeno" data-a="importar-extrato">Importar extrato</button><button class="btn verde pequeno" data-a="novo-lanc">+ Lançar</button></div>
   ${filtroPeriodo()}
+  <hr class="fina">
   <div class="chips" style="margin-bottom:10px">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
     ${ui.filtroCat ? `<button class="chip ativo" data-a="filtro-cat-limpa">${esc(catNome(ui.filtroCat))} ×</button>` : ''}</div>
   <input class="inp" placeholder="Buscar por descrição, categoria, banco..." data-a="busca" value="${esc(ui.busca)}" style="margin-bottom:12px">
@@ -252,15 +251,15 @@ function telaCartoes() {
     }
   }
   return `
-  <div class="linha-acao" style="margin-top:0"><h1>Cartões</h1><button class="btn verde" data-a="nova-compra">+ Compra no cartão</button></div>
+  <div class="linha-acao" style="margin-top:0"><h1>Cartões</h1><button class="btn verde pequeno" data-a="nova-compra">+ Compra no cartão</button></div>
   ${bannerFaturas()}
   ${filtroPeriodo()}
-  ${todos.length ? '<p class="mini" style="margin:0 0 10px">Toque num cartão para ver a fatura e o débito dele.</p>' : ''}
+
   <div class="grade g2">${todos.map((c) => `<div class="cc ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
       ${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão" title="Editar cartão">✎</button>` : ''}
       <div><div class="cc-nome">${esc(nomeCartao(c))}</div><div class="cc-det">${c.id ? [c.apelido && c.banco && c.apelido !== c.banco ? c.banco : '', nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ') : 'compras sem cartão escolhido'}</div></div>
       <div>${temCred(c) ? `<div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div>` : ''}
-      <div class="cc-ver">${convite(c)} ›</div></div></div>`).join('')}
+      <div class="cc-ver">${convite(c)}&nbsp;›</div></div></div>`).join('')}
     <button class="card" style="border-style:dashed;cursor:pointer;font-weight:900;color:var(--azul);min-height:120px;background:#fff" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
   ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
@@ -310,8 +309,10 @@ function telaPlano() {
   const totOrc = C.sum(desp, (c) => c.orcamento);
   const fixos = st().recorrencias.filter((r) => r !== sal);
   const m = C.mesAtual();
+  const estour = C.porCategoria(st(), [m]).filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0 && x.real > x.orcado).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
   return `
-  <h1>Planejamento</h1><p class="sub">O que você combina com você mesma para cada mês.</p>
+  <h1>Planejamento</h1><p class="sub">Quanto você quer gastar por mês em cada coisa.</p>
+  ${estour.length ? `<div class="card estourou-card"><h3 style="margin:0 0 8px">Passaram do limite em ${C.nomeMes(m)}</h3>${estour.map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:30px;height:30px;border-radius:9px')}<span class="meio">${esc(x.cat.nome)}<small>${brl(x.real)} de ${brl(x.orcado)}</small></span><b class="neg num">+${brl(x.real - x.orcado)}</b></div>`).join('')}</div>` : ''}
   <div class="card"><div class="linha-acao" style="margin:0"><div><h3>Salário por mês</h3><div class="mini">${sal ? `desde ${C.nomeMes(sal.inicio)}${sal.fim ? ` até ${C.nomeMes(sal.fim)}` : ''} · entra sozinho todo mês` : 'ainda não definido'}</div></div>
     <button class="btn ${sal ? 'branco' : ''} pequeno" data-a="${sal ? 'editar-fixo' : 'novo-salario'}" data-id="${sal?.id || ''}">${sal ? brl(sal.valor) : 'Definir'}</button></div>
     <p class="mini" style="margin:10px 0 0">Se num mês você lançar o salário recebido em Lançamentos, o previsto não é somado de novo.</p></div>
@@ -339,7 +340,7 @@ function telaRelatorios() {
   const linhas = cats.map((c) => ({ c, v: ms.map((m) => C.sum(C.movimentosDoMes(st(), m).filter((x) => x.categoriaId === c.id), (x) => x.valor)) })).filter((l) => l.v.some((x) => x > 0));
   const res = ms.map((m) => C.resumo(st(), [m]));
   return `
-  <h1>Relatórios</h1>${filtroPeriodo()}
+  <h1>Análise</h1>${filtroPeriodo()}
   <div class="card"><h3 style="margin-bottom:10px">Entradas × despesas</h3>${barras(ms, [{ nome: 'Entradas', cor: '#77C800', valores: serie('entradas') }, { nome: 'Despesas', cor: '#FF9600', valores: serie('despesas') }, { nome: 'Guardado', cor: '#268AFF', valores: serie('guardado') }])}</div>
   <div class="card"><h3 style="margin-bottom:10px">Despesas por categoria</h3>${desp.length ? `<div class="pizza-wrap">${rosca(desp.map((x) => ({ nome: x.cat.nome, valor: x.real, cor: x.cat.cor })), tot)}
     <div class="legenda">${desp.map((x) => `<div><span><span class="ponto" style="background:${x.cat.cor}"></span>${esc(x.cat.nome)}</span><span><b class="num">${brl(x.real)}</b> <span class="pc">${pct(x.real / tot)}</span></span></div>`).join('')}</div></div>` : vazio('🍩', 'Sem despesas no período.')}</div>
@@ -352,10 +353,11 @@ function telaRelatorios() {
 
 // ---------------- Metas ----------------
 function telaMetas() {
-  return `<div class="linha-acao" style="margin-top:0"><h1>Metas</h1><button class="btn verde" data-a="nova-meta">+ Nova meta</button></div>
+  return `<div class="linha-acao" style="margin-top:0"><h1>Metas</h1><button class="btn verde pequeno" data-a="nova-meta">+ Nova meta</button></div>
   <p class="sub">Viagem, casamento, reserva... o Flui acompanha com você.</p>
-  ${st().metas.length ? st().metas.map((mt) => { const p = C.progressoMeta(st(), mt); return `<div class="card" data-a="editar-meta" data-id="${mt.id}" style="cursor:pointer">
-    <div class="linha-acao" style="margin:0 0 10px"><h3>${esc(mt.nome)}</h3><span class="num" style="font-weight:900">${p.alvo ? pct(p.pct) : 'defina o valor'}</span></div>
+  ${st().metas.length ? st().metas.map((mt) => { const p = C.progressoMeta(st(), mt); const cm = cat(mt.categoriaId); return `<div class="card">
+    <div class="linha-acao" style="margin:0 0 10px"><h3 style="display:flex;align-items:center;gap:10px">${cm ? bolaCat(cm, 'width:32px;height:32px;border-radius:10px') : ''}${esc(mt.nome)}</h3><span style="display:flex;align-items:center;gap:8px"><span class="num" style="font-weight:900">${p.alvo ? pct(p.pct) : ''}</span><button class="cc-editar meta-editar" data-a="editar-meta" data-id="${mt.id}" aria-label="Editar meta">✎</button></span></div>
+    ${p.alvo ? '' : `<div class="meta-alvo"><span>Quanto quer juntar?</span><input class="inp num" inputmode="decimal" placeholder="R$ 0,00" data-meta-alvo="${mt.id}"><button class="btn pequeno" data-a="meta-alvo-ok" data-id="${mt.id}">Salvar</button></div>`}
     <div class="prog azul" style="height:18px"><i style="width:${Math.round(p.pct * 100)}%"></i></div>
     <div class="orc" style="padding:8px 0 0;border:none"><div class="linha2"><span>${brl(p.atual)}${p.alvo ? ` de ${brl(p.alvo)}` : ''}</span><span>${p.alvo ? `faltam ${brl(p.falta)}` : ''}${mt.dataAlvo ? ` · até ${C.nomeMes(mt.dataAlvo)}` : ''}</span></div></div>
     ${mt.dataAlvo && p.falta > 0 ? `<div class="mini" style="margin-top:6px">Para chegar a tempo: ${brl(p.falta / Math.max(1, C.difMeses(C.mesAtual(), mt.dataAlvo) + 1))} por mês</div>` : ''}</div>`; }).join('') : vazio('🎯', 'Crie sua primeira meta.')}`;
@@ -365,18 +367,24 @@ function telaMetas() {
 function telaCategorias() {
   const grupo = (t, n) => { const cs = st().categorias.filter((c) => c.tipo === t).sort(ordemCat); return `<div class="grupo-mes">${n}</div><div class="lista">${cs.map((c) => `<div class="item" data-a="editar-cat" data-id="${c.id}">
     ${bolaCat(c)}<div class="meio"><div class="titulo">${esc(c.nome)}${c.arquivada ? '<span class="tag">arquivada</span>' : ''}</div><div class="det">${c.orcamento ? `orçamento ${brl(c.orcamento)}/mês` : ''}</div></div></div>`).join('')}</div>`; };
-  return `<div class="linha-acao" style="margin-top:0"><h1>Categorias</h1><button class="btn pequeno" data-a="nova-cat">+ Nova</button></div>
+  const aba = ui.abaCats || 'cats';
+  const abas = `<div class="seg abas-cats">${[['cats', 'Categorias'], ['bancos', 'Meus bancos']].map(([k, n]) => `<button type="button" class="t-neutro ${aba === k ? 'ativo' : ''}" data-a="aba-cats" data-v="${k}">${n}</button>`).join('')}</div>`;
+  if (aba === 'bancos') return `<h1>Categorias e bancos</h1>${abas}
+    <div class="card"><p class="mini" style="margin:0 0 10px">Toque nos bancos que você usa. Só eles aparecem quando você lança algo.</p>${chipsBancos(st().settings.bancos || [])}
+    <div style="display:flex;gap:8px;margin-top:12px"><input autocapitalize="sentences" class="inp" id="novo-banco" placeholder="Não achou? Digite o nome"><button class="btn pequeno" data-a="banco-add">Adicionar</button></div></div>`;
+  return `<div class="linha-acao" style="margin-top:0"><h1>Categorias e bancos</h1><button class="btn pequeno" data-a="nova-cat">+ Nova</button></div>${abas}
   ${grupo('despesa', 'Despesas')}${grupo('guardar', 'Guardar')}${grupo('entrada', 'Entradas')}`;
 }
 
 // ---------------- Mais / Configurações ----------------
 function telaMais() {
-  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['relatorios', 'Relatórios', ICON.relat], ['metas', 'Metas', ICON.metas], ['categorias', 'Categorias', ICON.cats], ['config', 'Configurações e backup', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
+  return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações e backup', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
 }
 function telaConfig() {
   const s = st().settings;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   return `<h1>Configurações</h1>
+  <button class="btn branco pequeno" style="margin-bottom:12px" data-a="ver-tour">Ver o tour do app de novo</button>
   <div class="card"><h3>Sua conta</h3><p class="mini">${store.modo === 'local' ? 'Modo de teste: os dados ficam só neste navegador.' : `Conectada como <b>${esc(store.user.email)}</b>. Seus dados ficam salvos na sua conta e aparecem em qualquer aparelho em que você entrar.`}</p>
     <div class="campo"><label>Como o Flui te chama</label><input autocapitalize="sentences" class="inp" data-a="nome" value="${esc(s.nome || '')}" placeholder="Seu nome"></div>
     <button class="btn branco pequeno" data-a="sair">Sair da conta</button></div>
@@ -426,7 +434,7 @@ function modalLanc(l = {}) {
     <div data-extras class="${extras ? '' : 'oculto'}">
       <div class="duas"><div class="campo"><label>Data <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${l.data || ''}"></div>
         <div class="campo"><label>Observação <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="obs" value="${esc(l.obs || '')}"></div></div>
-      <div class="duas"><div class="campo ${tipo === 'entrada' ? 'oculto' : ''}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
+      <div class="duas"><div class="campo ${tipo !== 'despesa' ? 'oculto' : ''}" data-venc><label>Vence em <span class="opc">opcional</span></label><input class="inp" type="date" name="vencimento" value="${l.vencimento || ''}"></div></div>
       <div class="campo"><label>Situação</label><select class="inp" name="status">${(tipo === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}" ${l.status === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
     </div>
     <div class="acoes">${l.id ? '<button type="button" class="btn branco" data-a="excluir-lanc">Excluir</button>' : ''}<button class="btn verde" type="submit">${l.id ? 'Salvar' : 'Lançar'}</button></div>
@@ -574,7 +582,7 @@ function modalImportar() {
     <div class="imp-info"><b>Aceita o extrato do Nubank</b> (conta: Pix, débito, boletos e transferências).<br>
       Formato melhor: <b>OFX</b>. O <b>CSV</b> também funciona. O PDF não dá para importar, porque é só para leitura.</div>
     <ol class="imp-passos mini"><li>No app do Nubank, toque em <b>Conta</b> e depois em <b>Pedir extrato</b>.</li><li>Escolha o mês e toque em <b>Exportar extrato</b>. O Nubank manda para o seu e-mail.</li><li>Baixe o arquivo <b>.ofx</b> do e-mail e escolha ele aqui.</li></ol>
-    <label class="btn cheio" style="cursor:pointer;display:block;text-align:center">Escolher arquivo OFX ou CSV<input type="file" accept=".ofx,.csv,.OFX,.CSV,text/csv,application/x-ofx" data-a="arquivo-extrato" hidden></label>
+    <label class="btn cheio" style="cursor:pointer;display:block;text-align:center">Escolher arquivo OFX ou CSV<input type="file" data-a="arquivo-extrato" hidden></label>
     <p class="mini" style="margin-top:10px">Antes de salvar, você confere tudo. O que já foi importado antes é pulado sozinho. Extratos OFX de outros bancos também costumam funcionar.</p>`);
 }
 function prepararImportacao(dados) {
@@ -607,6 +615,39 @@ function modalRevisarImport() {
         ${l.ja ? '' : `<select class="inp imp-cat" data-imp-cat="${i}">${opts(l.tipo, l.catId)}</select>`}</div>
       <div class="imp-valor num ${l.tipo === 'entrada' ? 'pos' : ''}">${l.tipo === 'entrada' ? '+' : '−'}${brl(l.valorAbs)}</div></div>`).join('')}</div>
     <div class="acoes"><button type="button" class="btn branco" data-a="fechar">Cancelar</button><button class="btn verde" type="submit" data-imp-btn>Importar ${n}</button></div></form>`);
+}
+// ---------------- tour rápido ----------------
+const TOUR = [
+  { rota: 'plano', alvo: '[data-a=orc]', txt: 'Comece por aqui: diga quanto quer gastar por mês em cada categoria.' },
+  { rota: 'inicio', alvo: '.fab', txt: 'Toque no + para lançar um gasto, uma entrada ou algo que guardou.' },
+  { rota: 'lancamentos', alvo: '[data-a=importar-extrato]', txt: 'Tem Nubank? Importe o extrato e o Flui lança tudo para você.' },
+  { rota: 'cartoes', alvo: '.cc, [data-a=novo-cartao]', txt: 'Seus cartões e faturas ficam aqui. Toque no cartão para ver a fatura.' },
+  { rota: 'metas', alvo: '.card', txt: 'O que você guarda enche suas metas.' },
+  { rota: 'categorias', alvo: '.abas-cats', txt: 'Aqui você edita categorias e escolhe os bancos que usa.' },
+];
+function perguntarTour(nome) {
+  abrirModal(`<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo pronto${nome ? ', ' + esc(nome) : ''}! Quer um tour rápido pelo app? Leva menos de 1 minuto.</div></div>
+    <div class="acoes"><button class="btn branco" data-a="tour-nao">Agora não</button><button class="btn verde" data-a="tour-sim">Quero o tour</button></div>`);
+}
+function desenharTour() {
+  document.querySelector('.tour')?.remove();
+  if (ui.tour == null || ui.modal) return;
+  const p = TOUR[ui.tour]; if (!p) { ui.tour = null; return; }
+  if (ui.rota !== p.rota) { if (location.hash === '#' + p.rota) { ui.rota = p.rota; render(); } else location.hash = '#' + p.rota; return; }
+  const alvo = document.querySelector(p.alvo);
+  const box = document.createElement('div'); box.className = 'tour';
+  const ultimo = ui.tour === TOUR.length - 1;
+  box.innerHTML = `<div class="tour-ponto"></div><div class="tour-balao"><div class="tour-topo"><span class="tour-ic">${MASCOTE}</span><span>${p.txt}</span></div>
+    <div class="tour-acoes"><span class="mini">${ui.tour + 1} de ${TOUR.length}</span><span><button data-a="tour-sair">Pular</button><button class="ok" data-a="tour-prox">${ultimo ? 'Começar' : 'Próximo'}</button></span></div></div>`;
+  document.body.appendChild(box);
+  const pos = () => {
+    const r = alvo ? alvo.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0, bottom: innerHeight / 2 };
+    const cx = r.left + Math.min(r.width / 2, 40), cy = r.top + r.height / 2;
+    const pt = box.querySelector('.tour-ponto'); pt.style.left = `${cx - 11}px`; pt.style.top = `${cy - 11}px`;
+    const b = box.querySelector('.tour-balao'); const embaixo = cy < innerHeight * 0.55;
+    b.style.top = embaixo ? `${Math.min(r.bottom + 14, innerHeight - b.offsetHeight - 12)}px` : `${Math.max(12, r.top - b.offsetHeight - 14)}px`;
+  };
+  if (alvo) alvo.scrollIntoView({ block: 'center' }); setTimeout(pos, 60); pos();
 }
 const OB_PASSOS = 4;
 function modalBoasVindas() {
@@ -659,7 +700,9 @@ document.addEventListener('click', async (e) => {
     f.querySelectorAll('[data-tipo]').forEach((b) => b.classList.toggle('ativo', b === tipoBtn));
     const w = f.querySelector('[data-cats-wrap]'); if (w) w.innerHTML = chipsCat(t, ''); f.querySelector('.meta-hint')?.remove();
     const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa'));
-    const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.toggle('oculto', t === 'entrada');
+    const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.toggle('oculto', t !== 'despesa');
+    const mo = f.querySelector('[data-a=mais-opcoes]'); if (mo && mo.textContent.startsWith('+')) mo.textContent = t === 'despesa' ? '+ Mais opções (data, vencimento, observação)' : '+ Mais opções (data, observação)';
+    if (t === 'guardar' && !st().settings.dicaGuardar) { let d = f.querySelector('.dica-guardar'); if (!d) { d = document.createElement('div'); d.className = 'dica-guardar'; d.innerHTML = `${svgIcone('alvo', 18)}<span><b>O que você guarda vai para as Metas.</b> Cada categoria de guardar tem uma meta. Lá você define quanto quer juntar e acompanha a barra enchendo.</span>`; f.querySelector('[data-seg]')?.after(d); } store.salvarSettings({ dicaGuardar: true }); }
     const sel = f.status; if (sel) sel.innerHTML = (t === 'entrada' ? [['recebido', 'Recebido'], ['a receber', 'A receber']] : [['pago', 'Pago'], ['pendente', 'Pendente']]).map(([v, n]) => `<option value="${v}">${n}</option>`).join('');
     return;
   }
@@ -733,6 +776,15 @@ document.addEventListener('click', async (e) => {
       delete ds[k]; await store.salvarSettings({ ...patch, faturaDecisoes: ds }); toast('Escolha desfeita.'); render(); break; }
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'importar-extrato': modalImportar(); break;
+    case 'meta-alvo-ok': { const inp = document.querySelector(`[data-meta-alvo="${id}"]`); const v = parseValor(inp?.value); if (!(v > 0)) { inp?.focus(); break; }
+      const mt = S.metas.find((x) => x.id === id); await store.salvar('metas', { ...mt, alvo: v }); toast('Meta definida! Agora é ver a barra encher.', true); break; }
+    case 'aba-cats': ui.abaCats = el.dataset.v; render(); break;
+    case 'tour-sim': ui.modal = null; ui.tour = 0; ui.rota = ''; desenharTour(); break;
+    case 'tour-nao': fecharModal(); location.hash = '#plano'; toast('Comece pelo planejamento: quanto quer gastar por mês.', true); break;
+    case 'tour-prox': ui.tour++; if (ui.tour >= TOUR.length) { ui.tour = null; document.querySelector('.tour')?.remove(); location.hash = '#plano'; toast('Agora é com você: comece pelo planejamento!', true); } else desenharTour(); break;
+    case 'tour-sair': ui.tour = null; document.querySelector('.tour')?.remove(); break;
+    case 'ver-tour': ui.tour = 0; ui.rota = ''; desenharTour(); break;
+    case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
     case 'excluir-cartao': { const cid = $('[data-form=cartao]').dataset.id; const n = S.compras.filter((c) => c.cartaoId === cid).length;
@@ -822,7 +874,7 @@ document.addEventListener('change', async (e) => {
     const arq = t.files[0]; const nome = arq.name.toLowerCase();
     try {
       if (nome.endsWith('.pdf')) throw new Error('PDF não dá para importar. No e-mail do Nubank, baixe o arquivo .ofx (ou .csv).');
-      const txt = await arq.text();
+      const txt = arq.text ? await arq.text() : await new Promise((ok, erro) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = erro; r.readAsText(arq); });
       const dados = /<OFX>|OFXHEADER/i.test(txt) ? lerOFX(txt) : lerCSV(txt);
       if (!dados.itens.length) throw new Error('Não encontrei movimentações nesse arquivo.');
       prepararImportacao(dados); modalRevisarImport();
@@ -866,7 +918,7 @@ document.addEventListener('submit', async (e) => {
       fecharModal(); toast(n > 1 ? `Lançado no crédito em ${n}x!` : 'Lançado no crédito!', true); return; }
     const antigo = S.lancamentos.find((x) => x.id === id) || {};
     const novo = !id;
-    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('tipo') === 'entrada' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: v('obs') });
+    await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: v('data'), forma: v('forma'), banco: v('banco'), vencimento: v('tipo') !== 'despesa' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: v('obs') });
     fecharModal(); toast(novo ? (v('tipo') === 'guardar' ? 'Guardado! Seu eu do futuro agradece. 💚' : 'Prontinho, lançado!') : 'Salvo!', novo);
   }
   if (tipoF === 'compra') {
@@ -941,7 +993,7 @@ document.addEventListener('submit', async (e) => {
       await store.salvar('cartoes', { nome: b, banco: b, tipo: 'credito', vencimento: d >= 1 && d <= 31 ? d : '', cor: COR_BANCO[b] || '#268AFF' });
     }
     await store.salvarSettings({ nome: v('nome'), onboarding: true, bancos });
-    fecharModal(); toast(`Tudo pronto${v('nome') ? ', ' + v('nome') : ''}! Bora organizar.`, true);
+    perguntarTour(v('nome'));
   }
 
 });
