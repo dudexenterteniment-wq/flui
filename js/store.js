@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=67';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=68';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -31,6 +31,7 @@ class LocalBackend {
   _write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn(e); } }
   async signUp(email) { this.user = { uid: 'local-' + email, email }; this._write('flui:user', this.user); this.onUser(this.user); return this.user; }
   async signIn(email) { return this.signUp(email); }
+  async ativarPush() { throw new Error('modo-teste'); }
   async lembrar() {}
   async signOut() { this.user = null; localStorage.removeItem('flui:user'); this.onUser(null); }
   async resetPassword() { throw new Error('No modo de teste não há senha.'); }
@@ -48,7 +49,7 @@ class FirebaseBackend {
     const [{ initializeApp }, auth, fs] = await Promise.all([
       import(`${FIREBASE_SDK}/firebase-app.js`), import(`${FIREBASE_SDK}/firebase-auth.js`), import(`${FIREBASE_SDK}/firebase-firestore.js`)]);
     this.A = auth; this.F = fs;
-    const app = initializeApp(FIREBASE_CONFIG);
+    const app = initializeApp(FIREBASE_CONFIG); this.app = app;
     this.auth = auth.getAuth(app);
     try {
       this.db = fs.initializeFirestore(app, { localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() }) });
@@ -60,6 +61,16 @@ class FirebaseBackend {
   async signIn(email, senha) { const r = await this.A.signInWithEmailAndPassword(this.auth, email, senha); return r.user; }
   async lembrar(sim) { await this.A.setPersistence(this.auth, sim ? this.A.browserLocalPersistence : this.A.browserSessionPersistence); }
   async signOut() { await this.A.signOut(this.auth); }
+  // notificações: pega o token deste aparelho e guarda em users/{uid}/meta/push
+  async ativarPush(vapidKey) {
+    const msg = await import(`${FIREBASE_SDK}/firebase-messaging.js`);
+    if (!(await msg.isSupported())) throw new Error('nao-suportado');
+    const reg = await navigator.serviceWorker.ready;
+    const token = await msg.getToken(msg.getMessaging(this.app), { vapidKey, serviceWorkerRegistration: reg });
+    if (!token) throw new Error('sem-token');
+    await this.F.setDoc(this._doc('meta', 'push'), { tokens: this.F.arrayUnion(token), atualizado: new Date().toISOString() }, { merge: true });
+    return token;
+  }
   async resetPassword(email) { await this.A.sendPasswordResetEmail(this.auth, email); }
   _col(c) { return this.F.collection(this.db, 'users', this.user.uid, c); }
   _doc(c, id) { return this.F.doc(this.db, 'users', this.user.uid, c, id); }

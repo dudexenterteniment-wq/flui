@@ -9,3 +9,5 @@ export const FIREBASE_CONFIG = {
   appId: '1:255518018699:web:d9981ff07751ca8be9d88e',
 };
 export const FIREBASE_SDK = 'https://www.gstatic.com/firebasejs/10.12.2';
+// Chave pública de notificações (Firebase → Configurações do projeto → Cloud Messaging → Certificados push da Web). Pública, não é senha.
+export const VAPID_KEY = '';

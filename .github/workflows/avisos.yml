@@ -1,0 +1,23 @@
+name: Avisos do Flui
+on:
+  schedule:
+    - cron: '0 12 * * *'   # 9h de Brasília
+  workflow_dispatch:
+    inputs:
+      teste:
+        description: 'Mandar um aviso de teste para todo mundo com notificação ativada'
+        type: boolean
+        default: false
+jobs:
+  avisos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-save firebase-admin@12
+      - run: node scripts/avisos.mjs
+        env:
+          TZ: America/Sao_Paulo
+          TESTE: ${{ inputs.teste && '1' || '0' }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

@@ -1,9 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=67';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=67';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=67';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=67';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=67';
+import * as C from './calc.js?v=68';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=68';
+import { VAPID_KEY } from './config.js?v=68';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=68';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=68';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=68';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -394,6 +395,16 @@ function telaCategorias() {
 }
 
 // ---------------- Mais / Configurações ----------------
+function blocoPush() {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent); const instalado = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const perm = typeof Notification !== 'undefined' ? Notification.permission : 'indisponivel';
+  if (store.modo === 'local') return '<p class="mini">Indisponível no modo de teste.</p>';
+  if (!VAPID_KEY) return '<p class="mini">Em breve: avisos de fatura e do dia do salário no celular.</p>';
+  if (ios && !instalado) return '<p class="mini">No iPhone, instale o Flui na tela de início (Compartilhar → Adicionar à Tela de Início) e abra por lá para ativar.</p>';
+  if (perm === 'denied') return '<p class="mini">As notificações estão bloqueadas nas configurações do celular para este app.</p>';
+  if (perm === 'granted' && st().settings.pushAtivo) return '<p class="mini"><b class="pos">Ativadas neste aparelho ✓</b> Fatura fechando, vencendo e o dia do salário.</p><button class="btn branco pequeno" data-a="push-ativar">Ativar de novo</button>';
+  return '<p class="mini">Aviso quando a fatura fecha, quando vai vencer e no dia do salário.</p><button class="btn verde pequeno" data-a="push-ativar">Ativar notificações</button>';
+}
 function telaMais() {
   return `<h1>Mais</h1><div class="lista" style="margin-top:12px">${[['relatorios', 'Análise', ICON.relat], ['metas', 'Metas', ICON.metas], ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]].map(([r, n, i]) => `<a class="item" href="#${r}" style="text-decoration:none;color:inherit"><div class="bola" style="background:var(--azul)"><span style="width:24px;height:24px;display:block">${i}</span></div><div class="meio"><div class="titulo">${n}</div></div><div class="valor">›</div></a>`).join('')}</div>`;
 }
@@ -411,7 +422,7 @@ function telaConfig() {
       '<p class="mini">No Android (Chrome): toque nos <b>três pontinhos</b> e em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>. No computador, use o ícone de instalar na barra de endereço.</p>'}</div>
   <div class="card"><h3>Backup</h3><p class="mini">Guarde uma cópia dos seus dados.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pequeno" data-a="exportar">Baixar backup</button><label class="btn branco pequeno" style="cursor:pointer">Restaurar backup<input type="file" accept=".json,application/json" data-a="importar" hidden></label></div></div>
-  <div class="card"><h3>Notificações</h3><p class="mini">Os avisos aparecem quando você abre o Flui.</p></div>
+  <div class="card"><h3>Notificações</h3>${blocoPush()}</div>
   <p class="mini" style="text-align:center;margin-top:18px">Flui · versão 1.0</p>`;
 }
 
@@ -419,7 +430,7 @@ function telaConfig() {
 function abrirModal(html, depois) { ui.modal = { html: `<div class="fundo-modal" data-a="fechar-fundo"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`, depois }; render(); }
 function fecharModal() { ui.modal = null; render(); }
 const topoModal = (t) => `<div class="modal-topo"><h2>${t}</h2><button class="x" type="button" data-a="fechar" aria-label="Fechar">×</button></div>`;
-const selBanco = (nome, v) => { const bs = st().settings.bancos || [];
+const selBanco = (nome, v) => { const bs = st().settings.bancos || []; if (!v && bs.length === 1) v = bs[0];
   if (!bs.length && !v) return `<input type="hidden" name="${nome}" value=""><div class="mini" style="padding:10px 0">Você ainda não escolheu seus bancos. <a href="#categorias" data-a="fechar-ir-config">Escolher meus bancos</a></div>`;
   return `<select class="inp" name="${nome}"><option value="">—</option>${bs.map((b) => `<option ${b === v ? 'selected' : ''}>${esc(b)}</option>`).join('')}${v && !bs.includes(v) ? `<option selected>${esc(v)}</option>` : ''}</select>`; };
 const chipsBancos = (sel) => { const todos = [...new Set([...BANCOS_CATALOGO, ...sel])]; return `<div class="cats" data-bancos>${todos.map((b) => `<button type="button" class="${sel.includes(b) ? 'ativo' : ''}" data-banco-tg="${esc(b)}">${sel.includes(b) ? '✓ ' : ''}${esc(b)}</button>`).join('')}</div>`; };
@@ -842,6 +853,12 @@ document.addEventListener('click', async (e) => {
       else { location.hash = '#cartoes'; setTimeout(() => modalCartao(), 80); }
       break; }
     case 'setup-nunca': await store.salvarSettings({ lembreteSetupOff: true }); fecharModal(); toast('Combinado, não aparece mais.'); break;
+    case 'push-ativar': {
+      try { if (typeof Notification === 'undefined') throw new Error('nao-suportado');
+        const ok = await Notification.requestPermission(); if (ok !== 'granted') { toast('Sem permissão, não dá para avisar.'); render(); break; }
+        await store.backend.ativarPush(VAPID_KEY); await store.salvarSettings({ pushAtivo: true }); toast('Notificações ativadas! 🔔', true);
+      } catch (err) { toast(err.message === 'nao-suportado' ? 'Este navegador não aceita notificações.' : 'Não consegui ativar agora. Tente de novo.'); }
+      render(); break; }
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
