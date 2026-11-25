@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=49';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=49';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=49';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=49';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=49';
+import * as C from './calc.js?v=50';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=50';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=50';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=50';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=50';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -282,10 +282,10 @@ function blocoFatura(c, f, m) {
       <div class="meio"><div class="titulo" style="${paga ? 'text-decoration:line-through;color:var(--cinza)' : ''}">${esc(compra.descricao)}</div><div class="det">${compra.transferencia ? 'veio da fatura anterior · não é gasto novo' : esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
       <div class="valor num">${brl(parcela.valor)}</div></div>`).join('')}</div>
     <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
-      <span class="mini">Paguei um valor:</span>
+      <span class="mini">Quanto já paguei no total:</span>
       <input class="inp num" style="width:130px;padding:8px 12px" inputmode="decimal" placeholder="R$ 0,00" data-valor-fatura="${k}">
       <button class="btn pequeno" data-a="fatura-valor" data-k="${k}">Registrar</button>
-      ${f.avulso ? `<span class="mini">já registrado ${brl(f.avulso)} <button class="btn fantasma pequeno" data-a="fatura-valor-limpa" data-k="${k}">zerar</button></span>` : ''}
+      ${f.avulso ? `<span class="mini">você pagou ${brl(f.avulso)} <button class="btn fantasma pequeno" data-a="fatura-valor-limpa" data-k="${k}">zerar</button></span>` : ''}
     </div>
     ${f.decisao ? `<div class="decisao-info"><span>${textoDecisao(f.decisao, m)}</span><button class="btn fantasma pequeno" data-a="desfazer-decisao" data-id="${c.id}" data-m="${m}">Desfazer</button></div>`
       : f.aberto > 0 ? `<button class="btn branco" style="width:100%;margin-top:12px" data-a="decidir-fatura" data-id="${c.id}" data-m="${m}">Não deu para pagar tudo? Passar ou parcelar</button>` : ''}
@@ -828,8 +828,8 @@ document.addEventListener('click', async (e) => {
     case 'excluir-meta': if (confirm('Excluir esta meta?')) { await store.remover('metas', $('[data-form=meta]').dataset.id); fecharModal(); } break;
     case 'fatura-valor': { const k = el.dataset.k; const inp = document.querySelector(`[data-valor-fatura="${k}"]`); const v = parseValor(inp?.value);
       if (!(v > 0)) { toast('Digite quanto você pagou.'); break; }
-      const pf = { ...(S.settings.pagamentosFatura || {}) }; pf[k] = C.fromCents(C.cents(pf[k] || 0) + C.cents(v));
-      await store.salvarSettings({ pagamentosFatura: pf }); toast(`Pagamento de ${brl(v)} registrado!`); render(); break; }
+      const pf = { ...(S.settings.pagamentosFatura || {}) }; pf[k] = v;
+      await store.salvarSettings({ pagamentosFatura: pf }); toast(`Anotado: você pagou ${brl(v)} desta fatura.`); render(); break; }
     case 'fatura-valor-limpa': { const pf = { ...(S.settings.pagamentosFatura || {}) }; delete pf[el.dataset.k]; await store.salvarSettings({ pagamentosFatura: pf }); render(); break; }
     case 'cat-nova': {
       const w = el.closest('[data-cats-wrap]'); if (!w) break;

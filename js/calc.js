@@ -182,7 +182,8 @@ export function fatura(st, cartaoId, m) {
   const total = sum(itens, (x) => x.parcela.valor);
   const pagoItens = sum(itens.filter((x) => x.paga), (x) => x.parcela.valor);
   const avulso = Number(((st.settings || {}).pagamentosFatura || {})[`${cartaoId || 'sem'}|${m}`]) || 0;
-  const pago = fromCents(Math.min(cents(total), cents(pagoItens) + cents(avulso)));
+  // 'Paguei um valor' é o total pago da fatura; não soma de novo com as compras marcadas (vale o maior dos dois)
+  const pago = fromCents(Math.min(cents(total), Math.max(cents(pagoItens), cents(avulso))));
   const decisao = decisaoFatura(st, cartaoId, m);
   const transferido = decisao && (decisao.acao === 'passar' || decisao.acao === 'parcelar') ? fromCents(Math.min(cents(decisao.principal), cents(total) - cents(pago))) : 0;
   const aberto = fromCents(cents(total) - cents(pago) - cents(transferido));
