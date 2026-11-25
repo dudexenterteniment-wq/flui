@@ -376,3 +376,17 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .resumo-fixos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
 .resumo-fixos div { background: var(--fundo-2); border-radius: 14px; padding: 10px 12px; } .resumo-fixos span { display: block; font-size: 12px; font-weight: 900; color: var(--cinza); text-transform: uppercase; } .resumo-fixos b { font-size: 17px; }
 .bloco-fixo.entra { border-color: #CDEBA6; } .bloco-fixo.sai { border-color: var(--linha); }
+
+/* cartões com formato de cartão */
+.cartoes-fila { display: flex; gap: 12px; overflow-x: auto; padding: 6px 4px 12px; margin: 0 -4px; scroll-snap-type: x mandatory; }
+.cc.cartao { flex: 0 0 250px; aspect-ratio: 1.586; min-height: 0; padding: 14px 16px; border-radius: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative; scroll-snap-align: start; opacity: 1; }
+.cc.cartao:not(.sel) { opacity: .75; }
+.cc-l1 { display: flex; justify-content: space-between; align-items: center; }
+.cc.cartao .cc-nome { font-size: 18px; font-weight: 900; padding-right: 0; }
+.cc.cartao .cc-editar { position: static; width: 30px; height: 30px; font-size: 14px; }
+.cc-tipo { font-size: 12px; font-weight: 800; opacity: .85; margin-top: -18px; }
+.cc-chip { width: 34px; height: 25px; border-radius: 6px; background: linear-gradient(135deg, #F6D77A, #D9A93A); opacity: .9; }
+.cc-l3 { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+.cc-venc { font-size: 12px; font-weight: 800; opacity: .9; } .cc.cartao .cc-val { font-size: 20px; font-weight: 900; }
+.cc.cartao.sel { outline: 3px solid #fff; box-shadow: 0 0 0 6px var(--azul), 0 4px 0 rgba(0,0,0,.15); opacity: 1; }
+.cc-novo { background: #fff !important; border: 2px dashed var(--linha); color: var(--azul); font: inherit; font-weight: 900; justify-content: center !important; align-items: center; cursor: pointer; box-shadow: none; flex-basis: 160px !important; }

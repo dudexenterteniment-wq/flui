@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=40';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=40';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=40';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=40';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=40';
+import * as C from './calc.js?v=41';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=41';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=41';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=41';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=41';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -250,12 +250,11 @@ function telaCartoes() {
   ${bannerFaturas()}
   ${filtroPeriodo()}
 
-  <div class="grade g2">${todos.map((c) => `<div class="cc ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
-      ${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão" title="Editar cartão">✎</button>` : ''}
-      <div><div class="cc-nome">${esc(nomeCartao(c))}</div><div class="cc-det">${c.id ? [c.apelido && c.banco && c.apelido !== c.banco ? c.banco : '', nomeTipoCartao(c.tipo), c.vencimento ? `fatura vence dia ${c.vencimento}` : ''].filter(Boolean).map(esc).join(' · ') : 'compras sem cartão escolhido'}</div></div>
-      <div>${temCred(c) ? `<div class="cc-det">Fatura de ${C.nomeMes(mesRef())}</div><div class="cc-val num">${brl(totMes(c.id, mesRef()))}</div>` : ''}
-      <div class="cc-ver">${convite(c)}&nbsp;›</div></div></div>`).join('')}
-    <button class="card" style="border-style:dashed;cursor:pointer;font-weight:900;color:var(--azul);min-height:120px;background:#fff" data-a="novo-cartao">+ Adicionar cartão</button>
+  <div class="cartoes-fila">${todos.map((c) => `<div class="cc cartao ${c.id === ui.cartaoSel ? 'sel' : ''}" style="background:${c.cor || '#268AFF'}" data-a="ver-cartao" data-id="${c.id}" role="button" aria-pressed="${c.id === ui.cartaoSel}">
+      <div class="cc-l1"><span class="cc-nome">${esc(nomeCartao(c))}</span>${c.id ? `<button class="cc-editar" data-a="editar-cartao" data-id="${c.id}" aria-label="Editar cartão">✎</button>` : ''}</div>
+      <div class="cc-tipo">${c.id ? esc(nomeTipoCartao(c.tipo)) : 'Sem cartão'}</div><span class="cc-chip"></span>
+      <div class="cc-l3">${temCred(c) ? `<span class="cc-venc">${c.vencimento ? `Vence dia ${c.vencimento}` : 'Fatura'}</span><span class="cc-val num">${brl(totMes(c.id, mesRef()))}</span>` : '<span class="cc-venc">Ver débito ›</span>'}</div></div>`).join('')}
+    <button class="cc cartao cc-novo" data-a="novo-cartao">+ Adicionar cartão</button>
   </div>
   ${todos.length ? painel : vazio('💳', 'Cadastre um cartão ou lance uma compra.')}`;
 }
