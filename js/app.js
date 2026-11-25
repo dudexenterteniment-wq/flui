@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=72';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=72';
-import { VAPID_KEY } from './config.js?v=72';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=72';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=72';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=72';
+import * as C from './calc.js?v=73';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=73';
+import { VAPID_KEY } from './config.js?v=73';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=73';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=73';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=73';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -1173,6 +1173,11 @@ store.on(() => { if (!ui.modal) render(); });
     console.error(err); ui.carregando = false;
     $('#app').innerHTML = `<div class="entrada"><div class="entrada-box">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
+    const tinhaControle = !!navigator.serviceWorker.controller; let recarregou = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinhaControle && !recarregou) { recarregou = true; location.reload(); } });
+    navigator.serviceWorker.register('./sw.js').then((reg) => { document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); }); }).catch(() => {});
+  }
 })();
 window.__flui = { store, C };
