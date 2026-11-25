@@ -1,5 +1,5 @@
 // Flui — utilidades de interface: formatação, ícones, gráficos em SVG (sem dependências)
-import { nomeMes } from './calc.js?v=120';
+import { nomeMes } from './calc.js?v=121';
 
 const FMT = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 export const brl = (v) => FMT.format(Number(v) || 0);

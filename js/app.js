@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=120';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=120';
-import { VAPID_KEY } from './config.js?v=120';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=120';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=120';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=120';
+import * as C from './calc.js?v=121';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=121';
+import { VAPID_KEY } from './config.js?v=121';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=121';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=121';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=121';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=121" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=121" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=120" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=121" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=121" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -643,6 +643,7 @@ function conferirFatura(cid, m, msg) {
     <p class="mini" style="margin:0 0 12px">Abra o app do ${esc(k?.banco || 'banco')} e veja quanto está a <b>fatura atual</b> (a que vence em ${C.dataVencimento(k, m)?.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }) || '—'}). O Flui calculou:</p>
     <div class="campo"><label>Quanto falta pagar dessa fatura</label><input class="inp valor-grande num" name="falta" inputmode="decimal" value="${valorInput(Math.max(0, f.aberto))}" autocomplete="off"></div>
     <p class="mini" style="margin:0 0 12px">Total de compras: ${brl(f.total)}. Se o app do banco mostrar outro valor, corrija aqui.</p>
+    ${C.fatura(st(), cid, C.addMes(m, -1)).total > 0 ? '' : `<p class="mini imp-dica" style="margin:0 0 12px">Dica: importe também a <b>fatura anterior</b>${C.dataVencimento(k, C.addMes(m, -1)) ? ` (a que venceu em ${C.dataVencimento(k, C.addMes(m, -1)).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })})` : ''}. Com ela, o Flui calcula sozinho quanto falta.</p>`}
     <div class="acoes"><button type="button" class="btn branco" data-a="conferir-depois" data-v="${esc(k?.banco || '')}">Depois</button><button class="btn verde">Confirmar</button></div></form>`);
 }
 // assinaturas que apareceram na fatura: pergunta se vira gasto fixo no cartão (e até quando)
@@ -699,14 +700,22 @@ function mesDoPagamento(k, d) { const { V, F } = diasCartao(k); if (!V) return C
   const kk = { ...k, fechamento: F, vencimento: V }; const D = new Date(d + 'T12:00:00');
   let ult = null; for (let i = -3; i <= 1; i++) { const m = C.addMes(d.slice(0, 7), i); if (C.dataFechamento(kk, m) < D) ult = m; }
   if (!ult) return d.slice(0, 7); const venc = C.dataVencimento(kk, ult); return D <= new Date(venc.getTime() + 3 * 864e5) ? ult : C.addMes(ult, 1); }
+const mesmoPag = (a, b) => a.cartaoId === b.cartaoId && Math.abs(a.valor - b.valor) < 0.005 && Math.abs(new Date(a.data) - new Date(b.data)) <= 864e5;
 function realocarPagamentos() {
   const S = st(); const lista = S.settings.pagImportadosLista || []; const man = S.settings.pagManual || {};
   const cards = new Set(lista.map((p) => p.cartaoId));
   const daCarta = (k) => cards.has(k.split('|')[0]) && !man[k];
   const pg = Object.fromEntries(Object.entries(S.settings.pagamentosFatura || {}).filter(([k]) => !daCarta(k)));
   const fp = Object.fromEntries(Object.entries(S.settings.faturasPagas || {}).filter(([k]) => !daCarta(k)));
-  const aloc = {};
-  for (const p of lista) { const k = S.cartoes.find((x) => x.id === p.cartaoId); if (!k) continue; const key = `${k.id}|${mesDoPagamento(k, p.data)}`; if (man[key]) continue; aloc[key] = Math.round(((aloc[key] || 0) + p.valor) * 100) / 100; }
+  const aloc = {}; const unicos = lista.filter((p, i) => lista.findIndex((x) => mesmoPag(x, p)) === i).sort((a, b) => a.data.localeCompare(b.data));
+  const add = (key, v) => { aloc[key] = Math.round(((aloc[key] || 0) + v) * 100) / 100; };
+  const abertoCom = (cid, m) => C.fatura({ ...S, settings: { ...S.settings, pagamentosFatura: { ...pg, ...aloc }, faturasPagas: fp } }, cid, m);
+  for (const p of unicos) { const k = S.cartoes.find((x) => x.id === p.cartaoId); if (!k) continue; const m = mesDoPagamento(k, p.data); const key = `${k.id}|${m}`; if (man[key]) continue;
+    const prox = C.addMes(m, 1); const f = abertoCom(k.id, m);
+    // é a fatura fechada, o Flui sabe quanto ela tinha e o pagamento passou disso: o excedente adianta a próxima
+    if (f.total > 0 && p.valor > f.aberto + 0.005) {
+      const parte = Math.max(0, f.aberto); if (parte > 0.005) add(key, parte); const k2 = `${k.id}|${prox}`; if (!man[k2]) add(k2, p.valor - parte); }
+    else add(key, p.valor); }
   return store.salvarSettings({ pagamentosFatura: { ...pg, ...aloc }, faturasPagas: fp, pagAlocado: aloc });
 }
 async function prepararImportacao(dados) {
@@ -1248,7 +1257,7 @@ document.addEventListener('submit', async (e) => {
       const kSel = S.cartoes.find((x) => x.id === ccId); const conta2 = {}; for (const l of im.linhas.filter((x) => x.tipo === 'despesa')) { const mm = mesDaCompra(kSel, l.data); conta2[mm] = (conta2[mm] || 0) + 1; }
       const mesFat = Object.entries(conta2).sort((a, b) => b[1] - a[1])[0]?.[0] || C.mesAtual();
       const lista = [...(S.settings.pagImportadosLista || [])]; const jaPg = new Set(lista.map((x) => x.id)); let nPgF = 0;
-      for (const l of im.linhas.filter((x) => x.tipo !== 'despesa' && /pagamento/i.test(x.texto || x.descricao || ''))) { const id = l.id || `pgf-${l.data}-${l.valorAbs}`; if (jaPg.has(id)) continue; lista.push({ id, valor: l.valorAbs, data: l.data, cartaoId: ccId, lote }); nPgF++; }
+      for (const l of im.linhas.filter((x) => x.tipo !== 'despesa' && /pagamento/i.test(x.texto || x.descricao || ''))) { const id = l.id || `pgf-${l.data}-${l.valorAbs}`; const novo = { id, valor: l.valorAbs, data: l.data, cartaoId: ccId, lote }; if (jaPg.has(id) || lista.some((x) => mesmoPag(x, novo))) continue; lista.push(novo); nPgF++; }
       if (nPgF) await store.salvarSettings({ pagImportadosLista: lista });
       for (const l of compras) {
         await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: mesDaCompra(S.cartoes.find((x) => x.id === ccId), l.data), data: l.data, importId: l.id || '', lote }); }
@@ -1264,7 +1273,7 @@ document.addEventListener('submit', async (e) => {
     let nPag = 0;
     if (kc) { const lista = [...(S.settings.pagImportadosLista || [])]; const ja = new Set(lista.map((x) => x.id));
       for (const l of im.linhas.filter((x) => x.descricao === 'Pagamento de fatura' && x.tipo === 'despesa' && !x.ja)) {
-        const id = l.id || `pg-${l.data}-${l.valorAbs}`; l.marcado = false; if (ja.has(id)) continue; lista.push({ id, valor: l.valorAbs, data: l.data, cartaoId: kc.id, lote }); nPag++; }
+        const id = l.id || `pg-${l.data}-${l.valorAbs}`; l.marcado = false; const novo = { id, valor: l.valorAbs, data: l.data, cartaoId: kc.id, lote }; if (ja.has(id) || lista.some((x) => mesmoPag(x, novo))) continue; lista.push(novo); nPag++; }
       if (nPag) { await store.salvarSettings({ pagImportadosLista: lista }); await realocarPagamentos(); } }
     for (const l of sel.filter((x) => x.marcado)) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
     const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
@@ -1376,7 +1385,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=120" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=121" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
