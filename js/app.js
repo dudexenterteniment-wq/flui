@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=61';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=61';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=61';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=61';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=61';
+import * as C from './calc.js?v=62';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=62';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=62';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=62';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=62';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -209,7 +209,7 @@ function telaLancamentos() {
   <div class="acoes-topo"><button class="btn branco pequeno" data-a="importar-extrato">Importar extrato</button><button class="btn verde pequeno" data-a="novo-lanc">+ Lançar</button></div>
   ${filtroPeriodo()}
   <hr class="fina">
-  <div class="chips" style="margin-bottom:10px">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado'], ['fixos', 'Fixos']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
+  <div class="chips chips-tipo" style="margin-bottom:10px">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado'], ['fixos', 'Fixos']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
     ${ui.filtroCat ? `<button class="chip ativo" data-a="filtro-cat-limpa">${esc(catNome(ui.filtroCat))} ×</button>` : ''}</div>
   ${ui.filtroTipo === 'fixos' ? '<div class="fixos-dica"><span></span><span style="display:flex;gap:6px"><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button><button class="btn pequeno" data-a="novo-fixo">+ Fixo</button></span></div>' : ''}
   <input class="inp" placeholder="Buscar por descrição, categoria, banco..." data-a="busca" value="${esc(ui.busca)}" style="margin-bottom:12px">
