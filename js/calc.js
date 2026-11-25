@@ -301,6 +301,6 @@ export function realizadoConta(st, hoje = new Date()) {
   return fromCents(t);
 }
 export function saldoConta(st) {
-  const b = st.settings?.saldoBase; if (!b) return null;
+  const b = st.settings?.saldoBase; if (!b) return realizadoConta(st); // calculado: tudo que entrou − tudo que saiu
   return fromCents(cents(b.valor) + cents(realizadoConta(st)) - cents(b.ref || 0));
 }
