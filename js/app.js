@@ -1,9 +1,9 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=34';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=34';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=34';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=34';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=34';
+import * as C from './calc.js?v=35';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=35';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=35';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=35';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=35';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -299,10 +299,14 @@ function comprometido(cartaoId) {
 
 // ---------------- Planejamento ----------------
 function telaPlano() {
-  const sal = st().recorrencias.find((r) => r.tipo === 'entrada' && catNome(r.categoriaId) === 'Salário');
+  const m0 = C.mesAtual();
+  const todasRendas = st().recorrencias.filter((r) => r.tipo === 'entrada');
+  const rendas = todasRendas.filter((r) => !r.fim || C.difMeses(m0, r.fim) >= 0).sort((a, b) => b.valor - a.valor);
+  const rendaMes = C.sum(todasRendas.filter((r) => C.recorrenciaNoMes(r, m0)), (r) => r.valor);
+  const sal = rendaMes > 0 ? { valor: rendaMes } : null;
   const desp = st().categorias.filter((c) => !c.arquivada && c.tipo !== 'entrada').sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'guardar' ? 1 : -1) || ordemCat(a, b));
   const totOrc = C.sum(desp, (c) => c.orcamento);
-  const fixos = st().recorrencias.filter((r) => r !== sal);
+  const fixos = st().recorrencias.filter((r) => r.tipo !== 'entrada');
   const m = C.mesAtual();
   const visP = C.porCategoria(st(), [m]).filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0).sort((a, b) => (b.real / b.orcado) - (a.real / a.orcado));
   const estour = C.porCategoria(st(), [m]).filter((x) => x.cat.tipo === 'despesa' && x.orcado > 0 && x.real > x.orcado).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
@@ -313,9 +317,10 @@ function telaPlano() {
       ${visP.length ? `<span class="seta-lim ${ui.limitesPlano ? 'aberta' : ''}">▾</span>` : ''}</button>
     ${ui.limitesPlano ? `<div class="lista" style="margin-top:10px">${visP.map(orcLinha).join('')}</div>`
       : estour.slice(0, 2).map((x) => `<div class="estourou-linha">${bolaCat(x.cat, 'width:30px;height:30px;border-radius:9px')}<span class="meio">${esc(x.cat.nome)}<small>${brl(x.real)} de ${brl(x.orcado)}</small></span><b class="neg num">+${brl(x.real - x.orcado)}</b></div>`).join('')}</div>
-  <div class="card"><div class="linha-acao" style="margin:0"><div><h3>Salário por mês</h3><div class="mini">${sal ? `desde ${C.nomeMes(sal.inicio)}${sal.fim ? ` até ${C.nomeMes(sal.fim)}` : ''} · entra sozinho todo mês; extras você lança à parte` : 'ainda não definido'}</div></div>
-    <button class="btn ${sal ? 'branco' : ''} pequeno" data-a="${sal ? 'editar-fixo' : 'novo-salario'}" data-id="${sal?.id || ''}">${sal ? brl(sal.valor) : 'Definir'}</button></div>
-</div>
+  <div class="card"><div class="linha-acao" style="margin:0 0 8px"><h3>Renda fixa</h3><button class="btn pequeno" data-a="novo-salario">+ Renda</button></div>
+    ${rendas.length ? `<div class="lista">${rendas.map((r) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: '#77C800' }, 'width:34px;height:34px;border-radius:10px')}
+      <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}</div><div class="det">${C.recorrenciaNoMes(r, m) ? 'todo mês' : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'terminou'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}</div></div>
+      <div class="valor num pos">${brl(r.valor)}</div></div>`).join('')}</div>` : '<p class="mini" style="margin:0">Salário ou outra renda que entra todo mês.</p>'}</div>
   <div class="linha-acao"><h2>Orçamento por categoria</h2><span class="mini">total ${brl(totOrc)} / mês${sal ? ` · sobra planejada <b class="${sal.valor - totOrc < 0 ? 'neg' : 'pos'}">${brl(sal.valor - totOrc)}</b>` : ''}</span></div>
   <div class="lista">${desp.map((c) => `<div class="item" style="cursor:default">${bolaCat(c)}
     <div class="meio"><div class="titulo">${esc(c.nome)}</div><div class="det">${c.tipo === 'guardar' ? 'guardar' : 'despesa'}</div></div>
@@ -427,6 +432,10 @@ function modalLanc(l = {}) {
         <div class="campo"><label>Cartão</label>${selCartao('', true)}</div></div>
       <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
     <div class="campo"><label>Mês</label>${mesSelect('l-mes', mes)}</div>
+    ${l.id ? '' : `<label class="chave" style="margin:-4px 0 10px"><input type="checkbox" name="repete" data-a="repete-tg"> Repete todo mês</label>
+    <div data-repete class="oculto repete-box"><div class="campo" style="margin:0"><label>Até quando?</label>
+      <label class="chave mini" style="margin-bottom:6px"><input type="checkbox" name="repeteSemFim" checked data-a="repete-fim-tg"> Sem data para acabar</label>
+      <div data-repete-fim class="oculto">${mesSelect('l-fim', C.addMes(mes, 11))}</div></div></div>`}
     <button type="button" class="mais-opcoes" data-a="mais-opcoes">${extras ? '− Menos opções' : '+ Mais opções (data, vencimento, observação)'}</button>
     <div data-extras class="${extras ? '' : 'oculto'}">
       <div class="duas"><div class="campo"><label>Data <span class="opc">opcional</span></label><input class="inp" type="date" name="data" value="${l.data || ''}"></div>
@@ -494,10 +503,11 @@ function modalCartao(c = {}) {
 function modalFixo(r = {}, salario = false) {
   const tipo = r.tipo || (salario ? 'entrada' : 'despesa');
   const catSal = st().categorias.find((c) => c.nome === 'Salário');
-  abrirModal(`<form data-form="fixo" data-id="${r.id || ''}">${topoModal(salario ? 'Salário' : r.id ? 'Editar fixo' : 'Novo custo fixo')}
+  abrirModal(`<form data-form="fixo" data-id="${r.id || ''}">${topoModal(salario ? (r.id ? 'Editar renda' : 'Nova renda fixa') : r.id ? 'Editar fixo' : 'Novo custo fixo')}
     <div class="seg" data-seg="tipo">${[['despesa', 'Despesa'], ['entrada', 'Entrada'], ['guardar', 'Guardar']].map(([t, n]) => `<button type="button" class="t-${t} ${t === tipo ? 'ativo' : ''}" data-tipo="${t}">${n}</button>`).join('')}</div>
     <input type="hidden" name="tipo" value="${tipo}">
-    <div class="campo"><label>Valor por mês</label><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${r.valor ? valorInput(r.valor) : ''}" required></div>
+    <div class="campo"><label>Valor por mês</label><input class="inp valor-grande num" name="valor" inputmode="decimal" placeholder="R$ 0,00" value="${r.valor ? valorInput(r.valor) : ''}" data-orig="${r.valor || ''}" required></div>
+    ${r.id ? `<div data-desde class="oculto repete-box"><div class="campo" style="margin:0"><label>Novo valor vale a partir de</label>${mesSelect('f-desde', C.difMeses(r.inicio || C.mesAtual(), C.mesAtual()) > 0 ? C.mesAtual() : (r.inicio || C.mesAtual()))}<p class="mini" style="margin:6px 0 0">Os meses antes continuam com ${brl(r.valor)}.</p></div></div>` : ''}
     <div class="campo"><label>Nome</label><input autocapitalize="sentences" class="inp" name="nome" value="${esc(r.nome || (salario ? 'Salário' : ''))}" placeholder="Ex.: Academia"></div>
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, r.categoriaId || (salario ? catSal?.id : ''))}</div></div>
     <div class="duas"><div class="campo"><label>Começa em</label>${mesSelect('f-ini', r.inicio || C.mesAtual())}</div>
@@ -585,16 +595,17 @@ function modalImportar() {
 function prepararImportacao(dados) {
   const S = st(); const regras = S.settings.regrasImport || {};
   const porNome = (nome, tipo) => S.categorias.find((c) => c.nome === nome && c.tipo === tipo && !c.arquivada);
-  const sal = S.recorrencias.find((r) => r.tipo === 'entrada' && catNome(r.categoriaId) === 'Salário');
+  const rendaDoMes = (mes, valor) => S.recorrencias.find((r) => r.tipo === 'entrada' && C.recorrenciaNoMes(r, mes) && Math.abs(r.valor - valor) < 0.005);
   const jaIds = new Set(S.lancamentos.map((l) => l.importId).filter(Boolean));
   const linhas = dados.itens.map((it) => {
     const e = entender(it); const mes = it.data.slice(0, 7); const valor = Math.abs(it.valor);
     const regra = regras[chaveRegra(it.texto)]; const cRegra = regra && S.categorias.find((c) => c.id === regra && c.tipo === e.tipo);
-    let cat = cRegra || (e.tipo === 'entrada' && sal && Math.abs(sal.valor - valor) < 0.005 ? porNome('Salário', 'entrada') : null) || porNome(e.sugestao, e.tipo)
+    const renda = e.tipo === 'entrada' ? rendaDoMes(mes, valor) : null;
+    let cat = cRegra || (renda ? S.categorias.find((c) => c.id === renda.categoriaId) : null) || porNome(e.sugestao, e.tipo)
       || (e.tipo === 'despesa' ? porNome('Outros', 'despesa') : S.categorias.find((c) => c.tipo === e.tipo && !c.arquivada));
     const ja = it.id && jaIds.has(it.id);
     const parecido = !ja && S.lancamentos.some((l) => l.mes === mes && l.tipo === e.tipo && Math.abs((Number(l.valor) || 0) - valor) < 0.005 && !l.importId);
-    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', marcado: e.marcar && !ja && !parecido, ja,
+    return { ...it, ...e, mes, valorAbs: valor, catId: cat?.id || '', recorrenciaId: renda?.id || '', marcado: e.marcar && !ja && !parecido, ja,
       aviso: ja ? 'Já importado antes.' : parecido ? 'Parece que você já lançou este valor neste mês.' : e.aviso || '' };
   });
   ui.importacao = { banco: dados.banco || 'Nubank', formato: dados.formato, linhas };
@@ -686,6 +697,8 @@ function obIr(f, n) {
 document.addEventListener('click', async (e) => {
   const catBtn = e.target.closest('[data-cat]');
   if (catBtn) { const w = catBtn.closest('form'); w.querySelectorAll('[data-cat]').forEach((b) => b.classList.toggle('ativo', b === catBtn)); w.categoriaId.value = catBtn.dataset.cat; metaHint(w); return; }
+  if (e.target.matches('[data-a=repete-tg]')) { e.target.closest('form').querySelector('[data-repete]').classList.toggle('oculto', !e.target.checked); return; }
+  if (e.target.matches('[data-a=repete-fim-tg]')) { e.target.closest('form').querySelector('[data-repete-fim]').classList.toggle('oculto', e.target.checked); return; }
   const icBtn = e.target.closest('[data-icone]');
   if (icBtn) { const w = icBtn.closest('form'); w.querySelectorAll('[data-icone]').forEach((b) => b.classList.toggle('ativo', b === icBtn)); w.icone.value = icBtn.dataset.icone; return; }
   const corBtn = e.target.closest('[data-cor]');
@@ -792,7 +805,7 @@ document.addEventListener('click', async (e) => {
         await store.remover('cartoes', cid); fecharModal(); } break; }
     case 'novo-fixo': modalFixo(); break;
     case 'novo-salario': modalFixo({}, true); break;
-    case 'editar-fixo': modalFixo({ ...S.recorrencias.find((x) => x.id === id) }, catNome(S.recorrencias.find((x) => x.id === id)?.categoriaId) === 'Salário'); break;
+    case 'editar-fixo': modalFixo({ ...S.recorrencias.find((x) => x.id === id) }, S.recorrencias.find((x) => x.id === id)?.tipo === 'entrada'); break;
     case 'excluir-fixo': if (confirm('Excluir este fixo? Ele deixa de aparecer em todos os meses.')) { await store.remover('recorrencias', $('[data-form=fixo]').dataset.id); fecharModal(); } break;
     case 'nova-cat': modalCat(); break;
     case 'editar-cat': modalCat({ ...S.categorias.find((x) => x.id === id) }); break;
@@ -885,6 +898,7 @@ document.addEventListener('change', async (e) => {
   if (t.matches('[data-imp-cat]')) { const l = ui.importacao.linhas[+t.dataset.impCat]; l.catId = t.value; l.mudou = true; return; }
 });
 document.addEventListener('input', (e) => {
+  if (e.target.matches('[data-form=fixo] [name=valor]')) { const f = e.target.closest('form'); const d = f.querySelector('[data-desde]'); if (d) d.classList.toggle('oculto', Math.abs(parseValor(e.target.value) - Number(e.target.dataset.orig || 0)) < 0.005); }
   if (e.target.matches('[data-ob-dia]')) { const r = e.target.closest('[data-ob-cc]'); const cb = r.querySelector('input[type=checkbox]'); cb.checked = !!e.target.value; r.classList.toggle('on', cb.checked); }
   if (e.target.closest('form[data-form=decisao]')) setTimeout(() => previaDecisao(e.target.closest('form')), 0);
   if (e.target.closest('form[data-form=cartao]')) setTimeout(() => previaCartao(e.target.closest('form')), 0);
@@ -911,6 +925,11 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'lanc') {
     const valor = parseValor(v('valor')); if (!(valor > 0)) return alert('Digite um valor maior que zero.');
     if (!v('categoriaId')) return alert('Escolha uma categoria.');
+    if (!id && f.repete?.checked && v('forma') !== 'Crédito') {
+      const inicio = lerMes('l-mes', f); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
+      if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
+      await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: '', frequencia: 'mensal', forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: true, pagos: {} });
+      fecharModal(); toast(fim ? `Vai se repetir até ${C.nomeMes(fim)}.` : 'Vai se repetir todo mês.', true); return; }
     if (v('forma') === 'Crédito' && !id && v('tipo') === 'despesa') {
       const n = Math.max(1, parseInt(v('parcelas'), 10) || 1);
       await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: lerMes('l-mes', f), data: v('data') });
@@ -944,6 +963,16 @@ document.addEventListener('submit', async (e) => {
     const inicio = lerMes('f-ini', f); const fim = f.semFim.checked ? '' : lerMes('f-fim', f);
     if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
     const antigo = S.recorrencias.find((x) => x.id === id) || {};
+    const desdeBox = f.querySelector('[data-desde]');
+    if (id && desdeBox && !desdeBox.classList.contains('oculto')) {
+      const desde = lerMes('f-desde', f);
+      if (C.difMeses(antigo.inicio, desde) > 0 && (!fim || C.difMeses(desde, fim) >= 0)) {
+        const pagosAntes = {}; const pagosDepois = {}; for (const [m, ok] of Object.entries(antigo.pagos || {})) (C.difMeses(desde, m) >= 0 ? pagosDepois : pagosAntes)[m] = ok;
+        await store.salvar('recorrencias', { ...antigo, fim: C.addMes(desde, -1), pagos: pagosAntes });
+        await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio: desde, fim, diaVenc: parseInt(v('diaVenc'), 10) || '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: pagosDepois });
+        fecharModal(); toast(`Novo valor a partir de ${C.nomeMes(desde)}. Os meses antes não mudaram.`, true); return;
+      }
+    }
     await store.salvar('recorrencias', { ...antigo, id, tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: parseInt(v('diaVenc'), 10) || '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: antigo.pagos || {} });
     fecharModal(); toast('Fixo salvo!');
   }
@@ -961,7 +990,7 @@ document.addEventListener('submit', async (e) => {
     const im = ui.importacao; const sel = im.linhas.filter((l) => l.marcado && !l.ja);
     if (!sel.length) return alert('Nenhuma movimentação marcada.');
     const btn = $('[data-imp-btn]'); btn.disabled = true; btn.textContent = 'Importando...';
-    for (const l of sel) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '' });
+    for (const l of sel) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
     const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
     const bancos = S.settings.bancos || []; await store.salvarSettings({ regrasImport: regras, ...(im.banco && !bancos.includes(im.banco) ? { bancos: [...bancos, im.banco] } : {}) });
     ui.importacao = null; fecharModal(); toast(`${sel.length} lançamentos importados!`, true); return;

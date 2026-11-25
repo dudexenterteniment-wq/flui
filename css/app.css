@@ -353,3 +353,4 @@ h3 .bola { color: #fff; } h3 .bola svg { width: 18px; height: 18px; }
 .bloco-pizza .pizza-wrap svg { width: 168px; height: 168px; }
 @media (max-width: 380px) { .bloco-pizza .pizza-wrap svg { width: 140px; height: 140px; } }
 .per-custom { gap: 6px 12px; } .per-lin { display: inline-flex; align-items: center; gap: 6px; } .per-lin .mini { width: 22px; text-align: right; font-weight: 800; }
+.repete-box { background: var(--fundo-2); border-radius: 14px; padding: 10px 12px; margin-bottom: 12px; }

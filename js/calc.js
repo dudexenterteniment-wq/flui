@@ -107,7 +107,6 @@ export function movimentosDoMes(st, m) {
   for (const r of st.recorrencias) {
     if (!recorrenciaNoMes(r, m)) continue;
     if (vinculadas.has(r.id)) continue;
-    if (r.tipo === 'entrada' && entradasLancadas.has(r.categoriaId)) continue;
     const paga = !!(r.pagos || {})[m];
     out.push({ origem: 'fixo', id: r.id, tipo: r.tipo || (cat[r.categoriaId]?.tipo) || 'despesa', categoriaId: r.categoriaId,
       valor: Number(r.valor) || 0, descricao: r.nome || cat[r.categoriaId]?.nome || 'Fixo',
