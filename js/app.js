@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=88';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=88';
-import { VAPID_KEY } from './config.js?v=88';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=88';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=88';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=88';
+import * as C from './calc.js?v=89';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=89';
+import { VAPID_KEY } from './config.js?v=89';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=89';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=89';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=89';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=88" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=88" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=88" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=89" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=88" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -210,14 +210,13 @@ function telaLancamentos() {
   const porMes = ms.slice().reverse().map((m) => [m, movs.filter((x) => x.mes === m).sort(recentes)]).filter(([, l]) => l.length);
   const tot = (t) => C.sum(movs.filter((x) => x.tipo === t), (x) => x.valor);
   return `
-  <h1>Lançamentos</h1>
-  <div class="acoes-topo"><button class="btn branco pequeno" data-a="importar-extrato">Importar extrato</button><button class="btn verde pequeno" data-a="novo-lanc">+ Lançar</button></div>
+  <div class="titulo-linha"><h1>Lançamentos</h1><button class="link-importar" data-a="importar-extrato">Importar extrato</button></div>
   ${filtroPeriodo()}
   <hr class="fina">
-  <div class="chips chips-tipo" style="margin-bottom:10px">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado'], ['fixos', 'Fixos']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
-    ${ui.filtroCat ? `<button class="chip ativo" data-a="filtro-cat-limpa">${esc(catNome(ui.filtroCat))} ×</button>` : ''}</div>
+  <div class="filtros-linha"><button class="lupa ${ui.buscaAberta || ui.busca ? 'ativo' : ''}" data-a="abrir-busca" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button><div class="chips chips-tipo">${[['todos', 'Tudo'], ['despesa', 'Despesas'], ['entrada', 'Entradas'], ['guardar', 'Guardado'], ['fixos', 'Fixos']].map(([t, n]) => `<button class="chip ${ui.filtroTipo === t ? 'ativo' : ''}" data-a="filtro-tipo" data-v="${t}">${n}</button>`).join('')}
+    ${ui.filtroCat ? `<button class="chip ativo" data-a="filtro-cat-limpa">${esc(catNome(ui.filtroCat))} ×</button>` : ''}</div></div>
   ${ui.filtroTipo === 'fixos' ? '<div class="fixos-dica"><span></span><span style="display:flex;gap:6px"><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button><button class="btn pequeno" data-a="novo-fixo">+ Fixo</button></span></div>' : ''}
-  <input class="inp" placeholder="Buscar por descrição, categoria, banco..." data-a="busca" value="${esc(ui.busca)}" style="margin-bottom:12px">
+  ${ui.buscaAberta || ui.busca ? `<input class="inp" placeholder="Buscar..." data-a="busca" value="${esc(ui.busca)}" style="margin-bottom:12px">` : ''}
   ${porMes.length ? porMes.map(([m, l]) => `<div class="grupo-mes">${C.nomeMes(m, true)}</div><div class="lista">${l.map(itemMov).join('')}</div>`).join('') : vazio('🔎', 'Nada por aqui neste período.')}
   `;
 }
@@ -824,6 +823,7 @@ document.addEventListener('click', async (e) => {
       break; }
     case 'ver-cat': ui.filtroCat = id; ui.filtroTipo = 'todos'; location.hash = '#lancamentos'; break;
     case 'kpi-ir': if (el.dataset.v === 'metas') location.hash = '#metas'; else { ui.filtroTipo = el.dataset.v; location.hash = '#lancamentos'; } break;
+    case 'abrir-busca': if (ui.buscaAberta || ui.busca) { ui.buscaAberta = false; ui.busca = ''; render(); } else { ui.buscaAberta = true; render(); setTimeout(() => $('[data-a=busca]')?.focus(), 30); } break;
     case 'filtro-tipo': ui.filtroTipo = el.dataset.v; render(); break;
     case 'filtro-cat-limpa': ui.filtroCat = ''; render(); break;
     case 'excluir-lanc': if (confirm('Excluir este lançamento?')) { await store.remover('lancamentos', $('[data-form=lanc]').dataset.id); fecharModal(); toast('Lançamento excluído.'); } break;
@@ -1182,7 +1182,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=88" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=89" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho

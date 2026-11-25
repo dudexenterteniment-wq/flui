@@ -477,3 +477,10 @@ label.btn { position: relative; }
 .barra-inferior .nav-destaque .nd-bola svg { width: 24px !important; height: 24px !important; display: block; }
 .barra-inferior .nav-destaque .nd-bola svg { padding: 0 !important; background: none !important; }
 .kpi-ir { background: #fff; text-align: left; font: inherit; cursor: pointer; width: 100%; } .kpi-ir:active { transform: translateY(2px); }
+.titulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.titulo-linha h1 { margin-bottom: 8px; }
+.link-importar { background: none; border: 2px solid var(--linha); border-radius: 12px; padding: 6px 12px; font: inherit; font-weight: 800; font-size: 13px; color: var(--azul); cursor: pointer; white-space: nowrap; }
+.filtros-linha { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.filtros-linha .chips-tipo { flex: 1; min-width: 0; margin: 0 -16px 0 0; }
+.lupa { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--linha); background: #fff; color: var(--cinza); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.lupa svg { width: 20px; height: 20px; } .lupa.ativo { border-color: var(--azul); color: var(--azul); background: var(--azul-claro); }
