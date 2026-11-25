@@ -90,7 +90,7 @@ export function movimentosDoMes(st, m) {
     if (l.mes !== m) continue;
     out.push({ origem: 'lanc', id: l.id, tipo: l.tipo, categoriaId: l.categoriaId, valor: Number(l.valor) || 0,
       descricao: l.descricao || '', status: l.status || (l.tipo === 'entrada' ? 'recebido' : 'pago'),
-      forma: l.forma || '', banco: l.banco || '', vencimento: l.vencimento || '', data: l.data || '', mes: m });
+      forma: l.forma || '', banco: l.banco || '', vencimento: l.vencimento || '', data: l.data || '', criadoEm: l.criadoEm || '', mes: m });
   }
   for (const c of st.compras) {
     for (const p of parcelasDaCompra(c)) {
@@ -98,7 +98,7 @@ export function movimentosDoMes(st, m) {
       const paga = parcelaPaga(st, c, m);
       out.push({ origem: 'cartao', id: c.id, tipo: 'despesa', categoriaId: c.categoriaId, valor: p.valor,
         descricao: c.descricao + (p.de > 1 ? ` (${p.numero}/${p.de})` : ''), status: paga ? 'pago' : 'pendente',
-        cartaoId: c.cartaoId || '', forma: 'Cartão de crédito', mes: m });
+        cartaoId: c.cartaoId || '', forma: 'Cartão de crédito', data: c.data || '', criadoEm: c.criadoEm || '', mes: m });
     }
   }
   // entradas recorrentes não contam se já houver entrada lançada da mesma categoria no mês (evita salário duplicado)

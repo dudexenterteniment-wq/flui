@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=85';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=86';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
