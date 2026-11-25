@@ -111,7 +111,7 @@ export function movimentosDoMes(st, m) {
     out.push({ origem: 'fixo', id: r.id, tipo: r.tipo || (cat[r.categoriaId]?.tipo) || 'despesa', categoriaId: r.categoriaId,
       valor: Number(r.valor) || 0, descricao: r.nome || cat[r.categoriaId]?.nome || 'Fixo',
       status: paga ? (r.tipo === 'entrada' ? 'recebido' : 'pago') : 'previsto', diaVenc: r.diaVenc || '',
-      forma: r.forma || '', banco: r.banco || '', mes: m });
+      forma: r.forma || '', banco: r.banco || '', cartaoId: r.forma === 'Crédito' ? (r.cartaoId || '') : undefined, mes: m });
   }
   return out;
 }
@@ -127,9 +127,9 @@ export function resumo(st, meses) {
   const entradas = sum(por('entrada'), (x) => x.valor);
   const despesas = sum(por('despesa'), (x) => x.valor);
   const guardado = sum(por('guardar'), (x) => x.valor);
-  const cartao = sum(movs.filter((x) => x.origem === 'cartao'), (x) => x.valor);
-  const pendNaoCartao = sum(movs.filter((x) => x.origem !== 'cartao' && x.tipo === 'despesa' && (x.status === 'pendente' || x.status === 'previsto')), (x) => x.valor);
-  const ids = [...new Set(st.compras.map((c) => c.cartaoId || ''))];
+  const cartao = sum(movs.filter((x) => x.origem === 'cartao' || (x.origem === 'fixo' && x.forma === 'Crédito')), (x) => x.valor);
+  const pendNaoCartao = sum(movs.filter((x) => x.origem !== 'cartao' && x.forma !== 'Crédito' && x.tipo === 'despesa' && (x.status === 'pendente' || x.status === 'previsto')), (x) => x.valor);
+  const ids = [...new Set([...st.compras.map((c) => c.cartaoId || ''), ...(st.recorrencias || []).filter((r) => r.forma === 'Crédito').map((r) => r.cartaoId || '')])];
   const abertoCartao = sum(meses.flatMap((m) => ids.map((id) => fatura(st, id, m).aberto)));
   const pendente = fromCents(cents(pendNaoCartao) + cents(abertoCartao));
   const saldo = fromCents(cents(entradas) - cents(despesas) - cents(guardado));
@@ -177,6 +177,12 @@ export function fatura(st, cartaoId, m) {
   for (const c of st.compras) {
     if ((c.cartaoId || '') !== (cartaoId || '')) continue;
     for (const p of parcelasDaCompra(c)) if (p.mes === m) itens.push({ compra: c, parcela: p, paga: parcelaPaga(st, c, m) });
+  }
+  // fixos pagos no crédito (assinaturas) entram na fatura do cartão
+  for (const r of st.recorrencias || []) {
+    if (r.forma !== 'Crédito' || (r.cartaoId || '') !== (cartaoId || '') || r.tipo === 'entrada' || r.ativa === false || !recorrenciaNoMes(r, m)) continue;
+    const pseudo = { id: `rec~${r.id}`, recId: r.id, fixo: true, cartaoId: r.cartaoId || '', descricao: r.nome || 'Fixo', categoriaId: r.categoriaId };
+    itens.push({ compra: pseudo, parcela: { mes: m, numero: 1, de: 1, valor: Number(r.valor) || 0 }, paga: parcelaPaga(st, pseudo, m) });
   }
   itens.push(...transferidosPara(st, cartaoId, m));
   const total = sum(itens, (x) => x.parcela.valor);

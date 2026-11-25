@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=71';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=71';
-import { VAPID_KEY } from './config.js?v=71';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=71';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=71';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=71';
+import * as C from './calc.js?v=72';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=72';
+import { VAPID_KEY } from './config.js?v=72';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=72';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=72';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=72';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -153,6 +153,7 @@ function telaInicio() {
   const leg = ui.legendaToda ? desp : desp.slice(0, 4);
   return `
   <h1 class="titulo-pag">Início</h1>
+  ${st().settings.exclusaoEm ? `<div class="aviso-fatura vencida"><div class="af-txt"><b>Sua conta será excluída em ${new Date(st().settings.exclusaoEm).toLocaleDateString('pt-BR')}</b><div class="mini">Depois disso, os dados são apagados para sempre.</div></div><button class="btn branco pequeno" data-a="cancelar-exclusao">Cancelar exclusão</button></div>` : ''}
   ${filtroPeriodo()}
   <div class="grade g4 kpis">
     ${kpi('Entrou', r.entradas, 'verde')}${kpi('Gastou', r.despesas, 'laranja')}${kpi('Guardou', r.guardado, 'azul')}
@@ -285,8 +286,8 @@ function blocoFatura(c, f, m) {
     </div>
     <div class="fatura-ver" data-a="fatura-toggle" data-k="${k}">${aberta ? 'Esconder compras' : `Ver ${n} ${n === 1 ? 'compra' : 'compras'}`}<span class="seta">▾</span></div>
     <div class="fatura-corpo ${aberta ? '' : 'oculto'}">
-    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela }) => `<div class="item" ${compra.transferencia ? 'style="cursor:default"' : `data-a="editar-compra" data-id="${compra.id}"`}>
-      <div class="meio"><div class="titulo">${esc(compra.descricao)}</div><div class="det">${compra.transferencia ? 'veio da fatura anterior · não é gasto novo' : esc(catNome(compra.categoriaId))}${parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
+    <div class="lista" style="margin-top:10px">${f.itens.map(({ compra, parcela }) => `<div class="item" ${compra.transferencia ? 'style="cursor:default"' : compra.fixo ? `data-a="editar-fixo" data-id="${compra.recId}"` : `data-a="editar-compra" data-id="${compra.id}"`}>
+      <div class="meio"><div class="titulo">${esc(compra.descricao)}</div><div class="det">${compra.transferencia ? 'veio da fatura anterior · não é gasto novo' : esc(catNome(compra.categoriaId))}${compra.fixo ? ' · fixo todo mês' : parcela.de > 1 ? ` · parcela ${parcela.numero}/${parcela.de}` : ' · à vista'}</div></div>
       <div class="valor num">${brl(parcela.valor)}</div></div>`).join('')}</div>
     </div>
     ${f.decisao ? `<div class="decisao-info"><span>${textoDecisao(f.decisao, m)}</span><button class="btn fantasma pequeno" data-a="desfazer-decisao" data-id="${c.id}" data-m="${m}">Desfazer</button></div>`
@@ -317,7 +318,7 @@ function telaPlano() {
     const linhaFixo = (r, entrada) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: entrada ? '#77C800' : '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
         <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})` : C.difMeses(m, r.inicio) > 0 ? 'começa ' + C.nomeMes(r.inicio) : 'todo mês'}${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}</div></div>
-      <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
+      <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && r.forma !== 'Crédito' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
     return `<h1>Planejamento</h1>${abas}
     <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
     <div class="card bloco-fixo entra"><div class="linha-acao" style="margin:0 0 8px"><h3>Entra todo mês</h3><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button></div>
@@ -422,9 +423,10 @@ function telaConfig() {
       ios ? '<p class="mini">No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.</p>' :
       '<p class="mini">No Android (Chrome): toque nos <b>três pontinhos</b> e em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>. No computador, use o ícone de instalar na barra de endereço.</p>'}</div>
   <div class="card"><h3>Backup</h3><p class="mini">Guarde uma cópia dos seus dados.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pequeno" data-a="exportar">Baixar backup</button><label class="btn branco pequeno" style="cursor:pointer">Restaurar backup<input type="file" accept=".json,application/json" data-a="importar" hidden></label></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn verde pequeno" data-a="baixar-planilha">Baixar planilha (Excel)</button><button class="btn pequeno" data-a="exportar">Baixar backup</button><label class="btn branco pequeno" style="cursor:pointer">Restaurar backup<input type="file" data-a="importar" class="arquivo-oculto"></label></div></div>
   <div class="card"><h3>Notificações</h3>${blocoPush()}</div>
   <div class="card"><h3>Ajuda</h3><button class="btn branco pequeno" data-a="ver-tour">Ver o tour do app</button></div>
+  ${store.modo === 'local' ? '' : '<button class="btn-excluir" data-a="excluir-conta">Excluir minha conta</button>'}
   <p class="mini" style="text-align:center;margin-top:18px">Flui · versão 1.0</p>`;
 }
 
@@ -539,8 +541,9 @@ function modalFixo(r = {}, salario = false) {
       <div class="campo"><label>Termina em <span class="opc">opcional</span></label><label class="chave mini" style="margin-bottom:6px"><input type="checkbox" name="semFim" ${r.id && !r.fim ? 'checked' : !r.id ? 'checked' : ''}> sem data para acabar</label>${mesSelect('f-fim', r.fim || C.addMes(C.mesAtual(), 11))}</div></div>
     <div class="duas"><div class="campo ${tipo === 'entrada' ? '' : 'oculto'}" data-dia-renda><label>Dia que recebe <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="diaVenc" placeholder="Ex.: 5" value="${tipo === 'entrada' ? (r.diaVenc || '') : ''}"></div>
       <div class="campo"><label>Frequência</label><select class="inp" name="frequencia"><option value="mensal">Mensal</option><option value="anual" ${r.frequencia === 'anual' ? 'selected' : ''}>Anual</option></select></div></div>
-    <div class="duas"><div class="campo"><label>Forma <span class="opc">opcional</span></label><select class="inp" name="forma"><option value="">—</option>${FORMAS.map((f) => `<option ${f === r.forma ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
+    <div class="duas"><div class="campo"><label>Forma <span class="opc">opcional</span></label><select class="inp" name="forma" data-a="forma-fixo"><option value="">—</option>${['Débito', 'Crédito', 'Dinheiro', 'Boleto', 'Outro'].map((f) => `<option ${f === (r.forma === 'Pix' ? 'Débito' : r.forma) ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
       <div class="campo"><label>Banco <span class="opc">opcional</span></label>${selBanco('banco', r.banco)}</div></div>
+    <div class="campo ${r.forma === 'Crédito' ? '' : 'oculto'}" data-fixo-cartao><label>Cartão</label>${selCartao(r.cartaoId || '', !r.id)}<p class="mini" style="margin:6px 0 0">Entra todo mês na fatura deste cartão.</p></div>
     ${r.id ? `<label class="chave" style="margin-bottom:12px"><input type="checkbox" name="pausado" ${r.ativa === false ? 'checked' : ''}> Pausar este fixo</label>` : ''}
     <div class="campo"><label>Observação <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="obs" value="${esc(r.obs || '')}"></div>
     <div class="acoes">${r.id ? '<button type="button" class="btn branco" data-a="excluir-fixo">Excluir</button>' : ''}<button class="btn verde" type="submit">Salvar</button></div></form>`);
@@ -861,6 +864,17 @@ document.addEventListener('click', async (e) => {
         await store.backend.ativarPush(VAPID_KEY); await store.salvarSettings({ pushAtivo: true }); toast('Notificações ativadas! 🔔', true);
       } catch (err) { toast(err.message === 'nao-suportado' ? 'Este navegador não aceita notificações.' : 'Não consegui ativar agora. Tente de novo.'); }
       render(); break; }
+    case 'restaurar-juntar': { const d = ui.restaurar; if (!d) break; fecharModal(); await store.juntarTudo(d); ui.restaurar = null; toast('Pronto, juntei os dados!', true); location.hash = '#inicio'; break; }
+    case 'restaurar-substituir': { const d = ui.restaurar; if (!d) break; if (!confirm('Isso apaga os dados atuais e fica só com o arquivo. Antes, vou baixar uma cópia do que existe hoje. Continuar?')) break;
+      baixar(`flui-antes-de-restaurar-${new Date().toISOString().slice(0, 10)}.json`, store.exportar()); fecharModal(); await store.substituirTudo(d); ui.restaurar = null; toast('Backup restaurado!', true); location.hash = '#inicio'; break; }
+    case 'baixar-planilha': baixarPlanilha(); break;
+    case 'excluir-conta': abrirModal(`<div class="excluir-box"><h3>Excluir sua conta?</h3>
+        <p>Tem certeza? Seus dados ficam guardados por <b>3 dias</b>. Depois disso, a conta e tudo o que está nela são <b>apagados para sempre</b>.</p>
+        <p class="mini">Se mudar de ideia nesses 3 dias, é só entrar de novo e tocar em "Cancelar exclusão". Antes, você pode baixar sua planilha em Backup.</p>
+        <div class="acoes"><button class="btn branco" data-a="fechar">Voltar</button><button class="btn vermelho-btn" data-a="excluir-confirmar">Sim, excluir</button></div></div>`); break;
+    case 'excluir-confirmar': { const quando = new Date(Date.now() + 3 * 864e5).toISOString(); await store.salvarSettings({ exclusaoEm: quando }); fecharModal();
+      alert(`Pronto. Sua conta será excluída em ${new Date(quando).toLocaleDateString('pt-BR')}. Até lá, é só entrar de novo para cancelar.`); await store.backend.signOut(); break; }
+    case 'cancelar-exclusao': await store.salvarSettings({ exclusaoEm: '' }); toast('Exclusão cancelada. Que bom que você ficou! 💚', true); render(); break;
     case 'legenda-toggle': ui.legendaToda = !ui.legendaToda; render(); break;
     case 'novo-cartao': modalCartao(); break;
     case 'editar-cartao': modalCartao({ ...S.cartoes.find((x) => x.id === id) }); break;
@@ -928,9 +942,10 @@ document.addEventListener('change', async (e) => {
     try {
       const dados = validarBackup(await el.files[0].text());
       const n = (dados.lancamentos || []).length + (dados.compras || []).length;
-      if (!confirm(`Restaurar este backup? Ele tem ${n} lançamentos e compras e vai SUBSTITUIR os dados atuais desta conta. Antes, vou baixar um backup do que existe hoje.`)) return;
-      baixar(`flui-antes-de-restaurar-${new Date().toISOString().slice(0, 10)}.json`, store.exportar());
-      await store.substituirTudo(dados); toast('Backup restaurado!', true); location.hash = '#inicio';
+      ui.restaurar = dados;
+      abrirModal(`${topoModal('Restaurar backup')}<p style="margin:0 0 14px">Esse arquivo tem <b>${n}</b> lançamentos e compras. O que você quer fazer?</p>
+        <div class="opcoes-dec"><button type="button" class="op-dec" data-a="restaurar-juntar"><span class="op-ic">+</span><span><b>Juntar com o que já tenho</b><small>Mantém seus dados e acrescenta o que é novo</small></span></button>
+        <button type="button" class="op-dec" data-a="restaurar-substituir"><span class="op-ic">↺</span><span><b>Ficar só com o arquivo</b><small>Apaga o que tem hoje e usa só o backup</small></span></button></div>`);
     } catch (err) { alert(err.message || 'Não consegui ler esse arquivo.'); } finally { el.value = ''; }
   }
 });
@@ -946,7 +961,7 @@ function previaCartao(f) {
   const box = f.querySelector('[data-cores-cartao]');
   if (!box.dataset.manual && COR_BANCO[banco]) { const k = COR_BANCO[banco]; f.cor.value = k; pv.style.background = k; box.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b.dataset.cor === k)); }
 }
-document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); });
+document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); if (e.target.matches('[data-a=forma-fixo]')) e.target.closest('form').querySelector('[data-fixo-cartao]')?.classList.toggle('oculto', e.target.value !== 'Crédito'); });
 document.addEventListener('change', async (e) => {
   const t = e.target;
   if (t.matches('[data-a=arquivo-extrato]') && t.files[0]) {
@@ -1036,11 +1051,11 @@ document.addEventListener('submit', async (e) => {
       if (C.difMeses(antigo.inicio, desde) > 0 && (!fim || C.difMeses(desde, fim) >= 0)) {
         const pagosAntes = {}; const pagosDepois = {}; for (const [m, ok] of Object.entries(antigo.pagos || {})) (C.difMeses(desde, m) >= 0 ? pagosDepois : pagosAntes)[m] = ok;
         await store.salvar('recorrencias', { ...antigo, fim: C.addMes(desde, -1), pagos: pagosAntes });
-        await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio: desde, fim, diaVenc: v('tipo') === 'entrada' ? (parseInt(v('diaVenc'), 10) || '') : '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: pagosDepois });
+        await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio: desde, fim, diaVenc: v('tipo') === 'entrada' ? (parseInt(v('diaVenc'), 10) || '') : '', frequencia: v('frequencia'), forma: v('forma'), cartaoId: v('forma') === 'Crédito' ? v('cartaoId') : '', banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: pagosDepois });
         fecharModal(); toast(`Novo valor a partir de ${C.nomeMes(desde)}. Os meses antes não mudaram.`, true); return;
       }
     }
-    await store.salvar('recorrencias', { ...antigo, id, tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: v('tipo') === 'entrada' ? (parseInt(v('diaVenc'), 10) || '') : '', frequencia: v('frequencia'), forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: antigo.pagos || {} });
+    await store.salvar('recorrencias', { ...antigo, id, tipo: v('tipo'), valor, nome: v('nome') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: v('tipo') === 'entrada' ? (parseInt(v('diaVenc'), 10) || '') : '', frequencia: v('frequencia'), forma: v('forma'), cartaoId: v('forma') === 'Crédito' ? v('cartaoId') : '', banco: v('banco'), obs: v('obs'), ativa: !(f.pausado && f.pausado.checked), pagos: antigo.pagos || {} });
     fecharModal(); toast('Fixo salvo!');
   }
   if (tipoF === 'cat') {
@@ -1115,6 +1130,21 @@ async function migrar() {
     await store.remover('categorias', velha.id);
   }
 }
+function baixarPlanilha() {
+  const S = st(); const todos = [...S.lancamentos.map((l) => l.mes), ...S.compras.map((c) => c.mesPrimeira), ...S.recorrencias.map((r) => r.inicio)].filter(Boolean).sort();
+  const ini = todos[0] || C.mesAtual(); const fim = C.mesAtual();
+  const num = (v) => (Math.round(v * 100) / 100).toFixed(2).replace('.', ',');
+  const cel = (x) => { const t = String(x ?? ''); return /[;"\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const tipoNome = { entrada: 'Entrada', despesa: 'Despesa', guardar: 'Guardar' }; const origem = { lanc: 'Lançamento', cartao: 'Cartão de crédito', fixo: 'Fixo' };
+  const linhas = [['Mês', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Como pagou', 'Banco', 'Cartão', 'Origem', 'Situação']];
+  for (const m of C.rangeMeses(ini, fim)) for (const x of C.movimentosDoMes(S, m)) {
+    const k = x.cartaoId ? S.cartoes.find((c) => c.id === x.cartaoId) : null;
+    linhas.push([C.nomeMes(m, true), tipoNome[x.tipo] || x.tipo, catNome(x.categoriaId), x.descricao, num(x.valor), x.forma, x.banco, k ? nomeCartao(k) : '', origem[x.origem] || x.origem, x.status]);
+  }
+  const csv = '\uFEFF' + linhas.map((l) => l.map(cel).join(';')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = `flui-${ini}-a-${fim}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast('Planilha baixada! Abre no Excel ou no Google Planilhas.', true);
+}
 function baixar(nome, txt) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 
 window.addEventListener('hashchange', () => { ui.rota = location.hash.slice(1) || 'inicio'; ui.modal = null; render(); window.scrollTo(0, 0); });
@@ -1134,6 +1164,7 @@ store.on(() => { if (!ui.modal) render(); });
       render();
       await store.carregar();
       render();
+      if (st().settings.exclusaoEm && new Date(st().settings.exclusaoEm) <= new Date()) { try { await store.backend.excluirConta(); } catch (_) { await store.backend.signOut(); } return; }
       await migrar();
       if (!st().settings.onboarding) modalBoasVindas();
       else lembreteSetup();

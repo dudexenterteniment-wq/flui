@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=71';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=72';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -34,6 +34,7 @@ class LocalBackend {
   async ativarPush() { throw new Error('modo-teste'); }
   async lembrar() {}
   async signOut() { this.user = null; localStorage.removeItem('flui:user'); this.onUser(null); }
+  async excluirConta() { localStorage.removeItem('flui:data:' + this.user.uid); await this.signOut(); }
   async resetPassword() { throw new Error('No modo de teste não há senha.'); }
   async loadAll() { return this._read('flui:data:' + this.user.uid); }
   async saveAll(st) { this._write('flui:data:' + this.user.uid, st); }
@@ -61,6 +62,13 @@ class FirebaseBackend {
   async signIn(email, senha) { const r = await this.A.signInWithEmailAndPassword(this.auth, email, senha); return r.user; }
   async lembrar(sim) { await this.A.setPersistence(this.auth, sim ? this.A.browserLocalPersistence : this.A.browserSessionPersistence); }
   async signOut() { await this.A.signOut(this.auth); }
+  // apaga todos os dados da pessoa e depois a conta (o Firebase pode pedir login recente)
+  async excluirConta() {
+    const { writeBatch, getDocs } = this.F; const refs = [];
+    for (const c of [...COLECOES, 'meta']) (await getDocs(this._col(c))).docs.forEach((d) => refs.push(d.ref));
+    for (let i = 0; i < refs.length; i += 400) { const b = writeBatch(this.db); refs.slice(i, i + 400).forEach((r) => b.delete(r)); await b.commit(); }
+    await this.A.deleteUser(this.auth.currentUser);
+  }
   // notificações: pega o token deste aparelho e guarda em users/{uid}/meta/push
   async ativarPush(vapidKey) {
     const msg = await import(`${FIREBASE_SDK}/firebase-messaging.js`);
@@ -146,6 +154,18 @@ export class Store {
   }
   async _try(f) {
     try { await f(); this.erro = null; } catch (e) { console.error(e); this.erro = e; window.dispatchEvent(new CustomEvent('flui:erro', { detail: e })); }
+  }
+  async juntarTudo(novo) {
+    // categorias com o mesmo nome viram a mesma; o resto entra se ainda não existir
+    const mapa = {};
+    for (const c of novo.categorias || []) {
+      const igual = this.st.categorias.find((x) => x.id === c.id || (x.nome === c.nome && x.tipo === c.tipo));
+      if (igual) mapa[c.id] = igual.id; else await this.salvar('categorias', { ...c });
+    }
+    for (const col of COLECOES.filter((x) => x !== 'categorias')) {
+      const ids = new Set((this.st[col] || []).map((x) => x.id));
+      for (const it of novo[col] || []) { if (ids.has(it.id)) continue; await this.salvar(col, { ...it, ...(it.categoriaId && mapa[it.categoriaId] ? { categoriaId: mapa[it.categoriaId] } : {}) }); }
+    }
   }
   exportar() { return JSON.stringify({ app: 'Flui', formato: 1, exportadoEm: new Date().toISOString(), dados: this.st }, null, 2); }
 }

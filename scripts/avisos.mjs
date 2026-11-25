@@ -16,7 +16,16 @@ const dias = (d) => Math.round((d - hoje) / 864e5);
 const mA = mesAtual(hoje);
 const SO_TESTE = process.env.TESTE === '1';
 
-const pushDocs = (await db.collectionGroup('meta').get()).docs.filter((d) => d.id === 'push');
+const metaDocs = (await db.collectionGroup('meta').get()).docs;
+// contas com exclusão pedida há 3 dias ou mais: apaga dados e login
+const { getAuth } = await import('firebase-admin/auth'); const apagados = new Set();
+for (const d of metaDocs.filter((x) => x.id === 'settings' && x.data().exclusaoEm && new Date(x.data().exclusaoEm) <= agora)) {
+  const userRef = d.ref.parent.parent;
+  await db.recursiveDelete(userRef); apagados.add(userRef.id);
+  await getAuth().deleteUser(userRef.id).catch((e) => console.log('login já removido?', e.code));
+  console.log(`Conta ${userRef.id} excluída (pedido de ${d.data().exclusaoEm}).`);
+}
+const pushDocs = metaDocs.filter((d) => d.id === 'push' && !apagados.has(d.ref.parent.parent.id));
 console.log(`Aparelhos cadastrados em ${pushDocs.length} conta(s).`);
 for (const pd of pushDocs) {
   const userRef = pd.ref.parent.parent; const tokens = pd.data().tokens || [];
