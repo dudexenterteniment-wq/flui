@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=122';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=122';
-import { VAPID_KEY } from './config.js?v=122';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=122';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=122';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=122';
+import * as C from './calc.js?v=124';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=124';
+import { VAPID_KEY } from './config.js?v=124';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=124';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=124';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast } from './ui.js?v=124';
 
 const store = new Store();
 const $ = (s, el = document) => el.querySelector(s);
@@ -36,9 +36,9 @@ const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar'
 
 function render() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=122" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=124" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=122" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=124" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -57,7 +57,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=122" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=124" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -66,7 +66,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=122" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=124" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -636,15 +636,16 @@ function statusImport(b) {
   return { temCred, conta: ult('conta'), fatura: ult('fatura') };
 }
 // depois de importar a fatura: confirmar com o app do banco quanto falta (o saldo da fatura anterior não vem no arquivo)
-function conferirFatura(cid, m, msg) {
-  const k = st().cartoes.find((x) => x.id === cid); const f = C.fatura(st(), cid, m);
-  abrirModal(`<form data-form="conferir-fatura" data-id="${cid}" data-m="${m}">${topoModal('Conferir a fatura')}
+function conferirFatura(cid, m, msg, banco) {
+  const S = st(); const k = S.cartoes.find((x) => x.id === cid) || null; banco = banco || k?.banco || k?.nome || '';
+  const kc = k || S.cartoes.find((x) => ehCredito(x) && (x.banco || x.nome) === banco);
+  const mAtual = kc ? mesDaCompra(kc, new Date().toISOString().slice(0, 10)) : null; const f = kc ? C.fatura(S, kc.id, mAtual) : null;
+  abrirModal(`<form data-form="conferir-fatura" data-id="${kc?.id || ''}" data-m="${mAtual || ''}" data-banco="${esc(banco)}">${topoModal('Conferir com o banco')}
     <p style="margin:0 0 6px"><b>${esc(msg)}</b></p>
-    <p class="mini" style="margin:0 0 12px">Abra o app do ${esc(k?.banco || 'banco')} e veja quanto está a <b>fatura atual</b> (a que vence em ${C.dataVencimento(k, m)?.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }) || '—'}). O Flui calculou:</p>
-    <div class="campo"><label>Quanto falta pagar dessa fatura</label><input class="inp valor-grande num" name="falta" inputmode="decimal" value="${valorInput(Math.max(0, f.aberto))}" autocomplete="off"></div>
-    <p class="mini" style="margin:0 0 12px">Total de compras: ${brl(f.total)}. Se o app do banco mostrar outro valor, corrija aqui.</p>
-    ${C.fatura(st(), cid, C.addMes(m, -1)).total > 0 ? '' : `<p class="mini imp-dica" style="margin:0 0 12px">Dica: importe também a <b>fatura anterior</b>${C.dataVencimento(k, C.addMes(m, -1)) ? ` (a que venceu em ${C.dataVencimento(k, C.addMes(m, -1)).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })})` : ''}. Com ela, o Flui calcula sozinho quanto falta.</p>`}
-    <div class="acoes"><button type="button" class="btn branco" data-a="conferir-depois" data-v="${esc(k?.banco || '')}">Depois</button><button class="btn verde">Confirmar</button></div></form>`);
+    <p class="mini" style="margin:0 0 12px">Abra o app do ${esc(banco || 'banco')} e confira. Se algum valor estiver diferente, corrija aqui. O Flui ajusta o resto.</p>
+    <div class="campo"><label>Quanto tem na conta agora</label><input class="inp valor-grande num" name="saldo" inputmode="decimal" value="${valorInput(C.saldoConta(S))}" autocomplete="off"></div>
+    ${kc ? `<div class="campo"><label>Quanto falta pagar da fatura atual${C.dataVencimento(kc, mAtual) ? ` (vence ${C.dataVencimento(kc, mAtual).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })})` : ''}</label><input class="inp valor-grande num" name="falta" inputmode="decimal" value="${valorInput(Math.max(0, f.aberto))}" autocomplete="off"></div>` : ''}
+    <div class="acoes"><button type="button" class="btn branco" data-a="conferir-depois" data-v="${esc(banco)}">Depois</button><button class="btn verde">Confirmar</button></div></form>`);
 }
 // assinaturas que apareceram na fatura: pergunta se vira gasto fixo no cartão (e até quando)
 const NOMES_ASSIN = [[/UBER\W*ONE/i, 'Uber One'], [/NETFLIX/i, 'Netflix'], [/SPOTIFY/i, 'Spotify'], [/HBO/i, 'HBO Max'], [/LIVECAREER/i, 'LiveCareer'], [/DISNEY/i, 'Disney+'],
@@ -957,7 +958,7 @@ document.addEventListener('click', async (e) => {
       delete ds[k]; await store.salvarSettings({ ...patch, faturaDecisoes: ds }); toast('Escolha desfeita.'); render(); break; }
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'importar-extrato': ui.impDestino = ''; modalImportar(); break;
-    case 'conferir-depois': fecharModal(); if (!perguntarAssinaturas(el.dataset.v)) avisoCompleto(el.dataset.v, 'fatura', 'Fatura importada!'); break;
+    case 'conferir-depois': fecharModal(); if (!perguntarAssinaturas(el.dataset.v)) avisoCompleto(el.dataset.v, ui.ultimoTipo || 'fatura', 'Importado!'); break;
     case 'assin-pular': ui.assinaturas = []; fecharModal(); avisoCompleto(el.dataset.v, 'fatura', 'Fatura importada!'); break;
     case 'imp-de-novo': ui.impDestino = el.dataset.v; modalImportar(); break;
     case 'imp-dest': ui.impDestino = el.dataset.v; modalImportar(); break;
@@ -1194,9 +1195,12 @@ document.addEventListener('submit', async (e) => {
     ui.assinaturas = []; fecharModal(); avisoCompleto(f.dataset.banco, 'fatura', n ? `${n} assinatura${n > 1 ? 's' : ''} agora ${n > 1 ? 'são fixas' : 'é fixa'} no cartão.` : 'Fatura importada!'); return;
   }
   if (tipoF === 'conferir-fatura') {
-    const falta = parseValor(v('falta')); if (isNaN(falta)) return; const cid = f.dataset.id; const m = f.dataset.m; const k = `${cid}|${m}`; const tot = C.fatura(S, cid, m).total;
-    await store.salvarSettings({ pagamentosFatura: { ...(S.settings.pagamentosFatura || {}), [k]: Math.max(0, Math.round((tot - falta) * 100) / 100) }, pagManual: { ...(S.settings.pagManual || {}), [k]: true } });
-    const kk = S.cartoes.find((x) => x.id === cid); fecharModal(); if (!perguntarAssinaturas(kk?.banco || kk?.nome || '')) avisoCompleto(kk?.banco || kk?.nome || '', 'fatura', 'Fatura conferida!'); return;
+    const cid = f.dataset.id; const m = f.dataset.m; const saldo = parseValor(v('saldo'));
+    if (cid && f.elements.falta) { const falta = parseValor(v('falta')); const k = `${cid}|${m}`; const fat = C.fatura(st(), cid, m);
+      if (!isNaN(falta) && Math.abs(falta - Math.max(0, fat.aberto)) > 0.005) await store.salvarSettings({ pagamentosFatura: { ...(st().settings.pagamentosFatura || {}), [k]: Math.max(0, Math.round((fat.total - falta) * 100) / 100) }, pagManual: { ...(st().settings.pagManual || {}), [k]: true } }); }
+    // o saldo por último (o valor pago da fatura muda a conta)
+    if (!isNaN(saldo) && Math.abs(saldo - C.saldoConta(st())) > 0.005) await store.salvarSettings({ saldoBase: { valor: saldo, ref: C.realizadoConta(st()), em: new Date().toISOString() } });
+    const bb = f.dataset.banco; fecharModal(); if (!perguntarAssinaturas(bb)) avisoCompleto(bb, ui.ultimoTipo || 'fatura', 'Tudo conferido!'); return;
   }
   if (tipoF === 'saldo-conta') {
     const valor = parseValor(v('valor')); if (isNaN(valor)) return;
@@ -1264,7 +1268,7 @@ document.addEventListener('submit', async (e) => {
       const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
       await store.salvarSettings({ regrasImport: regras }); await realocarPagamentos(); const kk = S.cartoes.find((x) => x.id === ccId); const bk = kk?.banco || kk?.nome || ''; const catAss = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa');
       ui.assinaturas = catAss ? compras.filter((l) => l.catId === catAss.id).map((l) => ({ nome: nomeAssin(l.texto || l.descricao), parc: (l.texto || '').match(/Parcela (\d+)\/(\d+)/i), texto: l.texto, valor: l.valorAbs, mes: mesDaCompra(kSel, l.data), cartaoId: ccId, catId: catAss.id })) : [];
-      await registrar(compras.length, 'cartão', bk, 'fatura', mesFat); ui.importacao = null; fecharModal(); conferirFatura(ccId, mesFat, `${compras.length} compras lançadas no cartão!`); return;
+      await registrar(compras.length, 'cartão', bk, 'fatura', mesFat); ui.importacao = null; fecharModal(); ui.ultimoTipo = 'fatura'; conferirFatura(ccId, mesFat, `${compras.length} compras lançadas no cartão!`); return;
     }
     im.banco = bancoConta;
     { const k = S.cartoes.find((x) => (x.banco || x.nome) === bancoConta && x.tipo === 'credito'); if (k && sel.some((l) => /D[ée]bito|Pix/i.test(l.forma || '') || /pix|d[ée]bito/i.test(l.descricao || ''))) await store.salvar('cartoes', { ...k, tipo: 'ambos' }); }
@@ -1278,7 +1282,7 @@ document.addEventListener('submit', async (e) => {
     for (const l of sel.filter((x) => x.marcado)) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
     const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
     const bancos = S.settings.bancos || []; await store.salvarSettings({ regrasImport: regras, ...(im.banco && !bancos.includes(im.banco) ? { bancos: [...bancos, im.banco] } : {}) });
-    await registrar(sel.length, 'conta ' + (bancoConta || ''), bancoConta, 'conta', mesDe(sel)); ui.importacao = null; fecharModal(); avisoCompleto(bancoConta, 'conta', `${sel.filter((x) => x.marcado).length} lançamentos importados!${nPag ? ` ${nPag} pagamento(s) de fatura foram para o cartão.` : ''}`); return;
+    await registrar(sel.length, 'conta ' + (bancoConta || ''), bancoConta, 'conta', mesDe(sel)); ui.importacao = null; fecharModal(); ui.ultimoTipo = 'conta'; ui.assinaturas = []; conferirFatura('', '', `${sel.filter((x) => x.marcado).length} lançamentos importados!`, bancoConta); return;
   }
   if (tipoF === 'decisao') {
     const cid = id; const m = f.dataset.m; const k = `${cid || 'sem'}|${m}`; const ab = +f.dataset.aberto; const acao = v('acao'); const prox = C.addMes(m, 1);
@@ -1325,10 +1329,10 @@ async function garantirMetas() {
 }
 async function migrar() {
   // importações: compras no mês da fatura certa (pelo fechamento) e pagamentos na fatura certa
-  if (st().settings.importRegra !== 4) { const S = st();
+  if (st().settings.importRegra !== 5) { const S = st();
     for (const c of S.compras.filter((x) => x.importId && x.data && x.cartaoId)) { const k = S.cartoes.find((x) => x.id === c.cartaoId); const m = k ? mesDaCompra(k, c.data) : c.mesPrimeira; if (m !== c.mesPrimeira) await store.salvar('compras', { ...c, mesPrimeira: m }); }
     if ((S.settings.pagImportadosLista || []).length) await realocarPagamentos();
-    await store.salvarSettings({ importRegra: 4 }); }
+    await store.salvarSettings({ importRegra: 5 }); }
   await garantirMetas();
   // Pix vira Débito em todo lugar (mesmo dinheiro da conta)
   for (const col of ['lancamentos', 'recorrencias']) for (const x of st()[col].filter((i) => i.forma === 'Pix')) await store.salvar(col, { ...x, forma: 'Débito' });
@@ -1385,7 +1389,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=122" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=124" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
