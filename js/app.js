@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=158';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=158';
-import { VAPID_KEY } from './config.js?v=158';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=158';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=158';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=158';
+import * as C from './calc.js?v=159';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=159';
+import { VAPID_KEY } from './config.js?v=159';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=159';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=159';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=159';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -46,9 +46,9 @@ function render() {
 }
 function renderAgora() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=159" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=159" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -67,7 +67,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=158" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=159" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -76,7 +76,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.png?v=159" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -389,14 +389,15 @@ function telaRelatorios() {
   if (!(r.entradas > 0 || r.despesas > 0)) return `<h1>Análise</h1>${filtroPeriodo()}${vazio('📊', 'Lance algumas coisas para ver sua análise aqui.')}`;
   // 1. destaque principal
   const sobra = r.entradas - r.despesas - r.guardado;
-  const noAtual = ms.length === 1 && ult === cur;
+  const noAtual = ms.length === 1 && ult === cur; const futuro = ms.every((m) => C.difMeses(cur, m) > 0);
   const livre = noAtual ? C.saldoConta(S) + C.saldoCarteira(S) - r.pendente : sobra;
   const gP = r.entradas > 0 && r.guardado > 0 ? ` · guardou ${P(r.guardado / r.entradas)} do que entrou` : '';
   const [big, frase, tom] = noAtual
     ? (livre < 0 ? [`−${brl(-livre)}`, `vai faltar para pagar o que falta este mês${gP}`, 'vermelho'] : [brl(livre), `livres depois de pagar tudo deste mês${gP}`, 'verde'])
+    : futuro ? (sobra < 0 ? [`−${brl(-sobra)}`, 'previsto: vai gastar mais do que entra (fixos, parcelas e cartão já contados)', 'vermelho'] : [brl(sobra), 'previsto para sobrar, já contando fixos, parcelas e cartão', 'verde'])
     : (sobra < 0 ? [`−${brl(-sobra)}`, `gastou mais do que entrou${gP}`, 'vermelho'] : [brl(sobra), `sobrou do que entrou${gP}`, 'verde']);
   const heroi = `<div class="an-heroi ${tom}"><div class="an-big num">${big}</div><div class="an-frase">${frase}</div>
-    <div class="an-trio">${[['Entrou', r.entradas, 'entrada'], ['Gastou', r.despesas, 'despesa'], ['Guardou', r.guardado, 'metas']].map(([n, v, ir]) => `<button data-a="kpi-ir" data-v="${ir}" class="${ir === 'despesa' && (livre < 0 || r.despesas + r.guardado > r.entradas) ? 'gasto-alto' : ''}"><span>${n}</span><b class="num">${brl(v)}</b></button>`).join('')}</div></div>`;
+    <div class="an-trio">${(futuro ? [['Vai entrar', r.entradas, 'entrada'], ['Vai gastar', r.despesas, 'despesa'], ['Vai guardar', r.guardado, 'metas']] : [['Entrou', r.entradas, 'entrada'], ['Gastou', r.despesas, 'despesa'], ['Guardou', r.guardado, 'metas']]).map(([n, v, ir]) => `<button data-a="kpi-ir" data-v="${ir}" class="${ir === 'despesa' && (livre < 0 || r.despesas + r.guardado > r.entradas) ? 'gasto-alto' : ''}"><span>${n}</span><b class="num">${brl(v)}</b></button>`).join('')}</div></div>`;
   // 2. para onde foi (top 3)
   const desp = C.porCategoria(S, ms).filter((x) => x.cat.tipo === 'despesa' && x.real > 0).sort((a, b) => b.real - a.real);
   const totD = C.sum(desp, (x) => x.real) || 1;
@@ -1419,12 +1420,12 @@ document.addEventListener('submit', async (e) => {
       const catAssP = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa'); const kP = S.cartoes.find((x) => x.id === ccId);
       for (const l of im.linhas.filter((x) => x.jaParc && x.parc)) { const c0 = S.compras.find((c) => c.id === l.jaParc); if (c0 && (parseInt(c0.parcelaDe, 10) || 1) > l.parc.k) await store.salvar('compras', { ...c0, parcelaDe: l.parc.k }); } // fatura mais antiga importada depois
       for (const l of compras) {
-        if (l.parc && (!catAssP || l.catId !== catAssP.id)) { const mP = C.addMes(mesDaCompra(kP, l.data), -(l.parc.k - 1));
-          await store.salvar('compras', { total: Math.round(l.valorAbs * l.parc.n * 100) / 100, parcelas: l.parc.n, parcelaDe: l.parc.k, cartaoId: ccId, descricao: nomeParc(l.descricao || l.parc.base), categoriaId: l.catId, mesPrimeira: mP, data: l.data, importId: l.id || '', lote, parcKey: l.parcKey }); continue; }
+        if (l.parc) { const mP = C.addMes(mesDaCompra(kP, l.data), -(l.parc.k - 1));
+          await store.salvar('compras', { total: Math.round(l.valorAbs * l.parc.n * 100) / 100, parcelas: l.parc.n, parcelaDe: l.parc.k, cartaoId: ccId, descricao: catAssP && l.catId === catAssP.id ? nomeAssin(l.texto || l.descricao) : nomeParc(l.descricao || l.parc.base), categoriaId: l.catId, mesPrimeira: mP, data: l.data, importId: l.id || '', lote, parcKey: l.parcKey }); continue; }
         await store.salvar('compras', { total: l.valorAbs, parcelas: 1, cartaoId: ccId, descricao: l.descricao, categoriaId: l.catId, mesPrimeira: mesDaCompra(S.cartoes.find((x) => x.id === ccId), l.data), data: l.data, importId: l.id || '', lote }); }
       const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
       await store.salvarSettings({ regrasImport: regras }); await realocarPagamentos(); const kk = S.cartoes.find((x) => x.id === ccId); const bk = kk?.banco || kk?.nome || ''; const catAss = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa');
-      ui.assinaturas = catAss ? compras.filter((l) => l.catId === catAss.id).map((l) => ({ nome: nomeAssin(l.texto || l.descricao), parc: (l.texto || '').match(/Parcela (\d+)\/(\d+)/i), lote, texto: l.texto, valor: l.valorAbs, mes: mesDaCompra(kSel, l.data), cartaoId: ccId, catId: catAss.id })) : [];
+      ui.assinaturas = catAss ? compras.filter((l) => l.catId === catAss.id && !l.parc).map((l) => ({ nome: nomeAssin(l.texto || l.descricao), parc: (l.texto || '').match(/Parcela (\d+)\/(\d+)/i), lote, texto: l.texto, valor: l.valorAbs, mes: mesDaCompra(kSel, l.data), cartaoId: ccId, catId: catAss.id })) : [];
       await registrar(compras.length, 'cartão', bk, 'fatura', mesFat); ui.importacao = null; fecharModal(); ui.ultimoTipo = 'fatura'; conferirFatura(ccId, mesFat, `${compras.length} compras lançadas no cartão!`); return;
     }
     im.banco = bancoConta;
@@ -1500,6 +1501,14 @@ async function migrar() {
       for (const x of g.slice(1)) await store.remover('compras', x.c.id); }
     await store.salvarSettings({ parcRegra: 1 }); }
   // assinaturas criadas duas vezes (mesmo nome, valor, cartão e início): fica uma só
+  if (!st().settings.parcRegra2) { const S = st(); const catAss = S.categorias.find((c) => c.nome === 'Assinaturas' && c.tipo === 'despesa'); const grupos = {};
+    const temFixo = (t) => S.recorrencias.some((r) => r.forma === 'Crédito' && r.obsImport && chaveRegra(r.obsImport) === chaveRegra(t));
+    for (const c of S.compras.filter((x) => catAss && x.categoriaId === catAss.id && x.importId && x.cartaoId && (parseInt(x.parcelas, 10) || 1) === 1)) { const pi = infoParcela(c.descricao); if (!pi || temFixo(c.descricao)) continue;
+      const k = S.cartoes.find((x) => x.id === c.cartaoId); const mP = C.addMes(c.data && k ? mesDaCompra(k, c.data) : c.mesPrimeira, -(pi.k - 1)); const ch = chaveParc(pi.base, pi.n, Number(c.total)) + '|' + c.cartaoId + '|' + mP; (grupos[ch] = grupos[ch] || []).push({ c, pi, mP }); }
+    for (const g of Object.values(grupos)) { g.sort((a, b) => a.pi.k - b.pi.k); const { c, pi, mP } = g[0];
+      await store.salvar('compras', { ...c, descricao: nomeAssin(c.descricao), total: Math.round(Number(c.total) * pi.n * 100) / 100, parcelas: pi.n, parcelaDe: pi.k, mesPrimeira: mP, parcKey: chaveParc(pi.base, pi.n, Number(c.total)) });
+      for (const x of g.slice(1)) await store.remover('compras', x.c.id); }
+    await store.salvarSettings({ parcRegra2: 1 }); }
   { const vistos = new Set(); for (const r of [...st().recorrencias]) { if (!r.obsImport) continue; const k = [(r.nome || '').toLowerCase(), r.valor, r.cartaoId].join('|'); if (vistos.has(k)) await store.remover('recorrencias', r.id); else vistos.add(k); } }
   // importações: compras no mês da fatura certa (pelo fechamento) e pagamentos na fatura certa
   if (st().settings.importRegra !== 5) { const S = st();
@@ -1584,7 +1593,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=159" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
