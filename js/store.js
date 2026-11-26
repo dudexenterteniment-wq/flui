@@ -1,5 +1,5 @@
 // Flui — dados: modelo inicial, salvar/carregar (Firebase ou local), backup
-import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=152';
+import { FIREBASE_CONFIG, FIREBASE_SDK } from './config.js?v=154';
 
 export const COLECOES = ['categorias', 'lancamentos', 'cartoes', 'compras', 'recorrencias', 'metas'];
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -93,6 +93,8 @@ class FirebaseBackend {
   async put(st, col, item) { await this.F.setDoc(this._doc(col, item.id), clean(item)); }
   async del(st, col, id) { await this.F.deleteDoc(this._doc(col, id)); }
   async putSettings(st) { await this.F.setDoc(this._doc('meta', 'settings'), clean(st.settings)); }
+  // grava só os campos que mudaram: outro aparelho aberto com dados antigos não apaga o que foi salvo aqui
+  async patchSettings(st, patch) { try { await this.F.updateDoc(this._doc('meta', 'settings'), clean(patch)); } catch (e) { if (e?.code === 'not-found') await this.putSettings(st); else throw e; } }
   async replaceAll(st) {
     const { writeBatch, getDocs } = this.F;
     const ops = [];
@@ -128,6 +130,8 @@ export class Store {
     st.settings = { ...modeloInicial().settings, ...st.settings };
     this.st = st; this.emit(); return st;
   }
+  // busca de novo o que está salvo (ex.: mudou em outro aparelho); nunca recria do zero
+  async atualizarDaNuvem() { const st = await this.backend.loadAll(); if (!st) return false; for (const c of COLECOES) st[c] = st[c] || []; st.settings = { ...modeloInicial().settings, ...st.settings }; this.st = st; this.emit(); return true; }
   async salvar(col, item) {
     const arr = this.st[col]; const i = arr.findIndex((x) => x.id === item.id);
     if (!item.id) item.id = uid();
@@ -144,7 +148,7 @@ export class Store {
   }
   async salvarSettings(patch) {
     this.st.settings = { ...this.st.settings, ...patch }; this.emit();
-    await this._try(() => this.backend.putSettings(this.st));
+    await this._try(() => (this.backend.patchSettings ? this.backend.patchSettings(this.st, patch) : this.backend.putSettings(this.st)));
   }
   async substituirTudo(st) {
     for (const c of COLECOES) st[c] = st[c] || [];

@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=152';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=152';
-import { VAPID_KEY } from './config.js?v=152';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=152';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=152';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=152';
+import * as C from './calc.js?v=154';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=154';
+import { VAPID_KEY } from './config.js?v=154';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=154';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=154';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=154';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -37,11 +37,18 @@ const NAV = [
   ['categorias', 'Categorias e bancos', ICON.cats], ['config', 'Configurações', ICON.config]];
 const NAV_MOVEL = [['inicio', 'Início', ICON.inicio], ['lancamentos', 'Lançar', ICON.lanc], ['relatorios', 'Análise', ICON.relat], ['cartoes', 'Cartões', ICON.cartao], ['plano', 'Plano', ICON.plano]];
 
+// desenha a tela; se pedirem de novo no meio (ex.: um campo perde o foco enquanto troca a tela), desenha depois
+let desenhando = false, redesenhar = false;
 function render() {
+  if (desenhando) { redesenhar = true; return; }
+  desenhando = true; try { renderAgora(); } finally { desenhando = false; }
+  if (redesenhar) { redesenhar = false; queueMicrotask(render); }
+}
+function renderAgora() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=154" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=154" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -60,7 +67,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=152" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/icon.svg?v=154" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -69,7 +76,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.svg?v=154" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -330,7 +337,7 @@ function telaPlano() {
   if (aba === 'fixos') { const S0 = st();
     const linhaFixo = (r, entrada) => `<div class="item" data-a="editar-fixo" data-id="${r.id}">${bolaCat(cat(r.categoriaId) || { nome: r.nome, cor: entrada ? '#77C800' : '#AFB8C4' }, 'width:34px;height:34px;border-radius:10px')}
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
-        <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}` : r.fim ? `por ${C.difMeses(r.inicio, r.fim) + 1} ${C.difMeses(r.inicio, r.fim) ? 'meses' : 'mês'} · ${C.nomeMes(r.inicio)} a ${C.nomeMes(r.fim)}` : C.difMeses(m, r.inicio) > 0 ? 'a partir de ' + C.nomeMes(r.inicio) : 'todo mês'}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}</div></div>
+        <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}` : r.fim ? `por ${C.difMeses(r.inicio, r.fim) + 1} ${C.difMeses(r.inicio, r.fim) ? 'meses' : 'mês'} · ${C.nomeMes(r.inicio)} a ${C.nomeMes(r.fim)}` : C.difMeses(m, r.inicio) > 0 ? 'a partir de ' + C.nomeMes(r.inicio) : 'todo mês'}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}${entrada && !r.banco && st().settings.bancos?.length ? ' · <b class="neg">toque e escolha onde cai</b>' : ''}</div></div>
       <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && r.forma !== 'Crédito' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
     return `<h1>Planejamento</h1>${abas}
     <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
@@ -352,7 +359,17 @@ function telaPlano() {
   const totOrc = C.sum(comLim, (x) => x.orcado); const totReal = C.sum(comLim, (x) => x.real);
   const linhaLim = (x) => `<div class="lim-linha">${bolaCat(x.cat)}<div class="meio"><div class="titulo" style="margin:0">${esc(x.cat.nome)}</div></div>
       <label class="lim-campo"><input class="inp num lim-inp" inputmode="decimal" placeholder="—" value="${x.cat.orcamento ? valorInput(x.cat.orcamento) : ''}" data-a="orc" data-id="${x.cat.id}" aria-label="Limite de ${esc(x.cat.nome)}"></label></div>`;
-  return `<h1>Planejamento</h1>${abas}
+  // base: o valor em que os limites se apoiam (a renda ou um valor escolhido)
+  const rendaMes = C.sum(rendas.filter((r) => r.ativa !== false && r.frequencia !== 'anual'), (r) => r.valor);
+  const lb = st().settings.limiteBase || {}; const usaRenda = lb.tipo ? lb.tipo === 'renda' : rendaMes > 0;
+  const base = usaRenda ? rendaMes : Number(lb.valor) || 0;
+  const somaLim = C.sum([...desp, ...gua], (x) => Number(x.cat.orcamento) || 0); const dif = Math.round((base - somaLim) * 100) / 100;
+  const pctB = base > 0 ? Math.min(100, Math.round((somaLim / base) * 100)) : 0;
+  const estado = !(base > 0) ? '' : dif < -0.005 ? `<b class="neg">Passou ${brl(-dif)} de ${brl(base)}</b>` : dif <= 0.005 ? '<b style="color:#E59600">No limite: usou tudo</b>' : `<b class="pos">Ainda dá para distribuir ${brl(dif)}</b>`;
+  const caixaBase = `<div class="card lim-base"><div class="lb-linha"><label>Com base em</label><select class="inp" data-a="lim-base-tipo"><option value="renda" ${usaRenda ? 'selected' : ''}>Minha renda${rendaMes > 0 ? ` (${brl(rendaMes)})` : ''}</option><option value="valor" ${usaRenda ? '' : 'selected'}>Outro valor</option></select>
+      ${usaRenda ? '' : `<input class="inp num" inputmode="decimal" placeholder="R$ 0,00" data-a="lim-base-valor" value="${lb.valor ? valorInput(lb.valor) : ''}">`}</div>
+    ${base > 0 ? `<div class="lb-soma"><span>Limites somados</span><b class="num">${brl(somaLim)} <span class="mini">de ${brl(base)}</span></b></div><div class="prog ${dif < -0.005 ? 'estourou' : dif <= 0.005 ? 'amarelo' : ''}"><i style="width:${pctB}%"></i></div><div class="lb-estado">${estado}</div>` : `<p class="mini" style="margin:8px 0 0">${usaRenda ? 'Cadastre sua renda em Renda e fixos ou escolha "Outro valor".' : 'Digite o valor que você quer usar como base.'}</p>`}</div>`;
+  return `<h1>Planejamento</h1>${abas}${caixaBase}
   <div class="lim-titulo"><h3>Quanto quero gastar</h3>${passou ? `<a class="tag-neg" href="#relatorios" data-a="ver-passou">${passou} ${passou > 1 ? 'passaram' : 'passou'} do limite ›</a>` : comLim.length ? '<span class="tag-pos">tudo dentro</span>' : ''}</div>
   <button class="btn branco pequeno ver-gastos" data-a="ver-passou">Ver quanto gastei ›</button>
   <div class="grupo-mes lim-cab"><span>Gastos</span><span>Limite por mês</span></div>
@@ -582,12 +599,13 @@ function modalFixo(r = {}, salario = false) {
     ${r.id ? `<div data-desde class="oculto repete-box"><div class="campo" style="margin:0"><label>Novo valor vale a partir de</label>${mesSelect('f-desde', C.difMeses(r.inicio || C.mesAtual(), C.mesAtual()) > 0 ? C.mesAtual() : (r.inicio || C.mesAtual()))}<p class="mini" style="margin:6px 0 0">Os meses antes continuam com ${brl(r.valor)}.</p></div></div>` : ''}
     <div class="campo"><label>Nome</label><input autocapitalize="sentences" class="inp" name="nome" value="${esc(r.nome || (salario ? 'Salário' : ''))}" placeholder="Ex.: Academia"></div>
     <div class="campo"><label>Categoria</label><div data-cats-wrap>${chipsCat(tipo, r.categoriaId || (salario ? catSal?.id : ''))}</div></div>
-    <div class="duas"><div class="campo"><label>Começa em</label>${mesSelect('f-ini', r.inicio || C.mesAtual())}</div>
-      <div class="campo"><label>Termina em <span class="opc">opcional</span></label><label class="chave mini" style="margin-bottom:6px"><input type="checkbox" name="semFim" ${r.id && !r.fim ? 'checked' : !r.id ? 'checked' : ''}> sem data para acabar</label>${mesSelect('f-fim', r.fim || C.addMes(C.mesAtual(), 11))}</div></div>
+    <div class="duas"><div class="campo"><label data-ini-label>${r.forma === 'Crédito' && tipo !== 'entrada' ? '1ª parcela em' : 'Começa em'}</label>${mesSelect('f-ini', r.inicio || C.mesAtual())}</div>
+      <div class="campo ${r.forma === 'Crédito' && tipo !== 'entrada' ? '' : 'oculto'}" data-parc-campo><label>Parcelas</label><input class="inp" type="number" min="1" max="120" inputmode="numeric" name="parcFixo" placeholder="Todo mês" value="${r.forma === 'Crédito' && tipo !== 'entrada' && r.fim ? C.difMeses(r.inicio, r.fim) + 1 : ''}"><p class="mini" style="margin:6px 0 0">Vazio = todo mês, sem fim.</p></div>
+      <div class="campo ${r.forma === 'Crédito' && tipo !== 'entrada' ? 'oculto' : ''}" data-fim-campo><label>Termina em <span class="opc">opcional</span></label><label class="chave mini" style="margin-bottom:6px"><input type="checkbox" name="semFim" ${r.id && !r.fim ? 'checked' : !r.id ? 'checked' : ''}> sem data para acabar</label>${mesSelect('f-fim', r.fim || C.addMes(C.mesAtual(), 11))}</div></div>
     <div class="duas"><div class="campo ${tipo === 'entrada' ? '' : 'oculto'}" data-dia-renda><label>Dia que recebe <span class="opc">opcional</span></label><input class="inp" type="number" min="1" max="31" inputmode="numeric" name="diaVenc" placeholder="Ex.: 5" value="${tipo === 'entrada' ? (r.diaVenc || '') : ''}"></div>
       <div class="campo"><label>Frequência</label><select class="inp" name="frequencia"><option value="mensal">Mensal</option><option value="anual" ${r.frequencia === 'anual' ? 'selected' : ''}>Anual</option></select></div></div>
     <div class="duas"><div class="campo"><label>Forma <span class="opc">opcional</span></label><select class="inp" name="forma" data-a="forma-fixo"><option value="">—</option>${['Débito', 'Crédito', 'Dinheiro', 'Boleto', 'Outro'].map((f) => `<option ${f === (r.forma === 'Pix' ? 'Débito' : r.forma) ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
-      <div class="campo">${tipo === 'entrada' ? `<label>Onde cai</label><select class="inp" name="banco" required><option value="">Escolha...</option>${[...(st().settings.bancos || []), ...(r.banco && !(st().settings.bancos || []).includes(r.banco) ? [r.banco] : [])].map((b) => `<option ${b === r.banco || (!r.banco && (st().settings.bancos || []).length === 1) ? 'selected' : ''}>${esc(b)}</option>`).join('')}<option value="Dinheiro" ${r.banco === 'Dinheiro' ? 'selected' : ''}>Dinheiro (em espécie)</option></select>` : `<label>Banco <span class="opc">opcional</span></label>${selBanco('banco', r.banco)}`}</div></div>
+      <div class="campo ${r.forma === 'Crédito' && tipo !== 'entrada' ? 'oculto' : ''}" data-banco-fixo>${tipo === 'entrada' ? `<label>Onde cai</label><select class="inp" name="banco" required><option value="">Escolha...</option>${[...(st().settings.bancos || []), ...(r.banco && !(st().settings.bancos || []).includes(r.banco) ? [r.banco] : [])].map((b) => `<option ${b === r.banco || (!r.banco && (st().settings.bancos || []).length === 1) ? 'selected' : ''}>${esc(b)}</option>`).join('')}<option value="Dinheiro" ${r.banco === 'Dinheiro' ? 'selected' : ''}>Dinheiro (em espécie)</option></select>` : `<label>Banco <span class="opc">opcional</span></label>${selBanco('banco', r.banco)}`}</div></div>
     <div class="campo ${r.forma === 'Crédito' ? '' : 'oculto'}" data-fixo-cartao><label>Cartão</label>${selCartao(r.cartaoId || '', !r.id)}<p class="mini" style="margin:6px 0 0">Entra todo mês na fatura deste cartão.</p></div>
     ${r.id ? `<label class="chave" style="margin-bottom:12px"><input type="checkbox" name="pausado" ${r.ativa === false ? 'checked' : ''}> Pausar este fixo</label>` : ''}
     <div class="campo"><label>Observação <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="obs" value="${esc(r.obs || '')}"></div>
@@ -712,10 +730,24 @@ async function definirSaldo(banco, valor) {
 }
 const OLHO = (aberto) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${aberto ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'}</svg>`;
 function avisoCompleto(b, feito, msg) {
+  if (ui.guardarImport?.length) { ui.guardarDepois = [b, feito, msg]; return modalGuardarImp(); } // primeiro: escolher o objetivo do que foi guardado
   const st2 = statusImport(b); const falta = feito === 'conta' ? (st2.temCred && st2.fatura < st2.conta ? 'fatura' : '') : (st2.conta < st2.fatura ? 'conta' : '');
   if (!falta) { toast(msg, true); return; }
   abrirModal(`<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao"><b>${esc(msg)}</b><br>Para o ${esc(b)} ficar completo, importe também ${falta === 'fatura' ? 'a <b>fatura do cartão</b>: as compras no crédito não vêm no extrato da conta.' : 'o <b>extrato da conta</b>: débito, Pix e transferências não vêm na fatura.'}</div></div>
     <div class="acoes"><button class="btn branco" data-a="fechar">Depois</button><button class="btn verde" data-a="imp-de-novo" data-v="${esc(b)}">Importar agora</button></div>`);
+}
+// depois de importar: cada "guardou" escolhe o objetivo (meta)
+function modalGuardarImp() {
+  const S = st(); const id = ui.guardarImport[0]; const l = S.lancamentos.find((x) => x.id === id); if (!l) { ui.guardarImport.shift(); return fimGuardarImp(); }
+  const n = ui.guardarImport.length;
+  abrirModal(`<form data-form="guardar-imp" data-id="${l.id}">${topoModal('Para qual objetivo?')}
+    <p style="margin:0 0 12px">Você guardou <b>${brl(l.valor)}</b>${l.data ? ` em ${l.data.split('-').reverse().slice(0, 2).join('/')}` : ''}${l.descricao ? ` · ${esc(l.descricao)}` : ''}.${n > 1 ? ` <span class="mini">(mais ${n - 1} depois)</span>` : ''}</p>
+    <div data-cats-wrap>${metasEscolha(l.categoriaId)}</div>
+    <div class="acoes"><button type="button" class="btn branco" data-a="guardar-imp-pular">Pular</button><button class="btn verde">Salvar</button></div></form>`);
+}
+function fimGuardarImp() {
+  if (ui.guardarImport?.length) return modalGuardarImp();
+  fecharModal(); const d = ui.guardarDepois; ui.guardarDepois = null; location.hash = '#metas'; if (d) avisoCompleto(...d);
 }
 function modalImportar() {
   const S = st(); const d = ui.impDestino || '';
@@ -815,7 +847,7 @@ function modalRevisarImport() {
       <input type="checkbox" data-imp-ok="${i}" ${l.marcado ? 'checked' : ''} ${l.ja ? 'disabled' : ''} aria-label="Importar">
       <div class="imp-meio"><div class="imp-desc">${esc(l.descricao)}</div>
         <div class="mini">${l.data.split('-').reverse().join('/')} · ${esc(l.forma || '')}${l.aviso ? ` · <span class="imp-aviso">${esc(l.aviso)}</span>` : ''}</div>
-        ${l.ja ? '' : `${l.tipo === 'guardar' ? '<div class="imp-para">Para onde foi?</div>' : ''}<select class="inp imp-cat ${l.tipo === 'guardar' ? 'guardar' : ''}" data-imp-cat="${i}">${opts(l.tipo, l.catId)}</select>`}</div>
+        ${l.ja ? '' : l.tipo === 'guardar' ? '<div class="imp-para">Você escolhe o objetivo no final</div>' : `<select class="inp imp-cat" data-imp-cat="${i}">${opts(l.tipo, l.catId)}</select>`}</div>
       <div class="imp-valor num ${l.tipo === 'entrada' ? 'pos' : ''}">${l.tipo === 'entrada' ? '+' : '−'}${brl(l.valorAbs)}</div></div>`).join('')}</div>
     <div class="acoes"><button type="button" class="btn branco" data-a="fechar">Cancelar</button><button class="btn verde" type="submit" data-imp-btn>Importar ${n}</button></div></form>`);
 }
@@ -891,7 +923,7 @@ function modalBoasVindas() {
       <div class="campo"><div class="cats" data-ob-cats>${st().categorias.filter((c) => c.tipo === 'despesa' && !c.arquivada).sort(ordemCat).map((c) => `<button type="button" class="ativo" data-ob-cat="${c.id}">${catIcone(c, 16)} ${esc(c.nome)}</button>`).join('')}</div></div>
       <div style="display:flex;gap:8px"><input autocapitalize="sentences" class="inp" data-ob-cat-nova placeholder="Falta alguma? Digite o nome"><button type="button" class="btn pequeno" data-a="ob-cat-add">Adicionar</button></div></section>
     <section data-ob="5" class="oculto">${fala('Quais desses têm cartão? Escolha se é crédito, débito ou os dois. Me conta o dia que a fatura vence que eu te aviso antes.')}
-      <div data-ob-cartoes></div></section>
+      <div data-ob-sal-banco></div><div data-ob-cartoes></div></section>
     <div class="acoes"><button type="button" class="btn branco" data-a="ob-pular">Pular</button><button type="button" class="btn verde" data-a="ob-prox">Continuar</button></div></form>`);
 }
 function obCartoes(f) {
@@ -903,7 +935,9 @@ function obCartoes(f) {
 }
 function obIr(f, n) {
   n = Math.max(1, Math.min(OB_PASSOS, n)); f.dataset.passo = n;
-  if (n === 5) obCartoes(f);
+  if (n === 5) { obCartoes(f); // salário: onde cai (se tiver mais de um banco)
+    const bs = [...f.querySelectorAll('[data-banco-tg].ativo')].map((b) => b.dataset.bancoTg); const box = f.querySelector('[data-ob-sal-banco]'); const atual = f.salBanco?.value || '';
+    box.innerHTML = parseValor(f.salario.value) > 0 && bs.length > 1 ? `<div class="campo"><label>Seu salário cai em qual banco?</label><select class="inp" name="salBanco"><option value="">Escolha...</option>${bs.map((b) => `<option ${b === atual ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>` : ''; }
   f.querySelectorAll('[data-ob]').forEach((s) => s.classList.toggle('oculto', +s.dataset.ob !== n));
   f.querySelector('.ob-barra span').style.width = `${(n / OB_PASSOS) * 100}%`;
   f.querySelector('.ob-voltar').classList.toggle('oculto', n === 1);
@@ -977,7 +1011,7 @@ document.addEventListener('click', async (e) => {
   if (e.target.closest('[data-stop]') && el.tagName !== 'INPUT') return;
   const a = el.dataset.a; const id = el.dataset.id;
   if (a === 'fechar-fundo' && (e.target !== el || el.querySelector('[data-form=boas-vindas]'))) return;
-  if (['fatura-tudo', 'item-pago', 'fixo-pago', 'importar', 'arquivo-extrato', 'busca', 'orc', 'nome', 'prev-parc'].includes(a)) return; // tratados em 'change'/'input'
+  if (['fatura-tudo', 'item-pago', 'fixo-pago', 'importar', 'arquivo-extrato', 'busca', 'orc', 'nome', 'prev-parc', 'lim-base-tipo', 'lim-base-valor'].includes(a)) return; // tratados em 'change'/'input'
   e.preventDefault();
   const S = st();
   switch (a) {
@@ -1023,6 +1057,7 @@ document.addEventListener('click', async (e) => {
     case 'fatura-toggle': { const sF = (ui.faturasAbertas ||= new Set()); if (sF.has(el.dataset.k)) sF.delete(el.dataset.k); else sF.add(el.dataset.k); render(); break; }
     case 'importar-extrato': ui.impDestino = ''; modalImportar(); break;
     case 'conferir-depois': fecharModal(); if (!perguntarAssinaturas(el.dataset.v)) avisoCompleto(el.dataset.v, ui.ultimoTipo || 'fatura', 'Importado!'); break;
+    case 'guardar-imp-pular': ui.guardarImport.shift(); fimGuardarImp(); break;
     case 'assin-pular': ui.assinaturas = []; fecharModal(); avisoCompleto(el.dataset.v, 'fatura', 'Fatura importada!'); break;
     case 'conta-cartao': { const S = st(); const k = S.cartoes.find((x) => x.id === el.dataset.id); if (!k) break; await store.salvar('cartoes', { ...k, tipo: 'ambos' });
       const banco = k.banco || k.nome; if (S.cartoes.filter((x) => (x.banco || x.nome) === banco).length > 1) { const l = S.lancamentos.find((x) => x.id === el.dataset.l); if (l) await store.salvar('lancamentos', { ...l, contaCartaoId: k.id }); }
@@ -1168,6 +1203,8 @@ document.addEventListener('change', async (e) => {
     await store.salvarSettings({ parcelasPagas: pp, faturasPagas: fp }); toast(el.checked ? 'Fatura inteira marcada como paga! 💚' : 'Fatura em aberto.', el.checked); render(); }
   if (a === 'fatura-paga') { const k = `${el.dataset.id || 'sem'}|${el.dataset.m}`; const fp = { ...(S.settings.faturasPagas || {}) }; if (el.checked) fp[k] = true; else delete fp[k]; await store.salvarSettings({ faturasPagas: fp }); toast(el.checked ? 'Fatura marcada como paga.' : 'Fatura em aberto.'); }
   if (a === 'fixo-pago') { const r = S.recorrencias.find((x) => x.id === el.dataset.id); const pagos = { ...(r.pagos || {}) }; if (el.checked) pagos[el.dataset.m] = true; else delete pagos[el.dataset.m]; await store.salvar('recorrencias', { ...r, pagos }); }
+  if (a === 'lim-base-tipo') { await store.salvarSettings({ limiteBase: { ...(S.settings.limiteBase || {}), tipo: el.value } }); render(); return; }
+  if (a === 'lim-base-valor') { await store.salvarSettings({ limiteBase: { ...(S.settings.limiteBase || {}), tipo: 'valor', valor: parseValor(el.value) || 0 } }); render(); return; }
   if (a === 'orc') { const c = S.categorias.find((x) => x.id === el.dataset.id); await store.salvar('categorias', { ...c, orcamento: parseValor(el.value) }); toast('Orçamento salvo.'); }
   if (a === 'nome') await store.salvarSettings({ nome: el.value.trim() });
   if (a === 'importar' && el.files[0]) {
@@ -1193,7 +1230,11 @@ function previaCartao(f) {
   const box = f.querySelector('[data-cores-cartao]');
   if (!box.dataset.manual && COR_BANCO[banco]) { const k = COR_BANCO[banco]; f.cor.value = k; pv.style.background = k; box.querySelectorAll('[data-cor]').forEach((b) => b.classList.toggle('ativo', b.dataset.cor === k)); }
 }
-document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); if (e.target.matches('[data-a=forma-fixo]')) e.target.closest('form').querySelector('[data-fixo-cartao]')?.classList.toggle('oculto', e.target.value !== 'Crédito'); });
+document.addEventListener('change', (e) => { const f = e.target.closest('form[data-form=cartao]'); if (f) previaCartao(f); if (e.target.matches('[data-a=forma-fixo]')) { const ff = e.target.closest('form'); const cr = e.target.value === 'Crédito' && ff.tipo.value !== 'entrada';
+    ff.querySelector('[data-fixo-cartao]')?.classList.toggle('oculto', !cr); ff.querySelector('[data-parc-campo]')?.classList.toggle('oculto', !cr); ff.querySelector('[data-fim-campo]')?.classList.toggle('oculto', cr); ff.querySelector('[data-banco-fixo]')?.classList.toggle('oculto', cr);
+    const il = ff.querySelector('[data-ini-label]'); if (il) il.textContent = cr ? '1ª parcela em' : 'Começa em'; }
+  // escolheu o mês final: desmarca "sem data para acabar"
+  if (e.target.matches('[data-mes-m="f-fim"], [data-mes-y="f-fim"]')) { const sf = e.target.closest('form')?.semFim; if (sf) sf.checked = false; } });
 document.addEventListener('change', async (e) => {
   const t = e.target;
   if (t.matches('[data-a=arquivo-extrato]') && t.files[0]) {
@@ -1276,6 +1317,10 @@ document.addEventListener('submit', async (e) => {
     await store.salvar('compras', { ...antigo, id, total, parcelas: Math.max(1, parseInt(v('parcelas'), 10) || 1), cartaoId: v('cartaoId'), descricao: v('descricao'), categoriaId: v('categoriaId'), mesPrimeira: lerMes('c-mes', f), data: v('data') });
     fecharModal(); toast('Compra salva!');
   }
+  if (tipoF === 'guardar-imp') {
+    const l = S.lancamentos.find((x) => x.id === id); if (l && v('categoriaId')) await store.salvar('lancamentos', { ...l, categoriaId: v('categoriaId') });
+    ui.guardarImport.shift(); fimGuardarImp(); return;
+  }
   if (tipoF === 'assinaturas') {
     const lista = ui.assinaturas || []; ui.assinaturas = []; if (!lista.length || f.dataset.enviado) return; f.dataset.enviado = '1';
     let n = 0; for (const [i, a] of lista.entries()) { if (!f.elements['a' + i]?.checked) continue;
@@ -1314,7 +1359,9 @@ document.addEventListener('submit', async (e) => {
     const valor = parseValor(v('valor')); if (!(valor > 0)) return alert('Digite o valor.');
     if (!v('categoriaId')) return alert('Escolha uma categoria.');
     if (f.querySelector('select[name=banco][required]') && !v('banco')) return alert('Escolha onde o dinheiro cai.');
-    const inicio = lerMes('f-ini', f); const fim = f.semFim.checked ? '' : lerMes('f-fim', f);
+    const credF = v('forma') === 'Crédito' && v('tipo') !== 'entrada'; const nParc = parseInt(f.parcFixo?.value, 10);
+    const inicio = lerMes('f-ini', f); const fim = credF ? (nParc > 0 ? C.addMes(inicio, nParc - 1) : '') : f.semFim.checked ? '' : lerMes('f-fim', f);
+    if (credF) { const kc = S.cartoes.find((x) => x.id === v('cartaoId')); if (kc && f.banco) f.banco.value = kc.banco || kc.nome || ''; }
     if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
     const antigo = S.recorrencias.find((x) => x.id === id) || {};
     const desdeBox = f.querySelector('[data-desde]');
@@ -1378,7 +1425,7 @@ document.addEventListener('submit', async (e) => {
       for (const l of im.linhas.filter((x) => x.descricao === 'Pagamento de fatura' && x.tipo === 'despesa' && !x.ja)) {
         const id = l.id || `pg-${l.data}-${l.valorAbs}`; l.marcado = false; const novo = { id, valor: l.valorAbs, data: l.data, cartaoId: kc.id, lote }; if (ja.has(id) || lista.some((x) => mesmoPag(x, novo))) continue; lista.push(novo); nPag++; }
       if (nPag) { await store.salvarSettings({ pagImportadosLista: lista }); await realocarPagamentos(); } }
-    for (const l of sel.filter((x) => x.marcado)) await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) });
+    ui.guardarImport = []; for (const l of sel.filter((x) => x.marcado)) { const novoL = await store.salvar('lancamentos', { tipo: l.tipo, valor: l.valorAbs, categoriaId: l.catId, descricao: l.descricao, mes: l.mes, data: l.data, forma: l.forma, banco: im.banco, vencimento: '', status: l.tipo === 'entrada' ? 'recebido' : 'pago', obs: '', importId: l.id || '', lote, ...(l.recorrenciaId ? { recorrenciaId: l.recorrenciaId } : {}) }); if (l.tipo === 'guardar') ui.guardarImport.push(novoL.id); }
     const regras = { ...(S.settings.regrasImport || {}) }; for (const l of im.linhas.filter((x) => x.mudou && x.catId)) regras[chaveRegra(l.texto)] = l.catId;
     const bancos = S.settings.bancos || []; await store.salvarSettings({ regrasImport: regras, ...(im.banco && !bancos.includes(im.banco) ? { bancos: [...bancos, im.banco] } : {}) });
     await registrar(sel.length, 'conta ' + (bancoConta || ''), bancoConta, 'conta', mesDe(sel)); ui.importacao = null; fecharModal(); ui.ultimoTipo = 'conta'; ui.assinaturas = []; conferirFatura('', '', `${sel.filter((x) => x.marcado).length} lançamentos importados!`, bancoConta); return;
@@ -1401,7 +1448,9 @@ document.addEventListener('submit', async (e) => {
   if (tipoF === 'boas-vindas') {
     if (+f.dataset.passo < OB_PASSOS) return obIr(f, +f.dataset.passo + 1);
     const sal = parseValor(v('salario')); const dia = parseInt(v('diaSalario'), 10);
-    if (sal > 0) { const cs = S.categorias.find((c) => c.nome === 'Salário'); await store.salvar('recorrencias', { tipo: 'entrada', valor: sal, nome: 'Salário', categoriaId: cs?.id || '', inicio: C.mesAtual(), fim: '', diaVenc: dia >= 1 && dia <= 31 ? dia : '', frequencia: 'mensal', forma: '', banco: '', obs: '', ativa: true, pagos: {} }); }
+    const bsOb = [...f.querySelectorAll('[data-banco-tg].ativo')].map((b) => b.dataset.bancoTg); if (f.salBanco && !f.salBanco.value) return alert('Escolha em qual banco seu salário cai.');
+    const salBanco = f.salBanco ? f.salBanco.value : bsOb.length === 1 ? bsOb[0] : '';
+    if (sal > 0) { const cs = S.categorias.find((c) => c.nome === 'Salário'); await store.salvar('recorrencias', { tipo: 'entrada', valor: sal, nome: 'Salário', categoriaId: cs?.id || '', inicio: C.mesAtual(), fim: '', diaVenc: dia >= 1 && dia <= 31 ? dia : '', frequencia: 'mensal', forma: '', banco: salBanco, obs: '', ativa: true, pagos: {} }); }
     const bancos = [...f.querySelectorAll('[data-banco-tg].ativo')].map((b) => b.dataset.bancoTg);
     for (const r of f.querySelectorAll('[data-ob-cc]')) {
       if (!r.querySelector('input[type=checkbox]').checked) continue;
@@ -1498,7 +1547,9 @@ window.addEventListener('hashchange', () => { const nova = location.hash.slice(1
   ui.rota = nova; ui.modal = null; render(); window.scrollTo(0, 0); });
 // voltou para o app depois de um bom tempo fora (o celular às vezes não fecha de verdade): volta para o Início
 let saiuEm = 0; document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saiuEm = Date.now();
-  else if (saiuEm && Date.now() - saiuEm > 10 * 60 * 1000 && !ui.modal && !document.querySelector('.fundo-modal') && ui.rota !== 'inicio') location.hash = '#inicio'; });
+  else if (saiuEm) { const fora = Date.now() - saiuEm; const livre = !ui.modal && !document.querySelector('.fundo-modal');
+    if (fora > 60 * 1000 && livre && store.modo === 'nuvem') store.atualizarDaNuvem().catch(() => {}); // pega o que mudou em outro aparelho
+    if (fora > 10 * 60 * 1000 && livre && ui.rota !== 'inicio') location.hash = '#inicio'; } });
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); ui.installEvt = e; });
 window.addEventListener('flui:erro', () => toast('Não consegui salvar agora. Confira a internet; o Flui tenta de novo.'));
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.closest('form[data-form=boas-vindas]') && e.target.matches('input')) { e.preventDefault(); const f = e.target.closest('form'); if (e.target.matches('[data-ob-banco-novo]')) f.querySelector('[data-a=ob-banco-add]').click(); else f.querySelector('[data-a=ob-prox]').click(); return; }
@@ -1522,7 +1573,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=152" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.svg?v=154" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
