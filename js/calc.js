@@ -108,6 +108,7 @@ export function movimentosDoMes(st, m) {
   for (const r of st.recorrencias) {
     if (!recorrenciaNoMes(r, m)) continue;
     if (vinculadas.has(r.id)) continue;
+    if (r.tipo === 'entrada' && r.categoriaId && entradasLancadas.has(r.categoriaId) && !(r.pagos || {})[m] && st.lancamentos.some((l) => l.mes === m && l.tipo === 'entrada' && l.categoriaId === r.categoriaId && Math.abs((Number(l.valor) || 0) - r.valor) <= r.valor * 0.3)) continue; // a renda já foi lançada de verdade neste mês
     const paga = !!(r.pagos || {})[m];
     out.push({ origem: 'fixo', id: r.id, tipo: r.tipo || (cat[r.categoriaId]?.tipo) || 'despesa', categoriaId: r.categoriaId,
       valor: Number(r.valor) || 0, descricao: r.nome || cat[r.categoriaId]?.nome || 'Fixo',

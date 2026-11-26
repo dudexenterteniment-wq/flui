@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=168';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=168';
-import { VAPID_KEY } from './config.js?v=168';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=168';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=168';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=168';
+import * as C from './calc.js?v=170';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=170';
+import { VAPID_KEY } from './config.js?v=170';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=170';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=170';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=170';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -46,9 +46,9 @@ function render() {
 }
 function renderAgora() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=168" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=170" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=168" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=170" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -67,7 +67,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=168" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=170" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -76,7 +76,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.png?v=168" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.png?v=170" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -849,6 +849,10 @@ const mesmoPag = (a, b) => a.cartaoId === b.cartaoId && Math.abs(a.valor - b.val
 // não mexe nele (o banco já tinha contado). Só o que aconteceu DEPOIS do ajuste muda o saldo.
 const dia = (iso) => String(iso || '').slice(0, 10);
 const r2 = (v) => Math.round(v * 100) / 100;
+// o lançamento é de antes do saldo informado daquele banco? (aí mexer nele não muda o saldo)
+function ehAntigo(l) { if (!l) return false; const S = st(); const b = l.forma === 'Dinheiro' || l.banco === 'Dinheiro' ? null : l.banco || ''; if (b === null) return false;
+  const em = (S.settings.saldosBanco || {})[b]?.em || S.settings.saldoBase?.em; if (!em) return false;
+  if (l.data) return l.data <= dia(em); if (l.mes && l.mes < em.slice(0, 7)) return true; return (l.criadoEm || '') <= em; }
 function semBaseSoma(S) { const sb = S.settings.saldosBanco || {}; return C.realizadoConta(S, '') + C.bancosComConta(S).filter((b) => !sb[b]).reduce((t, b) => t + C.realizadoConta(S, b), 0); }
 function fotoSaldos() { const S = st(); const sb = S.settings.saldosBanco || {}; const bancos = {};
   for (const b of Object.keys(sb)) bancos[b] = C.realizadoConta(S, b);
@@ -895,14 +899,19 @@ async function prepararImportacao(dados) {
     await store.salvar('categorias', { nome, tipo: 'despesa', orcamento: 0, cor, arquivada: false });
   const S = st(); const regras = S.settings.regrasImport || {};
   const porNome = (nome, tipo) => S.categorias.find((c) => c.nome === nome && c.tipo === tipo && !c.arquivada);
-  const rendaDoMes = (mes, valor) => S.recorrencias.find((r) => r.tipo === 'entrada' && C.recorrenciaNoMes(r, mes) && Math.abs(r.valor - valor) < 0.005);
+  // salário/renda fixa: a entrada do extrato que é a renda daquele mês (valor exato ou parecido, até 30% de diferença, no mesmo banco)
+  const bImp = dados.banco || ''; const rendaUsada = new Set(S.lancamentos.filter((l) => l.recorrenciaId).map((l) => `${l.recorrenciaId}|${l.mes}`));
+  const candidatasRenda = {}; for (const it of dados.itens) { const e0 = entender(it); if (e0.tipo !== 'entrada') continue; const m0 = it.data.slice(0, 7); const v0 = Math.abs(it.valor);
+    for (const r of S.recorrencias.filter((x) => x.tipo === 'entrada' && C.recorrenciaNoMes(x, m0) && (!x.banco || !bImp || x.banco === bImp) && !rendaUsada.has(`${x.id}|${m0}`))) {
+      const dif = Math.abs(r.valor - v0) / (r.valor || 1); if (dif > 0.3) continue; const k = `${r.id}|${m0}`; if (!candidatasRenda[k] || dif < candidatasRenda[k].dif) candidatasRenda[k] = { dif, it, r }; } }
+  const rendaDoMes = (mes, valor, it) => { const c = Object.values(candidatasRenda).find((x) => x.it === it); return c ? c.r : null; };
   const jaIds = new Set([...S.lancamentos, ...S.compras].map((l) => l.importId).concat(S.recorrencias.map((r) => r.importIdOrig)).filter(Boolean));
   const outrosIds = new Set(S.categorias.filter((c) => c.nome === 'Outros').map((c) => c.id)); const aprendido = {};
   for (const x of [...S.lancamentos, ...S.compras]) { if (!x.categoriaId || outrosIds.has(x.categoriaId)) continue; const k = chaveRegra(x.descricao || ''); if (k) aprendido[k] = x.categoriaId; }
   const linhas = dados.itens.map((it) => {
     const e = entender(it); const mes = it.data.slice(0, 7); const valor = Math.abs(it.valor);
     const regra = regras[chaveRegra(it.texto)] || aprendido[chaveRegra(it.texto)] || aprendido[chaveRegra(e.descricao || '')]; const cRegra = regra && S.categorias.find((c) => c.id === regra && c.tipo === e.tipo);
-    const renda = e.tipo === 'entrada' ? rendaDoMes(mes, valor) : null;
+    const renda = e.tipo === 'entrada' ? rendaDoMes(mes, valor, it) : null;
     let cat = cRegra || (e.tipo === 'guardar' ? guardarPreferido(S) : null) || (renda ? S.categorias.find((c) => c.id === renda.categoriaId) : null) || porNome(e.sugestao, e.tipo)
       || (e.tipo === 'despesa' ? porNome('Outros', 'despesa') : S.categorias.find((c) => c.tipo === e.tipo && !c.arquivada));
     const pi = dados.cartao && e.tipo === 'despesa' ? infoParcela(it.texto) : null; const pk = pi ? chaveParc(pi.base, pi.n, valor) : '';
@@ -916,7 +925,7 @@ async function prepararImportacao(dados) {
     const fixoConta = !dados.cartao && !renda ? S.recorrencias.find((r) => r.forma !== 'Crédito' && (r.tipo || 'despesa') === e.tipo && r.ativa !== false && C.recorrenciaNoMes(r, mes) && bate(r)) : null;
     if (fixoConta) cat = S.categorias.find((c) => c.id === fixoConta.categoriaId) || cat;
     return { ...it, ...e, mes, valorAbs: valor, parc: pi, parcKey: pk, jaParc: jaParc?.id || '', catId: cat?.id || '', recorrenciaId: renda?.id || fixoConta?.id || '', marcado: e.marcar && !ja && !parecido && !pagFatura && !jaFixo, ja, jaFixo,
-      aviso: jaParc ? `Parcela ${pi.k}/${pi.n}: essa compra já está registrada no cartão.` : ja ? 'Já importado antes.' : jaFixo ? 'Já está nos seus fixos.' : fixoConta ? `Fixo: ${fixoConta.nome || 'conta fixa'} deste mês.` : pagFatura ? (/pagamento/i.test(it.texto || '') ? 'Pagamento: vai abater a fatura, não é compra.' : 'Estorno: não entra como compra.') : parecido ? 'Parece que você já lançou este valor neste mês.' : pi && pi.k < pi.n ? `Parcela ${pi.k}/${pi.n}: as próximas ${pi.n - pi.k} já entram nas faturas dos meses seguintes.` : e.aviso || '' };
+      aviso: jaParc ? `Parcela ${pi.k}/${pi.n}: essa compra já está registrada no cartão.` : ja ? 'Já importado antes.' : renda ? `É a sua renda "${renda.nome || 'Salário'}" deste mês (fica no lugar da prevista).` : jaFixo ? 'Já está nos seus fixos.' : fixoConta ? `Fixo: ${fixoConta.nome || 'conta fixa'} deste mês.` : pagFatura ? (/pagamento/i.test(it.texto || '') ? 'Pagamento: vai abater a fatura, não é compra.' : 'Estorno: não entra como compra.') : parecido ? 'Parece que você já lançou este valor neste mês.' : pi && pi.k < pi.n ? `Parcela ${pi.k}/${pi.n}: as próximas ${pi.n - pi.k} já entram nas faturas dos meses seguintes.` : e.aviso || '' };
   });
   const banco = dados.banco || (S.settings?.bancos?.length === 1 ? S.settings.bancos[0] : '');
   const cc = dados.cartao ? (S.cartoes.find((k) => k.tipo !== 'debito' && (k.banco || k.nome) === banco) || S.cartoes.find((k) => k.tipo !== 'debito')) : null;
@@ -1142,7 +1151,8 @@ document.addEventListener('click', async (e) => {
     case 'abrir-busca': if (ui.buscaAberta || ui.busca) { ui.buscaAberta = false; ui.busca = ''; render(); } else { ui.buscaAberta = true; render(); setTimeout(() => $('[data-a=busca]')?.focus(), 30); } break;
     case 'filtro-tipo': ui.filtroTipo = el.dataset.v; render(); break;
     case 'filtro-cat-limpa': ui.filtroCat = ''; render(); break;
-    case 'excluir-lanc': if (confirm('Excluir este lançamento?')) { await store.remover('lancamentos', $('[data-form=lanc]').dataset.id); fecharModal(); toast('Lançamento excluído.'); } break;
+    case 'excluir-lanc': if (confirm('Excluir este lançamento?')) { const idL = $('[data-form=lanc]').dataset.id; const velho = ehAntigo(S.lancamentos.find((x) => x.id === idL)); const fo = velho ? fotoSaldos() : null;
+      await store.remover('lancamentos', idL); if (fo) await manterSaldos(fo); fecharModal(); toast('Lançamento excluído.'); } break;
     case 'nova-compra': modalCompra(); break;
     case 'editar-compra': modalCompra({ ...S.compras.find((x) => x.id === id) }); break;
     case 'excluir-compra': if (confirm('Excluir esta compra e todas as parcelas?')) { await store.remover('compras', $('[data-form=compra]').dataset.id); fecharModal(); toast('Compra excluída.'); } break;
@@ -1440,8 +1450,9 @@ document.addEventListener('submit', async (e) => {
       await store.salvar('compras', { total: valor, parcelas: n, cartaoId: v('cartaoId'), descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: lerMes('l-mes', f), data: '' });
       fecharModal(); toast(n > 1 ? `Lançado no crédito em ${n}x!` : 'Lançado no crédito!', true); return; }
     const antigo = S.lancamentos.find((x) => x.id === id) || {};
-    const novo = !id;
+    const novo = !id; const foEd = id && ehAntigo(antigo) && lerMes('l-mes', f) === antigo.mes ? fotoSaldos() : null;
     await store.salvar('lancamentos', { ...antigo, id, tipo: v('tipo'), valor, categoriaId: v('categoriaId'), descricao: v('descricao'), mes: lerMes('l-mes', f), data: antigo.data || '', forma: v('forma'), banco: v('forma') === 'Dinheiro' ? '' : v('banco'), contaCartaoId: v('forma') === 'Dinheiro' ? '' : contaCid, vencimento: v('tipo') !== 'despesa' ? '' : v('vencimento'), status: v('status') || (v('tipo') === 'entrada' ? 'recebido' : 'pago'), obs: antigo.obs || '' });
+    if (foEd) await manterSaldos(foEd); // corrigir algo de antes do saldo informado não muda o saldo
     fecharModal(); toast(novo ? (v('tipo') === 'guardar' ? 'Guardado! Seu eu do futuro agradece.' : 'Prontinho, lançado!') : 'Salvo!', novo);
     if (novo && contaCid && v('forma') !== 'Crédito') { const k = st().cartoes.find((x) => x.id === contaCid); if (k && k.tipo === 'credito') { await store.salvar('cartoes', { ...k, tipo: 'ambos' }); toast(`${nomeCartao(k)} agora é débito e crédito.`); } }
     else if (novo && v('banco') && v('banco') !== 'Dinheiro' && v('forma') !== 'Crédito') perguntarContaDoBanco(v('banco'));
@@ -1467,7 +1478,8 @@ document.addEventListener('submit', async (e) => {
   }
   if (tipoF === 'lote-forma') {
     const d = v('destino'); if (!d) return alert('Escolha a forma de pagamento.');
-    const [ok, pulou] = await aplicarLoteForma(d); ui.sel = null; fecharModal(); toast(`${ok} ${ok === 1 ? 'item atualizado' : 'itens atualizados'}.${pulou ? ` ${pulou} não ${pulou === 1 ? 'pôde' : 'puderam'} mudar.` : ''}`, true); render(); return;
+    const tudoAntigo = itensSel().every(({ o, x }) => (o === 'lanc' ? ehAntigo(x) : true)); const foL = tudoAntigo ? fotoSaldos() : null;
+    const [ok, pulou] = await aplicarLoteForma(d); if (foL) await manterSaldos(foL); ui.sel = null; fecharModal(); toast(`${ok} ${ok === 1 ? 'item atualizado' : 'itens atualizados'}.${pulou ? ` ${pulou} não ${pulou === 1 ? 'pôde' : 'puderam'} mudar.` : ''}`, true); render(); return;
   }
   if (tipoF === 'guardar-imp') {
     const l = S.lancamentos.find((x) => x.id === id); if (l && v('categoriaId')) await store.salvar('lancamentos', { ...l, categoriaId: v('categoriaId') });
@@ -1634,6 +1646,13 @@ const nomeParc = (t) => { let x = String(t || '').replace(/\s*-\s*Parcela\s+\d+\
 const chaveParc = (base, n, valor) => [chaveRegra(base), n, Math.round(valor * 100)].join('|');
 async function migrar() { const fotoM = fotoSaldos(); await migrarDados(); await manterSaldos(fotoM); }
 async function migrarDados() {
+  // renda fixa contada duas vezes: a entrada real importada passa a ser a renda daquele mês
+  if (!st().settings.rendaRegra1) { const S = st(); const usadas = new Set(S.lancamentos.filter((l) => l.recorrenciaId).map((l) => `${l.recorrenciaId}|${l.mes}`));
+    for (const r of S.recorrencias.filter((x) => x.tipo === 'entrada')) {
+      const porMes = {}; for (const l of S.lancamentos.filter((x) => x.tipo === 'entrada' && x.importId && !x.recorrenciaId && C.recorrenciaNoMes(r, x.mes) && (!r.banco || !x.banco || r.banco === x.banco))) {
+        const dif = Math.abs(r.valor - l.valor) / (r.valor || 1); if (dif > 0.3 || usadas.has(`${r.id}|${l.mes}`)) continue; if (!porMes[l.mes] || dif < porMes[l.mes].dif) porMes[l.mes] = { dif, l }; }
+      for (const { l } of Object.values(porMes)) { await store.salvar('lancamentos', { ...l, recorrenciaId: r.id }); usadas.add(`${r.id}|${l.mes}`); } }
+    await store.salvarSettings({ rendaRegra1: 1 }); }
   // faturas infladas por importações repetidas (versões antigas): tira o que está em dobro.
   // Mantém o "quanto falta pagar" que a pessoa informou e não mexe no saldo (migrar() preserva os saldos).
   if (!st().settings.faturaRegra1) { const S = st(); const pg = { ...(S.settings.pagamentosFatura || {}) }; const man = S.settings.pagManual || {};
@@ -1755,7 +1774,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=168" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=170" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
