@@ -607,3 +607,18 @@ body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
 .lim-linha .det { font-size: 13px; color: var(--cinza, #777); font-weight: 700; margin-top: 2px; }
 .lim-linha .det.neg { color: var(--vermelho); }
 .mes-nav b { text-transform: none; }
+.sel-btn { border: 2px solid var(--linha); background: #fff; border-radius: 12px; padding: 6px 12px; font-weight: 800; color: var(--azul); cursor: pointer; flex-shrink: 0; font-family: inherit; }
+.sel-btn.ativo { background: var(--azul); color: #fff; border-color: var(--azul); }
+.sel-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 10px; font-weight: 700; color: var(--cinza, #777); font-size: 14px; }
+.item.selecionavel { cursor: pointer; }
+.item.nao-sel { opacity: .45; }
+.item.marcado { background: #E5F5FE; }
+.sel-caixa { width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--linha); flex-shrink: 0; display: grid; place-items: center; font-weight: 900; color: #fff; font-size: 15px; background: #fff; }
+.item.marcado .sel-caixa { background: var(--azul); border-color: var(--azul); }
+.sel-barra { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); width: min(94vw, 560px); background: #fff; border: 2px solid var(--linha); border-bottom-width: 4px; border-radius: 18px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; z-index: 40; box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+.sel-barra div { display: flex; gap: 6px; }
+.sel-barra .btn[disabled] { opacity: .4; pointer-events: none; }
+.lote-ops { display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow: auto; }
+.lote-op { display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid var(--linha); border-radius: 14px; font-weight: 700; cursor: pointer; }
+.lote-op:has(input:checked) { border-color: var(--azul); background: #E5F5FE; }
+.sel-barra b { white-space: nowrap; font-size: 15px; } .sel-barra .btn { padding-left: 12px; padding-right: 12px; }
