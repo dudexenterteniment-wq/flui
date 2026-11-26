@@ -594,3 +594,5 @@ body.sem-scroll .cartoes-fila { overflow: hidden; touch-action: none; }
 .lim-base .lb-soma { display: flex; justify-content: space-between; align-items: baseline; margin: 12px 0 6px; font-weight: 700; }
 .lim-base .lb-estado { margin-top: 8px; }
 .prog.amarelo > i { background: #FFC800; }
+.mascote { background: #EEF4FF; }
+.mascote img { width: 46px; height: 46px; object-fit: contain; display: block; }
