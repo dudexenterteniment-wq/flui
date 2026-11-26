@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=166';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=166';
-import { VAPID_KEY } from './config.js?v=166';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=166';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=166';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=166';
+import * as C from './calc.js?v=167';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=167';
+import { VAPID_KEY } from './config.js?v=167';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=167';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=167';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=167';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -46,9 +46,9 @@ function render() {
 }
 function renderAgora() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=166" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=167" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=166" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=167" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -67,7 +67,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=166" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=167" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -76,7 +76,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.png?v=166" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.png?v=167" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -529,7 +529,7 @@ function modalLanc(l = {}) {
     <div class="campo"><label>Descrição <span class="opc">opcional</span></label><input autocapitalize="sentences" class="inp" name="descricao" value="${esc(l.descricao || '')}" placeholder="Ex.: almoço com a equipe"></div>
     <div class="campo ${['guardar', 'entrada'].includes(tipo) ? 'oculto' : ''}" data-forma-campo><label data-forma-label>${tipo === 'entrada' ? 'Como recebeu?' : 'Como pagou?'}</label><div class="cats">${['Débito', 'Crédito', 'Dinheiro', 'Outro'].map((f) => `<button type="button" data-forma="${f}" ${f === 'Crédito' && tipo === 'entrada' ? 'hidden' : ''} class="${((l.forma === 'Pix' ? 'Débito' : l.forma) || '') === f ? 'ativo' : ''}">${f}</button>`).join('')}</div><input type="hidden" name="forma" value="${esc(l.forma === 'Pix' ? 'Débito' : l.forma || '')}"></div>
     <div class="campo ${l.forma === 'Dinheiro' ? 'oculto' : ''}" data-banco-campo><label data-banco-label>${tipo === 'guardar' ? 'De onde saiu?' : tipo === 'entrada' ? 'Onde caiu?' : 'Cartão'}</label>${selConta(l, tipo)}</div>
-    <div data-credito class="${l.forma === 'Crédito' && !l.id ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
+    <div data-credito class="${l.forma === 'Crédito' && l.tipo === 'despesa' ? '' : 'oculto'}" style="border:2px solid var(--linha);border-radius:16px;padding:12px;margin-bottom:14px">
       <div class="duas"><div class="campo"><label>Parcelas</label><input class="inp" type="number" min="1" max="48" name="parcelas" value="1" data-a="prev-parc-l"></div>
         <div class="campo"><label>Cartão</label>${selCartao('', true)}</div></div>
       <div class="mini" data-prev-l></div><div class="mini" style="margin-top:4px">Vai para a fatura do cartão, uma parcela por mês a partir do mês escolhido.</div></div>
@@ -750,7 +750,7 @@ function avisoCompleto(b, feito, msg) {
 // depois de importar: cada "guardou" escolhe o objetivo (meta)
 // compra nova no crédito: parcelas e cartão ficam na caixa do crédito; sem "Repete", sem segundo campo de cartão e sem situação
 function ajustarCredito(f) {
-  const cred = f.forma?.value === 'Crédito' && f.tipo?.value === 'despesa' && !f.dataset.id && !!f.querySelector('[data-credito]');
+  const cred = f.forma?.value === 'Crédito' && f.tipo?.value === 'despesa' && !!f.querySelector('[data-credito]');
   // crédito com "Repete" = gasto fixo no cartão (todo mês): aí não tem parcelas
   const pc = f.parcelas?.closest('.campo'); if (pc) pc.classList.toggle('oculto', cred && !!f.repete?.checked);
   if (cred) f.querySelector('[data-banco-campo]')?.classList.add('oculto'); else if (f.forma?.value !== 'Dinheiro') f.querySelector('[data-banco-campo]')?.classList.remove('oculto');
@@ -780,7 +780,13 @@ async function aplicarLoteForma(destino) {
   const op = modo === 'deb' ? opcoesConta().find((o) => o.v === ref) : null; const kc = modo === 'cred' ? S.cartoes.find((k) => k.id === ref) : null;
   for (const { o, x, tipo } of itensSel()) {
     if (o === 'lanc') {
-      if (modo === 'cred') { if (tipo !== 'despesa' || x.recorrenciaId) { pulou++; continue; } // entradas e parte de fixo da conta não viram crédito
+      if (modo === 'cred') { if (tipo !== 'despesa') { pulou++; continue; } // entradas não viram crédito
+        const recLig = x.recorrenciaId && S.recorrencias.find((r) => r.id === x.recorrenciaId);
+        if (recLig) { // parte de um fixo: o fixo passa a ser no crédito a partir deste mês
+          const novoR = { ...recLig, forma: 'Crédito', cartaoId: kc.id, banco: kc.banco || kc.nome || '', importIdOrig: x.importId || '' };
+          if (recLig.inicio && C.difMeses(recLig.inicio, x.mes) > 0) { await store.salvar('recorrencias', { ...recLig, fim: C.addMes(x.mes, -1) }); delete novoR.id; await store.salvar('recorrencias', { ...novoR, inicio: x.mes, pagos: {} }); }
+          else await store.salvar('recorrencias', { ...novoR, inicio: x.mes, pagos: {} });
+          await store.remover('lancamentos', x.id); ok++; continue; }
         await store.salvar('compras', { total: Number(x.valor) || 0, parcelas: 1, cartaoId: kc.id, descricao: x.descricao || catNome(x.categoriaId), categoriaId: x.categoriaId, mesPrimeira: x.data ? mesDaCompra(kc, x.data) : x.mes, data: x.data || '', importId: x.importId || '', lote: x.lote || '' });
         await store.remover('lancamentos', x.id); ok++; continue; }
       const forma = modo === 'din' ? 'Dinheiro' : x.tipo === 'despesa' ? (x.forma && !['Dinheiro', 'Crédito', 'Cartão de crédito'].includes(x.forma) ? x.forma : 'Débito') : 'Transferência';
@@ -1030,7 +1036,7 @@ document.addEventListener('click', async (e) => {
     const bCr = f.querySelector('[data-forma="Crédito"]'); if (bCr) { bCr.hidden = t === 'entrada'; if (t === 'entrada' && f.forma.value === 'Crédito') { f.forma.value = ''; bCr.classList.remove('ativo'); } }
     const fl = f.querySelector('[data-forma-label]'); if (fl) fl.textContent = t === 'entrada' ? 'Como recebeu?' : 'Como pagou?';
     if (semF) { f.forma.value = ''; f.querySelectorAll('[data-forma]').forEach((b) => b.classList.remove('ativo')); f.querySelector('[data-banco-campo]')?.classList.remove('oculto'); f.querySelector('[data-credito]')?.classList.add('oculto'); }
-    const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && !f.dataset.id && t === 'despesa')); ajustarCredito(f);
+    const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(f.forma && f.forma.value === 'Crédito' && t === 'despesa')); ajustarCredito(f);
     const sw = f.querySelector('[data-status-wrap]'); if (sw) sw.innerHTML = chipsStatus(t, '');
     const vc = f.querySelector('[data-venc]'); if (vc) vc.classList.add('oculto');
     const dr = f.querySelector('[data-dia-renda]'); if (dr) dr.classList.toggle('oculto', t !== 'entrada');
@@ -1042,7 +1048,7 @@ document.addEventListener('click', async (e) => {
   const fBtn = e.target.closest('[data-forma]');
   if (fBtn) { const f = fBtn.closest('form'); const novo = f.forma.value === fBtn.dataset.forma ? '' : fBtn.dataset.forma; f.forma.value = novo;
     f.querySelectorAll('[data-forma]').forEach((b) => b.classList.toggle('ativo', b.dataset.forma === novo));
-    const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(novo === 'Crédito' && !f.dataset.id && f.tipo.value === 'despesa'));
+    const cr = f.querySelector('[data-credito]'); if (cr) cr.classList.toggle('oculto', !(novo === 'Crédito' && f.tipo.value === 'despesa'));
     const bc = f.querySelector('[data-banco-campo]'); if (bc) { bc.classList.toggle('oculto', novo === 'Dinheiro'); if (novo === 'Dinheiro') { if (f.banco) f.banco.value = ''; if (f.conta) f.conta.value = ''; } } ajustarCredito(f);
     previaParcelasL(); return; }
   const decBtn = e.target.closest('[data-dec]');
@@ -1381,6 +1387,20 @@ document.addEventListener('submit', async (e) => {
       if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
       await store.salvar('recorrencias', { tipo: v('tipo'), valor, nome: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), inicio, fim, diaVenc: '', frequencia: 'mensal', forma: v('forma'), banco: v('banco'), obs: v('obs'), ativa: true, pagos: {} });
       fecharModal(); toast(fim ? `Vai se repetir até ${C.nomeMes(fim)}.` : 'Vai se repetir todo mês.', true); return; }
+    if (id && v('forma') === 'Crédito' && v('tipo') === 'despesa') { // lançamento que já existe vai para o cartão de crédito
+      const antigoL = S.lancamentos.find((x) => x.id === id) || {}; const kc = S.cartoes.find((x) => x.id === v('cartaoId')); if (!kc) return alert('Escolha o cartão.');
+      const mesF = lerMes('l-mes', f); const recLig = antigoL.recorrenciaId && S.recorrencias.find((r) => r.id === antigoL.recorrenciaId);
+      if (recLig || f.repete?.checked) { // é (ou vira) fixo: o fixo passa a ser no crédito e entra na fatura todo mês, a partir deste
+        const fim = f.repete?.checked ? (f.repeteSemFim.checked ? '' : lerMes('l-fim', f)) : recLig.fim || '';
+        if (fim && C.difMeses(mesF, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
+        const dados = { tipo: 'despesa', valor, nome: v('descricao') || recLig?.nome || catNome(v('categoriaId')), categoriaId: v('categoriaId'), fim, diaVenc: '', frequencia: 'mensal', forma: 'Crédito', cartaoId: kc.id, banco: kc.banco || kc.nome || '', obs: recLig?.obs || '', obsImport: recLig?.obsImport || antigoL.descricao || '', importIdOrig: antigoL.importId || '', ativa: true };
+        if (recLig && recLig.inicio && C.difMeses(recLig.inicio, mesF) > 0) { // o fixo já existia antes: os meses anteriores continuam como eram
+          await store.salvar('recorrencias', { ...recLig, fim: C.addMes(mesF, -1) }); await store.salvar('recorrencias', { ...dados, inicio: mesF, pagos: {} }); }
+        else await store.salvar('recorrencias', { ...(recLig || {}), ...dados, inicio: mesF, pagos: {} });
+        await store.remover('lancamentos', id); fecharModal(); toast(`Agora é fixo no crédito (${nomeCartao(kc)}): entra na fatura todo mês.`, true); return; }
+      const n = Math.max(1, parseInt(v('parcelas'), 10) || 1);
+      await store.salvar('compras', { total: valor, parcelas: n, cartaoId: kc.id, descricao: v('descricao') || catNome(v('categoriaId')), categoriaId: v('categoriaId'), mesPrimeira: mesF, data: antigoL.data || '', importId: antigoL.importId || '', lote: antigoL.lote || '' });
+      await store.remover('lancamentos', id); fecharModal(); toast(`Foi para a fatura do ${nomeCartao(kc)}.`, true); return; }
     if (id && f.repete?.checked && v('forma') !== 'Crédito') { // lançamento que já existe vira fixo (recorrente)
       const inicio = lerMes('l-mes', f); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
       if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
@@ -1687,7 +1707,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=166" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=167" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
