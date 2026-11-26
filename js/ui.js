@@ -1,5 +1,5 @@
 // Flui — utilidades de interface: formatação, ícones, gráficos em SVG (sem dependências)
-import { nomeMes } from './calc.js?v=163';
+import { nomeMes } from './calc.js?v=164';
 
 const FMT = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 export const brl = (v) => FMT.format(Number(v) || 0);
@@ -28,7 +28,7 @@ export const ICON = {
 };
 
 // mascote provisório (a águia definitiva entra depois)
-export const MASCOTE = '<img src="icons/mascote.png?v=163" alt="">';
+export const MASCOTE = '<img src="icons/mascote.png?v=164" alt="">';
 
 // ---------- rosca (donut) ----------
 export function rosca(dados, total) {

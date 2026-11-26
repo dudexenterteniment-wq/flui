@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=163';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=163';
-import { VAPID_KEY } from './config.js?v=163';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=163';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=163';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=163';
+import * as C from './calc.js?v=164';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=164';
+import { VAPID_KEY } from './config.js?v=164';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=164';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=164';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=164';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -46,9 +46,9 @@ function render() {
 }
 function renderAgora() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=163" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=164" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=163" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=164" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -67,7 +67,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=163" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=164" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -76,7 +76,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.png?v=163" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.png?v=164" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -1311,11 +1311,17 @@ document.addEventListener('submit', async (e) => {
     let contaCid = ''; if (f.conta) { const op = opcoesConta().find((o) => o.v === f.conta.value); f.banco.value = op ? op.banco : ''; contaCid = op?.cid || '';
       if (!['Dinheiro', 'Crédito'].includes(v('forma')) && (opcoesConta().length > 1 || ['guardar', 'entrada'].includes(v('tipo'))) && !op) return alert(v('tipo') === 'guardar' ? 'Escolha de onde saiu o dinheiro.' : v('tipo') === 'entrada' ? 'Escolha onde o dinheiro caiu.' : 'Escolha o cartão.');
       if (f.contaPadrao) { const novoP = f.contaPadrao.checked ? f.conta.value : (S.settings.cartaoPadrao === f.conta.value ? '' : S.settings.cartaoPadrao || ''); if (novoP !== (S.settings.cartaoPadrao || '')) await store.salvarSettings({ cartaoPadrao: novoP }); } }
-    if (v('tipo') === 'guardar') { // guardar: precisa dizer de onde saiu e não pode passar do que tem
-      const din = v('forma') === 'Dinheiro'; if (!din && !v('banco')) return alert('Escolha de onde saiu o dinheiro.');
-      const ant = S.lancamentos.find((x) => x.id === id); const volta = ant && ant.tipo === 'guardar' && (ant.forma === 'Dinheiro') === din ? Number(ant.valor) || 0 : 0;
-      const disp = (din ? C.saldoCarteira(S) : C.saldoConta(S)) + volta;
-      if (valor > disp + 0.005) return alert(`Você só tem ${brl(Math.max(0, disp))} ${din ? 'na carteira' : 'na conta'}. Diminua o valor${din ? '' : ' ou confira o saldo no Início'}.`); }
+    if (v('tipo') === 'guardar' && v('forma') !== 'Dinheiro' && !v('banco')) return alert('Escolha de onde saiu o dinheiro.');
+    // dinheiro que sai agora (débito/Pix/dinheiro já pago ou guardado): não pode passar do saldo daquele banco (ou da carteira)
+    const saiAgora = !f.repete?.checked && v('forma') !== 'Crédito' && (v('tipo') === 'guardar' || (v('tipo') === 'despesa' && (v('status') || 'pago') === 'pago')) && C.difMeses(lerMes('l-mes', f), C.mesAtual()) >= 0;
+    if (saiAgora) {
+      const din = v('forma') === 'Dinheiro'; const bco = din ? '' : v('banco'); const temBanco = bco && C.bancosComConta(S).includes(bco);
+      const ant = S.lancamentos.find((x) => x.id === id); const contava = ant && ant.forma !== 'Crédito' && (ant.tipo === 'guardar' || (ant.tipo === 'despesa' && ant.status === 'pago'));
+      const volta = contava && (din ? ant.forma === 'Dinheiro' : ant.forma !== 'Dinheiro' && (ant.banco || '') === (bco || '')) ? Number(ant.valor) || 0 : 0;
+      const disp = Math.round(((din ? C.saldoCarteira(S) : temBanco ? C.saldoBanco(S, bco) : C.saldoConta(S)) + volta) * 100) / 100;
+      const onde = din ? 'na carteira' : temBanco ? `no ${bco}` : 'na conta';
+      if (valor > disp + 0.005) return alert(din ? `Você só tem ${brl(Math.max(0, disp))} na carteira. Se estiver errado, ajuste a carteira no Início.` : `Você só tem ${brl(Math.max(0, disp))} ${onde}, e o banco não deixa ${v('tipo') === 'guardar' ? 'tirar' : 'gastar'} mais do que tem. Se o saldo estiver errado, ajuste o saldo da conta no Início.`);
+    }
     if (!id && f.repete?.checked && v('forma') === 'Crédito' && v('tipo') === 'despesa') { // compra recorrente no crédito: fixo no cartão
       const inicio = lerMes('l-mes', f); const fim = f.repeteSemFim.checked ? '' : lerMes('l-fim', f);
       if (fim && C.difMeses(inicio, fim) < 0) return alert('O mês final precisa ser depois do inicial.');
@@ -1622,7 +1628,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=163" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=164" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
