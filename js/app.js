@@ -1,10 +1,10 @@
 // Flui — telas e interação
-import * as C from './calc.js?v=156';
-import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=156';
-import { VAPID_KEY } from './config.js?v=156';
-import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=156';
-import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=156';
-import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=156';
+import * as C from './calc.js?v=158';
+import { ICS, ICONE_POR_NOME, svgIcone } from './icones.js?v=158';
+import { VAPID_KEY } from './config.js?v=158';
+import { lerOFX, lerCSV, entender, chaveRegra } from './importar.js?v=158';
+import { Store, uid, FORMAS, validarBackup, BANCOS_CATALOGO } from './store.js?v=158';
+import { brl, brl0, pct, esc, parseValor, valorInput, ICON, MASCOTE, rosca, barras, toast, aviso } from './ui.js?v=158';
 const alert = (m) => aviso(m);
 
 const store = new Store();
@@ -46,9 +46,9 @@ function render() {
 }
 function renderAgora() {
   const root = $('#app');
-  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=156" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
+  if (ui.carregando) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="slogan">Carregando...</p></div></div>`; return; }
   if (!store.user) { root.innerHTML = telaEntrada(); return; }
-  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=156" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
+  if (!st()) { root.innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="slogan">Buscando seus dados...</p></div></div>`; return; }
   const rota = NAV.some((n) => n[0] === ui.rota) || ui.rota === 'mais' ? ui.rota : 'inicio';
   const tela = { inicio: telaInicio, lancamentos: telaLancamentos, cartoes: telaCartoes, plano: telaPlano, relatorios: telaRelatorios, metas: telaMetas, categorias: telaCategorias, config: telaConfig, mais: telaMais }[rota];
   root.innerHTML = `<div class="app">
@@ -67,7 +67,7 @@ function modalNotificacoes() {
   const av = avisos();
   abrirModal(`${topoModal('Notificações')}${av.length ? av.map((a) => `<div class="aviso ${a.cor}"><span class="ic">${a.ic}</span><span>${a.txt}</span><button class="fechar" data-a="aviso-ok" data-k="${esc(a.k)}" aria-label="Dispensar">×</button></div>`).join('') + '<p class="mini">Toque no × para dispensar um aviso.</p>' : `<div class="flui-fala"><div class="mascote">${MASCOTE}</div><div class="balao">Tudo tranquilo por aqui! Quando algo precisar da sua atenção, eu aviso.</div></div>`}`);
 }
-const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=156" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
+const marca = (peq) => `<div class="marca"${peq ? ' style="padding:0"' : ''}><div class="marca-icone"${peq ? ' style="width:34px;height:34px;font-size:19px;border-radius:10px"' : ''}><img src="icons/mascote.png?v=158" alt=""></div><div class="marca-nome"${peq ? ' style="font-size:24px"' : ''}>Flu<span class="i-verde">ı</span></div></div>`;
 function seqHtml() { const n = C.sequenciaRegistro(st()); return n > 1 ? `🔥 ${n} dias` : ''; }
 
 // ---------------- entrada / login ----------------
@@ -76,7 +76,7 @@ const gravarLocal = (k, v) => { try { if (v === null) localStorage.removeItem(k)
 function telaEntrada() {
   const criar = ui.authModo === 'criar';
   return `<div class="entrada"><form class="entrada-box" data-form="auth">
-    <img class="entrada-mascote" src="icons/mascote.png?v=156" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
+    <img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="slogan">Seu dinheiro, no seu ritmo.</p>
     ${store.modo === 'local' ? '<div class="selo">MODO DE TESTE · dados só neste navegador</div>' : ''}
     <div class="campo"><label>E-mail</label><input class="inp" name="email" id="login-email" type="email" autocomplete="username email" value="${esc(lerLocal('flui:email') || '')}" required></div>
     ${store.modo === 'local' ? '' : `<div class="campo"><label>Senha</label><input class="inp" name="senha" type="password" autocomplete="${criar ? 'new-password' : 'current-password'}" minlength="6" required></div>`}
@@ -319,12 +319,14 @@ function comprometido(cartaoId) {
 
 // ---------------- Planejamento ----------------
 function telaPlano() {
-  const m = C.mesAtual();
+  // só a aba Renda e fixos troca de mês; Limites fica sempre no mês atual
+  const cur = C.mesAtual(); const m = (ui.abaPlano || 'fixos') === 'fixos' ? ui.mesPlano || cur : cur; const outroMes = m !== cur;
   const todasRendas = st().recorrencias.filter((r) => r.tipo === 'entrada');
   const sucessor = (r) => r.fim && todasRendas.find((x) => x !== r && x.categoriaId === r.categoriaId && (x.nome || '') === (r.nome || '') && x.inicio === C.addMes(r.fim, 1));
   const anterior = (r) => todasRendas.find((x) => x !== r && sucessor(x) === r);
-  const rendas = todasRendas.filter((r) => (!r.fim || C.difMeses(m, r.fim) >= 0) && !sucessor(r)).sort((a, b) => b.valor - a.valor);
-  const fixos = st().recorrencias.filter((r) => r.tipo !== 'entrada' && (!r.fim || C.difMeses(m, r.fim) >= 0)).sort((a, b) => b.valor - a.valor);
+  // mês atual: o que vale agora e o que ainda vai começar; outro mês: só o que vale naquele mês
+  const rendas = todasRendas.filter((r) => (outroMes ? C.recorrenciaNoMes(r, m) : (!r.fim || C.difMeses(m, r.fim) >= 0) && !sucessor(r))).sort((a, b) => b.valor - a.valor);
+  const fixos = st().recorrencias.filter((r) => r.tipo !== 'entrada' && (outroMes ? C.recorrenciaNoMes(r, m) : !r.fim || C.difMeses(m, r.fim) >= 0)).sort((a, b) => b.valor - a.valor);
   const noMes = (r) => C.recorrenciaNoMes(r, m) && r.ativa !== false;
   // por mês: tudo que está valendo ou vai começar (mesmo que comece no mês que vem); anual conta 1/12
   const porMes = (r) => (r.frequencia === 'anual' ? r.valor / 12 : r.valor);
@@ -339,7 +341,7 @@ function telaPlano() {
       <div class="meio"><div class="titulo">${esc(r.nome || catNome(r.categoriaId))}${r.ativa === false ? '<span class="tag">pausado</span>' : ''}</div>
         <div class="det">${anterior(r) && C.difMeses(m, r.inicio) > 0 ? `desde ${C.nomeMes(r.inicio)} (era ${brl0(anterior(r).valor)})${r.fim ? ` · até ${C.nomeMes(r.fim)}` : ''}` : r.fim ? `por ${C.difMeses(r.inicio, r.fim) + 1} ${C.difMeses(r.inicio, r.fim) ? 'meses' : 'mês'} · ${C.nomeMes(r.inicio)} a ${C.nomeMes(r.fim)}` : C.difMeses(m, r.inicio) > 0 ? 'a partir de ' + C.nomeMes(r.inicio) : 'todo mês'}${entrada && r.diaVenc ? ` · cai dia ${r.diaVenc}` : ''}${entrada && !r.banco && st().settings.bancos?.length ? ' · <b class="neg">toque e escolha onde cai</b>' : ''}</div></div>
       <div style="text-align:right"><div class="valor num ${entrada ? 'pos' : ''}">${entrada ? '+' : '−'}${brl(r.valor)}</div>${!entrada && r.tipo !== 'guardar' && r.forma !== 'Crédito' && noMes(r) ? `<label class="chave mini" data-stop="1"><input type="checkbox" data-a="fixo-pago" data-id="${r.id}" data-m="${m}" ${(r.pagos || {})[m] ? 'checked' : ''}> pago</label>` : ''}</div></div>`;
-    return `<h1>Planejamento</h1>${abas}
+    return `<h1>Planejamento</h1>${abas}<div class="mes-nav"><button type="button" data-a="plano-mes" data-v="-1" aria-label="Mês anterior">‹</button><b>${C.nomeMes(m, true).replace(/^./, (c) => c.toUpperCase())}${outroMes ? "" : " <span class=\"mini\">(agora)</span>"}</b><button type="button" data-a="plano-mes" data-v="1" aria-label="Próximo mês">›</button></div>
     <div class="mini" style="margin:-2px 0 6px;font-weight:800">Por mês</div><div class="resumo-fixos"><div><span>Entra</span><b class="pos num">${brl0(entra)}</b></div><div><span>Sai</span><b class="num">${brl0(sai)}</b></div><div><span>Sobra</span><b class="num ${entra - sai < 0 ? 'neg' : ''}">${brl0(entra - sai)}</b></div></div>
     <div class="card bloco-fixo entra"><div class="linha-acao" style="margin:0 0 8px"><h3>Entra todo mês</h3><button class="btn verde pequeno" data-a="novo-salario">+ Renda</button></div>
       ${rendas.length ? `<div class="lista rendas">${rendas.map((r) => linhaFixo(r, true)).join('')}</div>` : '<p class="mini" style="margin:0">Salário, freela fixo...</p>'}</div>
@@ -357,22 +359,23 @@ function telaPlano() {
   const desp = rows.filter((x) => x.cat.tipo === 'despesa').sort((a, b) => ordemCat(a.cat, b.cat)); const gua = rows.filter((x) => x.cat.tipo === 'guardar').sort((a, b) => ordemCat(a.cat, b.cat));
   const comLim = desp.filter((x) => x.orcado > 0); const passou = comLim.filter((x) => x.real > x.orcado).length;
   const totOrc = C.sum(comLim, (x) => x.orcado); const totReal = C.sum(comLim, (x) => x.real);
-  const linhaLim = (x) => `<div class="lim-linha">${bolaCat(x.cat)}<div class="meio"><div class="titulo" style="margin:0">${esc(x.cat.nome)}</div></div>
-      <label class="lim-campo"><input class="inp num lim-inp" inputmode="decimal" placeholder="—" value="${x.cat.orcamento ? valorInput(x.cat.orcamento) : ''}" data-a="orc" data-id="${x.cat.id}" aria-label="Limite de ${esc(x.cat.nome)}"></label></div>`;
+  // cada linha: nome, quanto já gastou no mês (vermelho se passou) e o limite para digitar
+  const linhaLim = (x) => { const lim = Number(x.cat.orcamento) || 0; const passouL = lim > 0 && x.real > lim + 0.005;
+    return `<div class="lim-linha">${bolaCat(x.cat)}<div class="meio"><div class="titulo" style="margin:0">${esc(x.cat.nome)}</div>
+      <div class="det ${passouL ? 'neg' : ''}">${x.real > 0 ? `${x.cat.tipo === 'guardar' ? 'guardou' : 'gastou'} ${brl(x.real)}${passouL ? ` · passou ${brl(x.real - lim)}` : ''}` : x.cat.tipo === 'guardar' ? 'nada guardado ainda' : 'nada gasto ainda'}</div></div>
+      <label class="lim-campo"><input class="inp num lim-inp" inputmode="decimal" placeholder="—" value="${lim ? valorInput(lim) : ''}" data-a="orc" data-id="${x.cat.id}" aria-label="Limite de ${esc(x.cat.nome)}"></label></div>`; };
   // base: o valor em que os limites se apoiam (a renda ou um valor escolhido)
   const rendaMes = C.sum(rendas.filter((r) => r.ativa !== false && r.frequencia !== 'anual'), (r) => r.valor);
   const lb = st().settings.limiteBase || {}; const usaRenda = lb.tipo ? lb.tipo === 'renda' : rendaMes > 0;
   const base = usaRenda ? rendaMes : Number(lb.valor) || 0;
   const somaLim = C.sum([...desp, ...gua], (x) => Number(x.cat.orcamento) || 0); const dif = Math.round((base - somaLim) * 100) / 100;
   const pctB = base > 0 ? Math.min(100, Math.round((somaLim / base) * 100)) : 0;
-  const estado = !(base > 0) ? '' : dif < -0.005 ? `<b class="neg">Passou ${brl(-dif)} de ${brl(base)}</b>` : dif <= 0.005 ? '<b style="color:#E59600">No limite: usou tudo</b>' : `<b class="pos">Ainda dá para distribuir ${brl(dif)}</b>`;
-  const caixaBase = `<div class="card lim-base"><div class="lb-linha"><label>Com base em</label><select class="inp" data-a="lim-base-tipo"><option value="renda" ${usaRenda ? 'selected' : ''}>Minha renda${rendaMes > 0 ? ` (${brl(rendaMes)})` : ''}</option><option value="valor" ${usaRenda ? '' : 'selected'}>Outro valor</option></select>
-      ${usaRenda ? '' : `<input class="inp num" inputmode="decimal" placeholder="R$ 0,00" data-a="lim-base-valor" value="${lb.valor ? valorInput(lb.valor) : ''}">`}</div>
-    ${base > 0 ? `<div class="lb-soma"><span>Limites somados</span><b class="num">${brl(somaLim)} <span class="mini">de ${brl(base)}</span></b></div><div class="prog ${dif < -0.005 ? 'estourou' : dif <= 0.005 ? 'amarelo' : ''}"><i style="width:${pctB}%"></i></div><div class="lb-estado">${estado}</div>` : `<p class="mini" style="margin:8px 0 0">${usaRenda ? 'Cadastre sua renda em Renda e fixos ou escolha "Outro valor".' : 'Digite o valor que você quer usar como base.'}</p>`}</div>`;
+  const estado = dif < -0.005 ? `<b class="neg">Passou ${brl(-dif)} do que você tem</b>` : dif <= 0.005 ? '<b style="color:#E59600">Você distribuiu tudo</b>' : `<b class="pos">Sobram ${brl(dif)} para distribuir</b>`;
+  const caixaBase = `<div class="card lim-base">
+    ${base > 0 ? `<div class="lb-grande"><span class="num">${brl(somaLim)}</span> <span class="lb-de">de ${brl(base)}</span></div><div class="prog ${dif < -0.005 ? 'estourou' : dif <= 0.005 ? 'amarelo' : ''}"><i style="width:${pctB}%"></i></div><div class="lb-estado">${estado}</div>` : `<p style="margin:0 0 6px;font-weight:700">${usaRenda ? 'Cadastre sua renda em Renda e fixos ou use outro valor.' : 'Digite quanto você tem para o mês.'}</p>`}
+    <div class="lb-linha"><span class="mini">Usando como base:</span><select class="inp lb-sel" data-a="lim-base-tipo"><option value="renda" ${usaRenda ? 'selected' : ''}>minha renda</option><option value="valor" ${usaRenda ? '' : 'selected'}>outro valor</option></select>${usaRenda ? '' : `<input class="inp num lb-val" inputmode="decimal" placeholder="R$ 0,00" data-a="lim-base-valor" value="${lb.valor ? valorInput(lb.valor) : ''}">`}</div></div>`;
   return `<h1>Planejamento</h1>${abas}${caixaBase}
-  <div class="lim-titulo"><h3>Quanto quero gastar</h3>${passou ? `<a class="tag-neg" href="#relatorios" data-a="ver-passou">${passou} ${passou > 1 ? 'passaram' : 'passou'} do limite ›</a>` : comLim.length ? '<span class="tag-pos">tudo dentro</span>' : ''}</div>
-  <button class="btn branco pequeno ver-gastos" data-a="ver-passou">Ver quanto gastei ›</button>
-  <div class="grupo-mes lim-cab"><span>Gastos</span><span>Limite por mês</span></div>
+  <div class="grupo-mes lim-cab"><span>Gastos ${passou ? `<span class="neg">· ${passou} ${passou > 1 ? 'passaram' : 'passou'}</span>` : ''}</span><span>Limite por mês</span></div>
   <div class="lista lim-lista">${desp.map(linhaLim).join('')}</div>
   ${gua.length ? `<div class="grupo-mes lim-cab"><span>Guardar</span><span>Meta por mês</span></div><div class="lista lim-lista">${gua.map(linhaLim).join('')}</div>` : ''}`;
 }
@@ -1065,6 +1068,7 @@ document.addEventListener('click', async (e) => {
     case 'importar-extrato': ui.impDestino = ''; modalImportar(); break;
     case 'conferir-depois': fecharModal(); if (!perguntarAssinaturas(el.dataset.v)) avisoCompleto(el.dataset.v, ui.ultimoTipo || 'fatura', 'Importado!'); break;
     case 'guardar-imp-pular': ui.guardarImport.shift(); fimGuardarImp(); break;
+    case 'plano-mes': ui.mesPlano = C.addMes(ui.mesPlano || C.mesAtual(), +el.dataset.v); if (ui.mesPlano === C.mesAtual()) ui.mesPlano = null; render(); break;
     case 'assin-pular': ui.assinaturas = []; fecharModal(); avisoCompleto(el.dataset.v, 'fatura', 'Fatura importada!'); break;
     case 'conta-cartao': { const S = st(); const k = S.cartoes.find((x) => x.id === el.dataset.id); if (!k) break; await store.salvar('cartoes', { ...k, tipo: 'ambos' });
       const banco = k.banco || k.nome; if (S.cartoes.filter((x) => (x.banco || x.nome) === banco).length > 1) { const l = S.lancamentos.find((x) => x.id === el.dataset.l); if (l) await store.salvar('lancamentos', { ...l, contaCartaoId: k.id }); }
@@ -1550,7 +1554,7 @@ const periodoHoje = () => { const h = new Date(); return { tipo: 'mes', ano: h.g
 })();
 window.addEventListener('hashchange', () => { const nova = location.hash.slice(1) || 'inicio';
   // cada tela abre no mês atual; só mantém o período quando veio de um toque na Análise
-  if (nova !== ui.rota) { if (ui.manterPeriodo) ui.manterPeriodo = false; else ui.periodo = periodoHoje(); }
+  if (nova !== ui.rota) { ui.mesPlano = null; if (ui.manterPeriodo) ui.manterPeriodo = false; else ui.periodo = periodoHoje(); }
   ui.rota = nova; ui.modal = null; render(); window.scrollTo(0, 0); });
 // voltou para o app depois de um bom tempo fora (o celular às vezes não fecha de verdade): volta para o Início
 let saiuEm = 0; document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saiuEm = Date.now();
@@ -1580,7 +1584,7 @@ store.on(() => { if (!ui.modal) render(); });
     });
   } catch (err) {
     console.error(err); ui.carregando = false;
-    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=156" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
+    $('#app').innerHTML = `<div class="entrada"><div class="entrada-box"><img class="entrada-mascote" src="icons/mascote.png?v=158" alt="">${marca()}<p class="erro">Não consegui iniciar o Flui. Confira a internet e recarregue a página.</p></div></div>`;
   }
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     // versão nova: assim que o service worker novo assume, recarrega uma vez sozinho
